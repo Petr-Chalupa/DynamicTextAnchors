@@ -1,0 +1,21 @@
+{
+    "name": "dta",
+    "description": "Dynamic Text Anchors",
+    "version": "1.0.0",
+    "author": "Petr Chalupa",
+    "license": "SEE LICENSE IN LICENSE.md",
+    "type": "module",
+    "main": "./lib/index.js",
+    "types": "./lib/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "start": "node ./lib/index.js"
+    },
+    "devDependencies": {
+        "typescript": "^5.2.2"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Petr-Chalupa/DynamicTextAnchors.git"
+    }
+}

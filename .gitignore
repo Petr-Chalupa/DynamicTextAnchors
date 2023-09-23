@@ -1,6 +1,9 @@
 # Dependency directories
 node_modules/
 
+# Build
+lib/
+
 # Env files
 .env.local
 .env.*.local
