@@ -1,0 +1,179 @@
+@import "variables";
+
+// resposivity
+@mixin max-width($threshold) {
+    @media screen and (max-width: $threshold) {
+        @content;
+    }
+}
+
+*,
+:after,
+::before {
+    box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: $secondary-color;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #7b7a7a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555555;
+}
+
+html,
+body {
+    min-height: 100%;
+    min-width: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1rem;
+    background-color: $primary-color;
+    color: $font-color;
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: 3rem;
+    width: 100%;
+    z-index: 10;
+    padding: 0.75rem 1em;
+    background-color: $secondary-color;
+    color: $font-color-secondary;
+    font-size: clamp(0.75rem, 3vw, 1.5rem);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+
+    h1 {
+        flex: 8;
+    }
+
+    a {
+        position: relative;
+        width: fit-content;
+        color: inherit;
+        text-decoration: none;
+        cursor: pointer;
+
+        &::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            bottom: 0;
+            left: 0;
+            border-radius: 3px;
+            background-color: $font-color-secondary;
+            transform-origin: right;
+            transform: scaleX(0);
+            transition: transform $anim-duration ease-in-out;
+        }
+
+        &:hover::before {
+            transform-origin: left;
+            transform: scaleX(1);
+        }
+    }
+}
+
+#container {
+    width: calc(100% - 2rem);
+    margin: 1rem auto;
+}
+
+#textfield {
+    width: 100%;
+    min-height: 10rem;
+    resize: vertical;
+    overflow: auto;
+    border: 2px solid $tertiary-color;
+    border-radius: $border-radius;
+    padding: 0.5rem;
+}
+
+#controls {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem 0;
+
+    #text-html {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-weight: bold;
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+
+            input {
+                width: 0;
+                height: 0;
+                opacity: 0;
+
+                &:checked + .slider {
+                    background-color: $tertiary-color;
+                }
+
+                &:checked + .slider::before {
+                    transform: translateX(26px);
+                }
+            }
+
+            .slider {
+                position: absolute;
+                inset: 0;
+                background-color: $secondary-color;
+                border-radius: 34px;
+                cursor: pointer;
+                transition: 0.4s;
+
+                &::before {
+                    position: absolute;
+                    content: "";
+                    height: 26px;
+                    width: 26px;
+                    left: 4px;
+                    bottom: 4px;
+                    background-color: $primary-color;
+                    border-radius: 50%;
+                    transition: 0.4s;
+                }
+            }
+        }
+    }
+
+    button {
+        font-weight: bold;
+        background-color: $tertiary-color;
+        border: 2px solid $tertiary-color;
+        border-radius: $border-radius;
+        padding: 0.5rem 0.25rem;
+        cursor: pointer;
+        transition: $anim-duration;
+
+        &:hover,
+        &:focus {
+            border: 2px solid $secondary-color;
+            box-shadow: 0 0.5em 0.5em -0.4em var(--hover);
+            transform: translateY(-0.125em);
+        }
+    }
+}

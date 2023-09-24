@@ -2,7 +2,7 @@
 node_modules/
 
 # Build
-lib/
+dist/
 
 # Env files
 .env.local
