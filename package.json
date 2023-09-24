@@ -9,17 +9,25 @@
     "types": "./dist/index.d.ts",
     "files": [
         "dist",
-        "playground",
         "LICENSE.md",
         "README.md",
         "package.json"
     ],
     "scripts": {
-        "build": "tsc"
+        "build": "tsc && vite build ./src/demo",
+        "demo-dev": "vite ./src/demo",
+        "demo-preview": "vite preview ./src/demo"
     },
-    "dependencies": {},
+    "dependencies": {
+        "lorem-ipsum": "^2.0.8"
+    },
     "devDependencies": {
-        "typescript": "^5.2.2"
+        "@vitejs/plugin-vue": "^4.2.3",
+        "sass": "^1.68.0",
+        "sass-loader": "^13.2.2",
+        "typescript": "^5.2.2",
+        "vite": "^4.4.5",
+        "vue": "^3.3.4"
     },
     "repository": {
         "type": "git",
