@@ -13,6 +13,7 @@
 
 ::-webkit-scrollbar {
     width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -93,13 +94,17 @@ nav {
 
 #textfield {
     width: 100%;
-    min-height: 15rem;
-    height: 15rem;
+    min-height: 50vh;
     resize: vertical;
     overflow: auto;
     border: 2px solid $tertiary-color;
     border-radius: $border-radius;
     padding: 0.5rem;
+    font-family: inherit;
+
+    p {
+        margin: 0.25rem;
+    }
 }
 
 #controls {

@@ -30,9 +30,9 @@
 import { ref } from "vue";
 import { LoremIpsum } from "lorem-ipsum";
 //
-import { hello } from "../../../dist/index.js";
+import * as DTA from "../../../dist/index.js";
 
-hello();
+DTA.hello();
 
 const isHTML = ref(false);
 const text = ref("Lorem ipsum dolor sit amet...");
@@ -44,18 +44,12 @@ function generateText() {
   const randomInt = (min = 0, max = 1) => Math.floor(Math.random() * (max - min + 1)) << 0;
 
   const lorem = new LoremIpsum({
-    sentencesPerParagraph: {
-      max: 16,
-      min: 3,
-    },
-    wordsPerSentence: {
-      max: 9,
-      min: 3,
-    },
+    sentencesPerParagraph: { max: 16, min: 3, },
+    wordsPerSentence: { max: 9, min: 3, },
   });
 
-  //edit text to html if isHTML===true
-
-  text.value = lorem.generateParagraphs(randomInt(1, 16));
+  let loremText = lorem.generateParagraphs(randomInt(1, 16));
+  if (isHTML.value) html.value = `<p>${loremText.split("\n").join("</p><p>")}</p>`; // možnost volby max zanoření
+  else text.value = loremText;
 }
 </script>
