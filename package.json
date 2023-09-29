@@ -14,7 +14,8 @@
         "package.json"
     ],
     "scripts": {
-        "build": "tsc && vite build ./src/demo",
+        "build-tsc-watch":"tsc --watch",
+        "build-all": "tsc && vite build ./src/demo",
         "demo-dev": "vite ./src/demo",
         "demo-preview": "vite preview ./src/demo"
     },
