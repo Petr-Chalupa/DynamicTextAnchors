@@ -6,8 +6,8 @@
   </nav>
 
   <div id="container">
-    <div v-if="!isXML" id="textfield" :contenteditable="editMode">{{ loremText }}</div>
-    <div v-else id="textfield" v-html="loremXML" :contenteditable="editMode"></div>
+    <div v-if="!isXML" id="textfield" :contenteditable="editMode" ref="textfield">{{ loremText }}</div>
+    <div v-else id="textfield" v-html="loremXML" :contenteditable="editMode" ref="textfield"></div>
 
     <div id="controls">
       <div id="text-html">
@@ -47,6 +47,7 @@ const lorem = new LoremIpsum({
 //
 import { DTA } from "../../../dist/index.js";
 
+const textfield = ref(null);
 const loremText = ref("");
 const loremXML = ref("");
 const isXML = ref(false);
@@ -59,16 +60,16 @@ const dta = new DTA();
 function randomInt(min = 0, max = 1) { return Math.floor(Math.random() * (max - min + 1)) << 0 }
 
 function genLoremXML(depth = 0) {
-  let paragraphs = lorem.generateParagraphs(randomInt(1, Math.round(16 / depth))).split("\n"); // decrease number of paragraphs with greater depth
+  let paragraphs = lorem.generateParagraphs(randomInt(1, Math.round(16 / depth))).split("\n"); // decrease number of <p> with greater depth
   paragraphs = paragraphs.map((p) => {
-    if (Math.random() > 0.5 && depth < maxDepth.value) { // 50% chance of creating child paragraph
+    if (Math.random() > 0.5 && depth < maxDepth.value) { // 50% chance of creating child <div>
       let sentences = p.split(/[\.\!\?]\s/);
-      sentences = sentences.slice(0, randomInt(0, sentences.length));
-      const splitIndex = sentences.join(". ").length + 2; // + 2 because of the interpuction and space after the last sentence
+      sentences = sentences.slice(0, randomInt(0, sentences.length)); // random position of child <div> inside parent <div>
+      const splitIndex = sentences.join(". ").length + 2; // + 2 because of the ". " after the last sentence
       return `<div><p>${p.substring(0, splitIndex)}</p>${genLoremXML(depth + 1)}<p>${p.substring(splitIndex)}</p></div>`;
     } else return `<p>${p}</p>`;
   });
-  return paragraphs.map((p) => p.replaceAll(/\<p\>\s*\<\/p\>/g, "")).join(""); // remove empty paragraphs
+  return paragraphs.map((p) => p.replaceAll(/\<p\>\s*\<\/p\>/g, "")).join(""); // remove empty <p>
 }
 
 function generateText() {
@@ -76,12 +77,12 @@ function generateText() {
     do {
       loremXML.value = genLoremXML();
     } while (loremXML.value === "");
-    dta.setXML(loremXML.value);
+    dta.setText(textfield.value, loremXML.value);
   } else {
     do {
       loremText.value = lorem.generateParagraphs(randomInt(1, 16));
     } while (loremText.value === "");
-    dta.setText(loremText.value);
+    dta.setText(textfield.value, loremText.value, false);
   }
 }
 
@@ -90,6 +91,8 @@ function editText() {
 }
 
 function createAnchor() {
+  dta.createAnchor(window.getSelection());
+
   anchors.value.push("ANCHOR#" + new Date().getTime());
 }
 </script>
