@@ -26,12 +26,23 @@ export class DTA {
         if (!selection || selection.rangeCount === 0) throw Error("Anchor creation error: Empty selection!");
 
         const range = selection.getRangeAt(0);
-        const container = range.commonAncestorContainer;
+        let container = range.commonAncestorContainer;
+        while (container.nodeType != Node.ELEMENT_NODE) container = container.parentNode;
         if (!(container.isSameNode(this.#rootNode) || this.#rootNode.contains(container))) throw Error("Anchor creation error: Invalid selection!");
 
         console.log(selection, range, selection.toString());
         console.log(range.cloneContents());
-        const contents = range.cloneContents();
+
+        let startContainer = range.startContainer;
+        while (startContainer.nodeType != Node.ELEMENT_NODE) startContainer = startContainer.parentNode;
+        let endContainer = range.endContainer;
+        while (endContainer.nodeType != Node.ELEMENT_NODE) endContainer = endContainer.parentNode;
+
+        console.log(startContainer, endContainer);
+
+        const contents = range.extractContents();
+        console.log(contents);
+        range.insertNode(contents); //není ideální
 
         return `ANCHOR: ${new Date().getTime()}`;
     }

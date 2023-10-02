@@ -29,7 +29,7 @@
 
     <div id="anchors">
       <h3>Anchors</h3>
-      <div v-if="anchors.length === 0">-- No anchors yet --</div>
+      <div v-if="anchors.length === 0"><i>-- No anchors yet --</i></div>
       <div v-for="anchor in anchors" :key="anchor">{{ anchor }}</div>
     </div>
   </div>
@@ -68,7 +68,7 @@ function genLoremXML(depth = 0) {
       return `<div><p>${p.substring(0, splitIndex)}</p>${genLoremXML(depth + 1)}<p>${p.substring(splitIndex)}</p></div>`;
     } else return `<p>${p}</p>`;
   });
-  return paragraphs.map((p) => p.replaceAll(/\<p\>\s*\<\/p\>/g, "")).join(""); // remove empty <p>
+  return paragraphs.map((p) => p.replaceAll(/\<(p|div)\>\s*\<\/(p|div)\>/g, "")).join(""); // remove empty <p>
 }
 
 function generateXML() {
