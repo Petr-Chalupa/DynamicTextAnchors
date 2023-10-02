@@ -6,29 +6,30 @@
   </nav>
 
   <div id="container">
-    <div v-if="!isXML" id="textfield" :contenteditable="editMode" ref="textfield">{{ loremText }}</div>
-    <div v-else id="textfield" v-html="loremXML" :contenteditable="editMode" ref="textfield"></div>
+    <div id="textfield" v-html="loremXML" :contenteditable="editMode" ref="textfield"></div>
 
     <div id="controls">
       <div id="text-html">
-        <p>TEXT</p>
+        <p>USE</p>
         <label class="switch">
-          <input type="checkbox" v-model="isXML" />
+          <input type="checkbox" v-model="editMode" />
           <span class="slider"></span>
         </label>
-        <p>XML</p>
+        <p>EDIT</p>
       </div>
-      <label v-if="isXML" id="depth">
+      <label id="depth">
         Maximální zanoření ({{ maxDepth }})
         <input type="range" min="1" max="10" v-model="maxDepth" />
       </label>
-      <button @click="generateText">GENERATE</button>
-      <button @click="editText">EDIT MANUALLY <span v-if="editMode">✅</span><span v-else>❌</span></button>
-      <button @click="createAnchor">CREATE ANCHOR</button>
+      <button @click="generateXML">GENERATE</button>
+      <button @click="loadAnchors" :disabled="loremXML.length === 0 || editMode">LOAD ANCHORS</button>
+      <button @click="saveAnchors" :disabled="loremXML.length === 0 || editMode">SAVE ANCHORS</button>
+      <button @click="createAnchor" :disabled="loremXML.length === 0 || editMode">CREATE ANCHOR</button>
     </div>
 
     <div id="anchors">
       <h3>Anchors</h3>
+      <div v-if="anchors.length === 0">-- No anchors yet --</div>
       <div v-for="anchor in anchors" :key="anchor">{{ anchor }}</div>
     </div>
   </div>
@@ -48,10 +49,8 @@ const lorem = new LoremIpsum({
 import { DTA } from "../../../dist/index.js";
 
 const textfield = ref(null);
-const loremText = ref("");
 const loremXML = ref("");
-const isXML = ref(false);
-const maxDepth = ref(1);
+const maxDepth = ref(5);
 const editMode = ref(false);
 const anchors = ref([]);
 //
@@ -72,27 +71,23 @@ function genLoremXML(depth = 0) {
   return paragraphs.map((p) => p.replaceAll(/\<p\>\s*\<\/p\>/g, "")).join(""); // remove empty <p>
 }
 
-function generateText() {
-  if (isXML.value) {
-    do {
-      loremXML.value = genLoremXML();
-    } while (loremXML.value === "");
-    dta.setText(textfield.value, loremXML.value);
-  } else {
-    do {
-      loremText.value = lorem.generateParagraphs(randomInt(1, 16));
-    } while (loremText.value === "");
-    dta.setText(textfield.value, loremText.value, false);
-  }
+function generateXML() {
+  do {
+    loremXML.value = genLoremXML();
+  } while (loremXML.value === "");
+  dta.setXML(textfield.value, loremXML.value);
 }
 
-function editText() {
-  editMode.value = !editMode.value;
+function loadAnchors() {
+  alert("todo: load anchors from file");
+  loremXML.value = dta.loadAnchors();
+}
+
+function saveAnchors() {
+  alert("todo: save anchors to file");
 }
 
 function createAnchor() {
-  dta.createAnchor(window.getSelection());
-
-  anchors.value.push("ANCHOR#" + new Date().getTime());
+  anchors.value.push(dta.createAnchor(window.getSelection()));
 }
 </script>

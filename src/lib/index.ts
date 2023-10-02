@@ -4,11 +4,10 @@ export class DTA {
 
     constructor() {}
 
-    setText(rootNode: Element, text: string, isXML: boolean = true) {
+    setXML(rootNode: Element, xml: string) {
         if (!rootNode) throw Error("Missing root node!");
         this.#rootNode = rootNode;
-        if (!isXML) text = `<p>${text}</p>`;
-        this.#xmlDoc = this.#validateXML(text);
+        this.#xmlDoc = this.#validateXML(xml);
     }
 
     #validateXML(xml: string) {
@@ -16,6 +15,11 @@ export class DTA {
         const errNode = xmlDoc.querySelector("parsererror");
         if (errNode) throw Error("Validation error: Invalid XML!");
         return xmlDoc;
+    }
+
+    loadAnchors() {
+        //load
+        return new XMLSerializer().serializeToString(this.#xmlDoc);
     }
 
     createAnchor(selection: Selection) {
@@ -28,5 +32,7 @@ export class DTA {
         console.log(selection, range, selection.toString());
         console.log(range.cloneContents());
         const contents = range.cloneContents();
+
+        return `ANCHOR: ${new Date().getTime()}`;
     }
 }
