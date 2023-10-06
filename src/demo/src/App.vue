@@ -35,7 +35,7 @@
   </div>
 </template>
 
-<style lang="scss" src="@/assets/css/main.scss" />
+<style lang="scss" src="@/assets/scss/main.scss" />
 
 <script setup>
 import { ref } from "vue";
@@ -58,7 +58,7 @@ const dta = new DTA();
 
 function randomInt(min = 0, max = 1) { return Math.floor(Math.random() * (max - min + 1)) << 0 }
 
-function genLoremXML(depth = 0) {
+function genLoremXML(depth = 0) { //insert random <b>, <i>... tags (todo)
   let paragraphs = lorem.generateParagraphs(randomInt(1, Math.round(16 / depth))).split("\n"); // decrease number of <p> with greater depth
   paragraphs = paragraphs.map((p) => {
     if (Math.random() > 0.5 && depth < maxDepth.value) { // 50% chance of creating child <div>

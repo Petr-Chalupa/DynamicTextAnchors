@@ -212,14 +212,16 @@ nav {
         border: 2px solid $tertiary-color;
         border-radius: $border-radius;
         padding: 0.5rem 0.25rem;
-        cursor: pointer;
         transition: $anim-duration;
 
         &:hover,
         &:focus {
-            border: 2px solid $secondary-color;
-            box-shadow: 0 0.5em 0.5em -0.4em var(--hover);
-            transform: translateY(-0.125em);
+            &:not([disabled]) {
+                border: 2px solid $secondary-color;
+                box-shadow: 0 0.5em 0.5em -0.4em var(--hover);
+                transform: translateY(-0.125em);
+                cursor: pointer;
+            }
         }
 
         .editModeOn {
