@@ -1,6 +1,7 @@
 export class DTA {
     #rootNode: Element;
     #xmlDoc: Document;
+    #wrapTag: Element = document.createElement("mark");
 
     constructor() {}
 
@@ -15,6 +16,12 @@ export class DTA {
         const errNode = xmlDoc.querySelector("parsererror");
         if (errNode) throw new Error("Validation error: Invalid XML!");
         return xmlDoc;
+    }
+
+    setWrapTag(tag: string, options: Object = {}) {
+        if (!tag) throw new Error("Missing wrap tag!");
+        this.#wrapTag = document.createElement(tag);
+        for (const [attr, value] of Object.entries(options)) this.#wrapTag.setAttribute(attr, value);
     }
 
     loadAnchors() {
@@ -56,8 +63,9 @@ export class DTA {
             const partialRange = new Range();
             partialRange.setStart(node, startOffset);
             partialRange.setEnd(node, endOffset);
-            partialRange.surroundContents(document.createElement("b")); //udělat trochu lépe (nastavitelné?)
+            partialRange.surroundContents(this.#wrapTag.cloneNode());
         });
+        range.collapse();
 
         return `ANCHOR: ${new Date().getTime()}`;
     }
