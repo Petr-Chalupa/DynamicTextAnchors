@@ -2,7 +2,7 @@
 
 ### [LICENSE FILE](./LICENSE.md)
 
-### [DOCUMENTATION FILE](/documentation/Dokumentace.pdf)
+### [DOCUMENTATION FILE](/documentation/Documentation.pdf)
 
 ---
 
