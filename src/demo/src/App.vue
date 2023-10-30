@@ -24,7 +24,7 @@
       <button @click="generateXML">GENERATE</button>
       <button @click="loadAnchors" :disabled="loremXML.length === 0 || editMode">LOAD ANCHORS</button>
       <button @click="saveAnchors" :disabled="loremXML.length === 0 || editMode">SAVE ANCHORS</button>
-      <button @click="createAnchor" :disabled="loremXML.length === 0 || editMode">CREATE ANCHOR</button>
+      <button @click="createAnchors" :disabled="loremXML.length === 0 || editMode">CREATE ANCHOR</button>
     </div>
 
     <div id="anchors">
@@ -87,7 +87,8 @@ function saveAnchors() {
   alert("todo: save anchors to file");
 }
 
-function createAnchor() {
-  anchors.value.push(dta.createAnchor(window.getSelection()));
+function createAnchors() {
+  const anchorBlock = dta.createAnchors(window.getSelection());
+  anchors.value.push(anchorBlock.value);
 }
 </script>

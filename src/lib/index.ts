@@ -1,7 +1,13 @@
+interface WrapElement {
+    tag: string;
+    attributes: { [attr: string]: string };
+}
+
 export class DTA {
     #rootNode: Element;
     #xmlDoc: Document;
-    #wrapTag: Element = document.createElement("mark");
+    #wrapElement: WrapElement = { tag: "mark", attributes: {} };
+    #anchorBlocks: AnchorBlock[] = [];
 
     constructor() {}
 
@@ -18,10 +24,10 @@ export class DTA {
         return xmlDoc;
     }
 
-    setWrapTag(tag: string, options: Object = {}) {
+    setWrapElement(tag: string, attributes: object = {}) {
         if (!tag) throw new Error("Missing wrap tag!");
-        this.#wrapTag = document.createElement(tag);
-        for (const [attr, value] of Object.entries(options)) this.#wrapTag.setAttribute(attr, value);
+        this.#wrapElement.tag = tag;
+        Object.assign(this.#wrapElement.attributes, attributes);
     }
 
     loadAnchors() {
@@ -29,7 +35,7 @@ export class DTA {
         return new XMLSerializer().serializeToString(this.#xmlDoc);
     }
 
-    createAnchor(selection: Selection) {
+    createAnchors(selection: Selection) {
         if (!selection || selection.rangeCount === 0) throw new Error("Anchor creation error: Empty selection!");
 
         const range = selection.getRangeAt(0);
@@ -37,14 +43,17 @@ export class DTA {
         while (container.nodeType != Node.ELEMENT_NODE) container = container.parentNode;
         if (!(container.isSameNode(this.#rootNode) || this.#rootNode.contains(container))) throw new Error("Anchor creation error: Invalid selection!");
 
-        // console.log(selection, range, selection.toString());
-        // console.log(range.cloneContents());
+        const anchorBlock = new AnchorBlock(container, range, this.#wrapElement);
+        this.#anchorBlocks.push(anchorBlock);
+        return anchorBlock;
+    }
+}
 
-        // let startContainer = range.startContainer;
-        // while (startContainer.nodeType != Node.ELEMENT_NODE) startContainer = startContainer.parentNode;
-        // let endContainer = range.endContainer;
-        // while (endContainer.nodeType != Node.ELEMENT_NODE) endContainer = endContainer.parentNode;
+class AnchorBlock {
+    #anchors: Anchor[] = [];
+    #value: string = "";
 
+    constructor(container: Node, range: Range, wrapElement: WrapElement) {
         const intersectingTextNodes: Node[] = [];
         const traverse = (node: Node) => {
             if (!range.intersectsNode(node)) return;
@@ -55,18 +64,58 @@ export class DTA {
             }
         };
         traverse(container);
-        // console.log(intersectingTextNodes);
-
         intersectingTextNodes.forEach((node, index) => {
             const startOffset = index === 0 ? range.startOffset : 0;
             const endOffset = index === intersectingTextNodes.length - 1 ? range.endOffset : node.textContent.length;
-            const partialRange = new Range();
-            partialRange.setStart(node, startOffset);
-            partialRange.setEnd(node, endOffset);
-            partialRange.surroundContents(this.#wrapTag.cloneNode());
+
+            const anchor = new Anchor(node, startOffset, endOffset, wrapElement);
+            if (index > 0) {
+                anchor.leftJoin = this.#anchors[index - 1];
+                this.#anchors[index - 1].rightJoin = anchor;
+            }
+
+            this.#anchors.push(anchor);
+            this.#value += anchor.value;
         });
         range.collapse();
+    }
 
-        return `ANCHOR: ${new Date().getTime()}`;
+    get value() {
+        return this.#value;
+    }
+}
+
+class Anchor {
+    #value: string;
+    #startOffset: number;
+    #endOffset: number;
+    #leftJoin: Anchor = null;
+    #rightJoin: Anchor = null;
+
+    constructor(node: Node, startOffset: number, endOffset: number, wrapElement: WrapElement) {
+        this.#value = node.textContent.substring(startOffset, endOffset);
+        this.#startOffset = startOffset;
+        this.#endOffset = endOffset;
+
+        const surroundNode = document.createElement(wrapElement.tag);
+        surroundNode.setAttribute("data-uuid", crypto.randomUUID());
+        for (const [attr, value] of Object.entries(wrapElement.attributes)) surroundNode.setAttribute(attr, value);
+
+        const partialRange = new Range();
+        partialRange.setStart(node, this.#startOffset);
+        partialRange.setEnd(node, this.#endOffset);
+        partialRange.surroundContents(surroundNode);
+    }
+
+    set leftJoin(leftJoin: Anchor) {
+        this.#leftJoin = leftJoin;
+    }
+
+    set rightJoin(rightJoin: Anchor) {
+        this.#rightJoin = rightJoin;
+    }
+
+    get value() {
+        return this.#value;
     }
 }
