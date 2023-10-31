@@ -7,7 +7,7 @@ export class DTA {
     #rootNode: Element;
     #xmlDoc: Document;
     #wrapElement: WrapElement = { tag: "mark", attributes: {} };
-    #anchorBlocks: AnchorBlock[] = [];
+    anchorBlocks: AnchorBlock[] = [];
 
     constructor() {}
 
@@ -44,14 +44,14 @@ export class DTA {
         if (!(container.isSameNode(this.#rootNode) || this.#rootNode.contains(container))) throw new Error("Anchor creation error: Invalid selection!");
 
         const anchorBlock = new AnchorBlock(container, range, this.#wrapElement);
-        this.#anchorBlocks.push(anchorBlock);
+        this.anchorBlocks.push(anchorBlock);
         return anchorBlock;
     }
 }
 
 class AnchorBlock {
-    #anchors: Anchor[] = [];
-    #value: string = "";
+    anchors: Anchor[] = [];
+    value: string = "";
 
     constructor(container: Node, range: Range, wrapElement: WrapElement) {
         const intersectingTextNodes: Node[] = [];
@@ -70,40 +70,38 @@ class AnchorBlock {
 
             const anchor = new Anchor(node, startOffset, endOffset, wrapElement);
             if (index > 0) {
-                anchor.leftJoin = this.#anchors[index - 1];
-                this.#anchors[index - 1].rightJoin = anchor;
+                anchor.leftJoin = this.anchors[index - 1];
+                this.anchors[index - 1].rightJoin = anchor;
             }
 
-            this.#anchors.push(anchor);
-            this.#value += anchor.value;
+            this.anchors.push(anchor);
+            this.value += anchor.value;
         });
         range.collapse();
-    }
-
-    get value() {
-        return this.#value;
     }
 }
 
 class Anchor {
-    #value: string;
-    #startOffset: number;
-    #endOffset: number;
+    uuid: string;
+    value: string;
+    startOffset: number;
+    endOffset: number;
     #leftJoin: Anchor = null;
     #rightJoin: Anchor = null;
 
     constructor(node: Node, startOffset: number, endOffset: number, wrapElement: WrapElement) {
-        this.#value = node.textContent.substring(startOffset, endOffset);
-        this.#startOffset = startOffset;
-        this.#endOffset = endOffset;
+        this.uuid = crypto.randomUUID();
+        this.value = node.textContent.substring(startOffset, endOffset);
+        this.startOffset = startOffset;
+        this.endOffset = endOffset;
 
         const surroundNode = document.createElement(wrapElement.tag);
-        surroundNode.setAttribute("data-uuid", crypto.randomUUID());
+        surroundNode.setAttribute("data-uuid", this.uuid);
         for (const [attr, value] of Object.entries(wrapElement.attributes)) surroundNode.setAttribute(attr, value);
 
         const partialRange = new Range();
-        partialRange.setStart(node, this.#startOffset);
-        partialRange.setEnd(node, this.#endOffset);
+        partialRange.setStart(node, this.startOffset);
+        partialRange.setEnd(node, this.endOffset);
         partialRange.surroundContents(surroundNode);
     }
 
@@ -113,9 +111,5 @@ class Anchor {
 
     set rightJoin(rightJoin: Anchor) {
         this.#rightJoin = rightJoin;
-    }
-
-    get value() {
-        return this.#value;
     }
 }

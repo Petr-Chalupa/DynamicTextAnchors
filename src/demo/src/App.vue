@@ -18,7 +18,7 @@
         <p>EDIT</p>
       </div>
       <label id="depth">
-        Maximální zanoření ({{ maxDepth }})
+        Maximal depth ({{ maxDepth }})
         <input type="range" min="1" max="10" v-model="maxDepth" />
       </label>
       <button @click="generateXML">GENERATE</button>
@@ -30,9 +30,11 @@
     <div id="anchors">
       <h3>Anchors</h3>
       <div v-if="anchors.length === 0"><i>-- No anchors yet --</i></div>
-      <div v-for="anchor in anchors" :key="anchor" class="anchor">
-        <h6 @mouseenter="highlightAnchor(anchor)" @mouseleave="highlightAnchor(anchor)">{{ anchor.dataset.uuid }}</h6>
-        <p>{{ anchor.textContent }}</p>
+      <div v-for="anchor in anchors" :key="anchor.value" class="anchor">
+        <div v-for="{ uuid, value } in anchor.anchors" :key="uuid" @mouseenter="highlightAnchor(uuid)" @mouseleave="highlightAnchor()" @dblclick="scrollToAnchor(uuid)">
+          <h6>{{ uuid }}</h6>
+          <p>{{ value }}</p>
+        </div>
       </div>
     </div>
   </div>
@@ -93,11 +95,15 @@ function saveAnchors() {
 
 function createAnchors() {
   const anchorBlock = dta.createAnchors(window.getSelection());
-  anchors.value.push(anchorBlock.value);
+  anchors.value.push(anchorBlock);
 }
 
-function highlightAnchor(anchor) {
-  const anchorElement = textfield.value.querySelector(`[data-uuid="${anchor.dataset.uuid}"]`);
-  anchorElement.classList.toggle("highlighted");
+function highlightAnchor(uuid) {
+  textfield.value.querySelector(".highlighted")?.classList.remove("highlighted");
+  if (uuid) textfield.value.querySelector(`[data-uuid="${uuid}"]`).classList.add("highlighted");
+}
+
+function scrollToAnchor(uuid) {
+  textfield.value.querySelector(`[data-uuid="${uuid}"]`).scrollIntoView(false, { behavior: "smooth" });
 }
 </script>
