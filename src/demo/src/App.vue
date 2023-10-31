@@ -30,7 +30,10 @@
     <div id="anchors">
       <h3>Anchors</h3>
       <div v-if="anchors.length === 0"><i>-- No anchors yet --</i></div>
-      <div v-for="anchor in anchors" :key="anchor">{{ anchor }}</div>
+      <div v-for="anchor in anchors" :key="anchor" class="anchor">
+        <h6 @mouseenter="highlightAnchor(anchor)" @mouseleave="highlightAnchor(anchor)">{{ anchor.dataset.uuid }}</h6>
+        <p>{{ anchor.textContent }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -76,6 +79,7 @@ function generateXML() {
     loremXML.value = genLoremXML();
   } while (loremXML.value === "");
   dta.setXML(textfield.value, loremXML.value);
+  anchors.value = [];
 }
 
 function loadAnchors() {
@@ -90,5 +94,10 @@ function saveAnchors() {
 function createAnchors() {
   const anchorBlock = dta.createAnchors(window.getSelection());
   anchors.value.push(anchorBlock.value);
+}
+
+function highlightAnchor(anchor) {
+  const anchorElement = textfield.value.querySelector(`[data-uuid="${anchor.dataset.uuid}"]`);
+  anchorElement.classList.toggle("highlighted");
 }
 </script>

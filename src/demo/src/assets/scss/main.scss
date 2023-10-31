@@ -110,6 +110,10 @@ nav {
     & p:last-of-type {
         margin: 0;
     }
+
+    [data-uuid].highlighted {
+        box-shadow: 0px 0px 5px 5px $tertiary-color;
+    }
 }
 
 #controls {
@@ -226,6 +230,28 @@ nav {
 
         .editModeOn {
             display: inline;
+        }
+    }
+}
+
+#anchors {
+    width: 50%;
+    display: grid;
+    gap: 0.5rem;
+
+    .anchor {
+        border: 2px solid $tertiary-color;
+        border-radius: $border-radius;
+        padding: 0.25rem;
+
+        h6 {
+            font-size: 0.85rem;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        p {
+            margin: 0;
         }
     }
 }
