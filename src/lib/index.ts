@@ -25,7 +25,7 @@ export class DTA {
     }
 
     setWrapElement(tag: string, attributes: object = {}) {
-        if (!tag) throw new Error("Missing wrap tag!");
+        if (!tag) throw new Error("Missing wrap element tag!");
         this.#wrapElement.tag = tag;
         Object.assign(this.#wrapElement.attributes, attributes);
     }
@@ -35,8 +35,8 @@ export class DTA {
         return new XMLSerializer().serializeToString(this.#xmlDoc);
     }
 
-    createAnchors(selection: Selection) {
-        if (!selection || selection.rangeCount === 0) throw new Error("Anchor creation error: Empty selection!");
+    createAnchorBlock(selection: Selection) {
+        if (!selection || selection.toString().trim().length === 0 || selection.rangeCount === 0) throw new Error("Anchor creation error: Empty selection!");
 
         const range = selection.getRangeAt(0);
         let container = range.commonAncestorContainer;
@@ -51,7 +51,7 @@ export class DTA {
 
 class AnchorBlock {
     anchors: Anchor[] = [];
-    value: string = "";
+    #value: string = "";
 
     constructor(container: Node, range: Range, wrapElement: WrapElement) {
         const intersectingTextNodes: Node[] = [];
@@ -64,6 +64,7 @@ class AnchorBlock {
             }
         };
         traverse(container);
+
         intersectingTextNodes.forEach((node, index) => {
             const startOffset = index === 0 ? range.startOffset : 0;
             const endOffset = index === intersectingTextNodes.length - 1 ? range.endOffset : node.textContent.length;
@@ -73,17 +74,21 @@ class AnchorBlock {
                 anchor.leftJoin = this.anchors[index - 1];
                 this.anchors[index - 1].rightJoin = anchor;
             }
-
             this.anchors.push(anchor);
-            this.value += anchor.value;
+            this.#value += anchor.value;
         });
+
         range.collapse();
+    }
+
+    get value() {
+        return this.#value;
     }
 }
 
 class Anchor {
     uuid: string;
-    value: string;
+    #value: string;
     startOffset: number;
     endOffset: number;
     #leftJoin: Anchor = null;
@@ -91,7 +96,7 @@ class Anchor {
 
     constructor(node: Node, startOffset: number, endOffset: number, wrapElement: WrapElement) {
         this.uuid = crypto.randomUUID();
-        this.value = node.textContent.substring(startOffset, endOffset);
+        this.#value = node.textContent.substring(startOffset, endOffset);
         this.startOffset = startOffset;
         this.endOffset = endOffset;
 
@@ -104,6 +109,12 @@ class Anchor {
         partialRange.setEnd(node, this.endOffset);
         partialRange.surroundContents(surroundNode);
     }
+
+    get value() {
+        return this.#value;
+    }
+
+    set value(value: string) {}
 
     set leftJoin(leftJoin: Anchor) {
         this.#leftJoin = leftJoin;

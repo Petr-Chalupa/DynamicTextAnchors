@@ -6,32 +6,32 @@
   </nav>
 
   <div id="container">
-    <div id="textfield" v-html="loremXML" :contenteditable="editMode" ref="textfield"></div>
+    <div id="textfield" v-html="loremXML" ref="textfield"></div>
 
     <div id="controls">
       <div id="text-html">
-        <p>USE</p>
+        <p>EDIT</p>
         <label class="switch">
-          <input type="checkbox" v-model="editMode" />
+          <input type="checkbox" v-model="useMode" />
           <span class="slider"></span>
         </label>
-        <p>EDIT</p>
+        <p>USE</p>
       </div>
       <label id="depth">
         Maximal depth ({{ maxDepth }})
         <input type="range" min="1" max="10" v-model="maxDepth" />
       </label>
-      <button @click="generateXML">GENERATE</button>
-      <button @click="loadAnchors" :disabled="loremXML.length === 0 || editMode">LOAD ANCHORS</button>
-      <button @click="saveAnchors" :disabled="loremXML.length === 0 || editMode">SAVE ANCHORS</button>
-      <button @click="createAnchors" :disabled="loremXML.length === 0 || editMode">CREATE ANCHOR</button>
+      <button @click="generateXML" :disabled="useMode">GENERATE</button>
+      <button @click="loadAnchors" :disabled="loremXML.length === 0 || !useMode">LOAD ANCHORS</button>
+      <button @click="saveAnchors" :disabled="loremXML.length === 0 || !useMode">SAVE ANCHORS</button>
+      <button @click="createAnchorBlock" :disabled="loremXML.length === 0 || !useMode">CREATE ANCHOR</button>
     </div>
 
-    <div id="anchors">
+    <div id="anchors" :key="forceRerenderKey">
       <h3>Anchors</h3>
-      <div v-if="anchors.length === 0"><i>-- No anchors yet --</i></div>
-      <div v-for="anchor in anchors" :key="anchor.value" class="anchor">
-        <div v-for="{ uuid, value } in anchor.anchors" :key="uuid" @click="highlightAnchor(uuid)">
+      <div v-if="dta.anchorBlocks.length === 0"><i>-- No anchors yet --</i></div>
+      <div v-for="anchorBlock in dta.anchorBlocks" :key="anchorBlock.value" class="anchor">
+        <div v-for="{ uuid, value } in anchorBlock.anchors" :key="uuid" @click="highlightAnchor(uuid)">
           <h6>{{ uuid }}</h6>
           <p>{{ value }}</p>
         </div>
@@ -43,7 +43,7 @@
 <style lang="scss" src="@/assets/scss/main.scss" />
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 //
 import { LoremIpsum } from "lorem-ipsum";
 const lorem = new LoremIpsum({
@@ -55,9 +55,9 @@ import { DTA } from "../../../dist/index.js";
 
 const textfield = ref(null);
 const loremXML = ref("");
+const useMode = ref(false);
 const maxDepth = ref(5);
-const editMode = ref(false);
-const anchors = ref([]);
+const forceRerenderKey = ref(0);
 //
 const dta = new DTA();
 
@@ -81,8 +81,11 @@ function generateXML() {
     loremXML.value = genLoremXML();
   } while (loremXML.value === "");
   dta.setXML(textfield.value, loremXML.value);
-  anchors.value = [];
 }
+
+watch(useMode, () => {
+  console.log("USE -> EDIT? Unsaved changes? -> SAVE for future reload");
+});
 
 function loadAnchors() {
   alert("todo: load anchors from file");
@@ -93,9 +96,9 @@ function saveAnchors() {
   alert("todo: save anchors to file");
 }
 
-function createAnchors() {
-  const anchorBlock = dta.createAnchors(window.getSelection());
-  anchors.value.push(anchorBlock);
+function createAnchorBlock() {
+  dta.createAnchorBlock(window.getSelection());
+  forceRerenderKey.value++;
 }
 
 function highlightAnchor(uuid) {
