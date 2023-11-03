@@ -31,7 +31,7 @@
       <h3>Anchors</h3>
       <div v-if="anchors.length === 0"><i>-- No anchors yet --</i></div>
       <div v-for="anchor in anchors" :key="anchor.value" class="anchor">
-        <div v-for="{ uuid, value } in anchor.anchors" :key="uuid" @mouseenter="highlightAnchor(uuid)" @mouseleave="highlightAnchor()" @dblclick="scrollToAnchor(uuid)">
+        <div v-for="{ uuid, value } in anchor.anchors" :key="uuid" @click="highlightAnchor(uuid)">
           <h6>{{ uuid }}</h6>
           <p>{{ value }}</p>
         </div>
@@ -99,11 +99,8 @@ function createAnchors() {
 }
 
 function highlightAnchor(uuid) {
-  textfield.value.querySelector(".highlighted")?.classList.remove("highlighted");
-  if (uuid) textfield.value.querySelector(`[data-uuid="${uuid}"]`).classList.add("highlighted");
-}
-
-function scrollToAnchor(uuid) {
-  textfield.value.querySelector(`[data-uuid="${uuid}"]`).scrollIntoView(false, { behavior: "smooth" });
+  const highlightedAnchor = textfield.value.querySelector(".highlighted");
+  highlightedAnchor?.classList.remove("highlighted");
+  if (highlightedAnchor?.dataset.uuid != uuid) textfield.value.querySelector(`[data-uuid="${uuid}"]`).classList.add("highlighted");
 }
 </script>
