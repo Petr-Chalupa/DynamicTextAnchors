@@ -6,7 +6,7 @@
   </nav>
 
   <div id="container">
-    <div id="textfield" v-html="loremXML" ref="textfield"></div>
+    <div id="textfield" v-html="loremXML" :contenteditable="!useMode" :key="forceTextfieldRerenderKey" ref="textfield"></div>
 
     <div id="controls">
       <div id="text-html">
@@ -27,7 +27,7 @@
       <button @click="createAnchorBlock" :disabled="loremXML.length === 0 || !useMode">CREATE ANCHOR</button>
     </div>
 
-    <div id="anchors" :key="forceRerenderKey">
+    <div id="anchors" :key="forceAnchorsRerenderKey">
       <h3>Anchors</h3>
       <div v-if="dta.anchorBlocks.length === 0"><i>-- No anchors yet --</i></div>
       <div v-for="anchorBlock in dta.anchorBlocks" :key="anchorBlock.value" class="anchor">
@@ -44,22 +44,29 @@
 
 <script setup>
 import { ref, watch } from "vue";
-//
 import { LoremIpsum } from "lorem-ipsum";
 const lorem = new LoremIpsum({
   sentencesPerParagraph: { max: 16, min: 3, },
   wordsPerSentence: { max: 9, min: 3, },
 });
-//
 import { DTA } from "../../../dist/index.js";
 
 const textfield = ref(null);
 const loremXML = ref("");
-const useMode = ref(false);
 const maxDepth = ref(5);
-const forceRerenderKey = ref(0);
+const useMode = ref(false);
+const forceTextfieldRerenderKey = ref(0);
 //
 const dta = new DTA();
+const unsavedAnchors = ref(false);
+const forceAnchorsRerenderKey = ref(0);
+
+watch(useMode, () => {
+  if (!useMode.value && unsavedAnchors.value) {
+    saveAnchors();
+    forceTextfieldRerenderKey.value++;
+  }
+});
 
 function randomInt(min = 0, max = 1) { return Math.floor(Math.random() * (max - min + 1)) << 0 }
 
@@ -79,13 +86,9 @@ function genLoremXML(depth = 0) { //insert random <b>, <i>, <img>... tags (todo)
 function generateXML() {
   do {
     loremXML.value = genLoremXML();
-  } while (loremXML.value === "");
+  } while (loremXML.value.trim().length === 0);
   dta.setXML(textfield.value, loremXML.value);
 }
-
-watch(useMode, () => {
-  console.log("USE -> EDIT? Unsaved changes? -> SAVE for future reload");
-});
 
 function loadAnchors() {
   alert("todo: load anchors from file");
@@ -93,12 +96,14 @@ function loadAnchors() {
 }
 
 function saveAnchors() {
-  alert("todo: save anchors to file");
+  dta.saveAnchors();
+  unsavedAnchors.value = false;
 }
 
 function createAnchorBlock() {
   dta.createAnchorBlock(window.getSelection());
-  forceRerenderKey.value++;
+  unsavedAnchors.value = true;
+  forceAnchorsRerenderKey.value++;
 }
 
 function highlightAnchor(uuid) {

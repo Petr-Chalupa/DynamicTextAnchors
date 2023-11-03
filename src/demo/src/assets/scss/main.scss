@@ -194,7 +194,8 @@ nav {
                 opacity: 0.75;
             }
 
-            &::-webkit-slider-thumb {
+            &::-webkit-slider-thumb,
+            &::-moz-range-thumb {
                 -webkit-appearance: none;
                 appearance: none;
                 width: 25px;

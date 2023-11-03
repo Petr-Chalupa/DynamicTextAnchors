@@ -30,6 +30,8 @@ export class DTA {
         Object.assign(this.#wrapElement.attributes, attributes);
     }
 
+    saveAnchors() {}
+
     loadAnchors() {
         //load
         return new XMLSerializer().serializeToString(this.#xmlDoc);
@@ -37,15 +39,15 @@ export class DTA {
 
     createAnchorBlock(selection: Selection) {
         if (!selection || selection.toString().trim().length === 0 || selection.rangeCount === 0) throw new Error("Anchor creation error: Empty selection!");
+        for (let i = 0; i < selection.rangeCount; i++) {
+            const range = selection.getRangeAt(i);
+            let container = range.commonAncestorContainer;
+            while (container.nodeType != Node.ELEMENT_NODE) container = container.parentNode;
+            if (!(container.isSameNode(this.#rootNode) || this.#rootNode.contains(container))) throw new Error(`Anchor creation error: Invalid selection at range ${i}!`);
 
-        const range = selection.getRangeAt(0);
-        let container = range.commonAncestorContainer;
-        while (container.nodeType != Node.ELEMENT_NODE) container = container.parentNode;
-        if (!(container.isSameNode(this.#rootNode) || this.#rootNode.contains(container))) throw new Error("Anchor creation error: Invalid selection!");
-
-        const anchorBlock = new AnchorBlock(container, range, this.#wrapElement);
-        this.anchorBlocks.push(anchorBlock);
-        return anchorBlock;
+            const anchorBlock = new AnchorBlock(container, range, this.#wrapElement);
+            this.anchorBlocks.push(anchorBlock);
+        }
     }
 }
 
