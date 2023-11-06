@@ -183,43 +183,6 @@ nav {
         }
     }
 
-    #depth {
-        display: grid;
-        justify-content: center;
-        gap: 0.25rem;
-
-        input {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 0.75rem;
-            border-radius: $border-radius;
-            background: $secondary-color;
-            outline: none;
-            opacity: 0.5;
-            transition: $anim-duration;
-
-            &:hover {
-                opacity: 0.75;
-            }
-
-            &::-webkit-slider-thumb,
-            &::-moz-range-thumb {
-                -webkit-appearance: none;
-                appearance: none;
-                width: 25px;
-                height: 25px;
-                border-radius: 50%;
-                background: $tertiary-color;
-                cursor: pointer;
-
-                &:hover {
-                    border: 2px solid $secondary-color;
-                }
-            }
-        }
-    }
-
     button {
         font-weight: bold;
         background-color: $tertiary-color;
