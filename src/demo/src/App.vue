@@ -17,8 +17,7 @@
         </label>
         <p>USE</p>
       </div>
-      <LoremGenSettings v-model:settings="loremGenSettings" />
-      <button @click="generateXML" :disabled="useMode">GENERATE</button>
+      <LoremGenerator @genXML="genXML" />
       <button @click="loadAnchors" :disabled="loremXML.length === 0 || !useMode">LOAD ANCHORS</button>
       <button @click="saveAnchors" :disabled="loremXML.length === 0 || !useMode">SAVE ANCHORS</button>
       <button @click="createAnchorBlock" :disabled="loremXML.length === 0 || !useMode">CREATE ANCHOR</button>
@@ -40,21 +39,10 @@
 <style lang="scss" src="@/assets/scss/main.scss" />
 
 <script setup>
-import { reactive, ref, watch } from "vue";
-import { LoremIpsum } from "lorem-ipsum";
+import { ref, watch } from "vue";
 import { DTA } from "../../../dist/index.js";
-import LoremGenSettings from "./LoremGenSettings.vue";
-import * as Icon from "./assets/icon.svg";
+import LoremGenerator from "./LoremGenerator.vue";
 
-const loremGenSettings = reactive({
-  sentencesPerParagraph: { max: 16, min: 3, },
-  wordsPerSentence: { max: 9, min: 3, },
-  maxDepth: 5,
-  specialTags: {
-    text: ["h1", "h2", "h3", "h4", "h5", "h6", "i", "b", "u"],
-    nontext: ["img", "audio", "video", "table"],
-  }
-});
 const textfield = ref(null);
 const loremXML = ref("");
 const useMode = ref(false);
@@ -71,44 +59,9 @@ watch(useMode, () => {
   }
 });
 
-function randomInt(min = 0, max = 1) { return Math.floor(Math.random() * (max - min + 1)) << 0 }
-
-function generateXML() {
-  const lorem = new LoremIpsum({
-    ...loremGenSettings.sentencesPerParagraph,
-    ...loremGenSettings.wordsPerSentence,
-  }, "plain", "\n");
-
-  const genRandomTag = (value = "") => {
-    let tag = ["p", "div", "span"][randomInt(0, 2)]; // default normal tag
-    let isText = true;
-    if (randomInt(0, 3) === 0) { // 25% chance for special tag
-      if (randomInt(0, 7) === 0) { // 6,25% chance for special non-text tag
-        isText = false;
-        tag = loremGenSettings.specialTags.nontext[randomInt(0, loremGenSettings.specialTags.nontext.length - 1)];
-      }
-      else tag = loremGenSettings.specialTags.text[randomInt(0, loremGenSettings.specialTags.text.length - 1)];
-    }
-    return isText ? `<${tag}>${value}</${tag}>` : `<${tag} controls="true" src="${Icon.default}" title="${value}" />`;
-  };
-
-  const genLoremXML = (depth = 0) => {
-    let paragraphs = lorem.generateParagraphs(randomInt(1, Math.round(16 / depth))).split("\n"); // decrease number of <p> with greater depth
-    paragraphs = paragraphs.map((p) => {
-      if (Math.random() > 0.5 && depth < loremGenSettings.maxDepth) { // 50% chance of creating child <div>
-        let sentences = p.split(/[\.\!\?]\s/);
-        sentences = sentences.slice(0, randomInt(0, sentences.length)); // random position of child <div> inside parent
-        const splitIndex = sentences.join(". ").length + 2; // + 2 because of the ". " after the last sentence
-        return `<div>${genRandomTag(p.substring(0, splitIndex))}${genLoremXML(depth + 1)}${genRandomTag(p.substring(splitIndex))}</div>`;
-      } else return p;
-    });
-    return paragraphs.join("");
-  };
-
-  do {
-    loremXML.value = genLoremXML();
-  } while (loremXML.value.trim().length === 0);
-  dta.setXML(textfield.value, loremXML.value);
+function genXML(XML) {
+  loremXML.value = XML;
+  dta.setXML(textfield.value, XML);
 }
 
 function loadAnchors() {
