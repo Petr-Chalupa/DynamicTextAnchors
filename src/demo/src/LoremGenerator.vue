@@ -41,9 +41,9 @@ const settings = reactive({
     sentencesPerParagraph: { max: 16, min: 3, },
     wordsPerSentence: { max: 9, min: 3, },
     maxDepth: 5,
-    specialTags: {
+    additionalTags: {
         text: ["h1", "h2", "h3", "h4", "h5", "h6", "i", "b", "u"],
-        nontext: ["img", "audio", "video", "table"],
+        special: ["img", "audio", "video", "table"],
     }
 });
 let loremXML = "";
@@ -66,19 +66,30 @@ function generateXML() {
 
     const genRandomTag = (value = "") => {
         let tag = ["p", "div", "span"][randomInt(0, 2)]; // default normal tag
-        if (randomInt(0, 3) === 0) { // 25% chance for special tag
-            if (randomInt(0, 3) === 0) { // 6,25% chance for special non-text tag
-                tag = settings.specialTags.nontext[randomInt(0, settings.specialTags.nontext.length - 1)];
+        if (randomInt(0, 3) === 0) { // 25% chance for additional tag
+            if (randomInt(0, 3) === 0) { // 6,25% chance for special tag
+                tag = settings.additionalTags.special[randomInt(0, settings.additionalTags.special.length - 1)];
             }
-            else tag = settings.specialTags.text[randomInt(0, settings.specialTags.text.length - 1)];
+            else tag = settings.additionalTags.text[randomInt(0, settings.additionalTags.text.length - 1)];
         }
         switch (tag) {
             case "img":
                 return `<${tag} src="${Icon.default}" title="${value}" />`;
             case "audio":
-                return `<${tag} controls="true" src="${Audio.default}" title="${value}" />`;
+                return `<${tag} controls="true" src="${Audio.default}" title="${value}"></${tag}>`;
             case "video":
-                return `<${tag} controls="true" src="${Video.default}" title="${value}" />`;
+                return `<${tag} controls="true" src="${Video.default}" title="${value}"></${tag}>`;
+            case "table": {
+                const rows = randomInt(2, 5);
+                const columns = randomInt(1, 5);
+                let el = `<thead><th colspan="${columns}">TABLE #${value.length}</th></thead>`;
+                for (let i = 0; i < rows; i++) {
+                    el += "<tr>";
+                    for (let j = 0; j < columns; j++) el += `<td>${lorem.generateWords(randomInt(1, 3))}</td>`;
+                    el += "</tr>";
+                }
+                return `<${tag}>${el}</${tag}>`;
+            }
             default:
                 return `<${tag}>${value}</${tag}>`;
         }

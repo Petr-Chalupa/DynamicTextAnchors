@@ -111,13 +111,29 @@ nav {
         margin: 0.25rem 0;
     }
 
+    :is(h1, h2, h3, h4, h5, h6) {
+        margin-top: 1rem;
+    }
+
     img,
     video,
-    audio,
-    table {
+    audio {
         max-height: 7.5rem;
         display: block;
         border-radius: $border-radius;
+    }
+
+    table {
+        display: block;
+        width: 100%;
+        border-collapse: collapse;
+
+        tr,
+        td,
+        th {
+            border: 1px solid $tertiary-color;
+            padding: 0.5rem;
+        }
     }
 
     [data-uuid].highlighted {
