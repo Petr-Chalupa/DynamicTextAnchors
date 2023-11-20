@@ -85,4 +85,8 @@ function highlightAnchor(uuid) {
   highlightedAnchor?.classList.remove("highlighted");
   if (highlightedAnchor?.dataset.uuid != uuid) textfield.value.querySelector(`[data-uuid="${uuid}"]`).classList.add("highlighted");
 }
+
+document.addEventListener("anchor-click", (e) => {
+  console.log(e);
+});
 </script>

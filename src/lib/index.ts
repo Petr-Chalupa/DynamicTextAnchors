@@ -110,6 +110,12 @@ class Anchor {
         partialRange.setStart(node, this.startOffset);
         partialRange.setEnd(node, this.endOffset);
         partialRange.surroundContents(surroundNode);
+
+        const anchorClickEvent = new CustomEvent("anchor-click", {
+            bubbles: true,
+            detail: { uuid: this.uuid, leftJoin: this.#leftJoin, rightJoin: this.#rightJoin },
+        });
+        surroundNode.addEventListener("click", (e) => surroundNode.dispatchEvent(anchorClickEvent));
     }
 
     get value() {
