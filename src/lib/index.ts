@@ -95,6 +95,7 @@ class Anchor {
     endOffset: number;
     #leftJoin: Anchor = null;
     #rightJoin: Anchor = null;
+    #surroundNode: Element;
 
     constructor(node: Node, startOffset: number, endOffset: number, wrapElement: WrapElement) {
         this.uuid = crypto.randomUUID();
@@ -102,20 +103,25 @@ class Anchor {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
 
-        const surroundNode = document.createElement(wrapElement.tag);
-        surroundNode.setAttribute("data-uuid", this.uuid);
-        for (const [attr, value] of Object.entries(wrapElement.attributes)) surroundNode.setAttribute(attr, value);
+        this.#surroundNode = document.createElement(wrapElement.tag);
+        this.#surroundNode.setAttribute("data-uuid", this.uuid);
+        this.#surroundNode.setAttribute("tabindex", "0");
+        for (const [attr, value] of Object.entries(wrapElement.attributes)) this.#surroundNode.setAttribute(attr, value);
 
         const partialRange = new Range();
         partialRange.setStart(node, this.startOffset);
         partialRange.setEnd(node, this.endOffset);
-        partialRange.surroundContents(surroundNode);
+        partialRange.surroundContents(this.#surroundNode);
 
-        const anchorClickEvent = new CustomEvent("anchor-click", {
-            bubbles: true,
-            detail: { uuid: this.uuid, leftJoin: this.#leftJoin, rightJoin: this.#rightJoin },
+        this.#setEvents();
+    }
+
+    #setEvents() {
+        const events = ["click", "dblclick", "mouseenter", "mouseover", "mouseleave", "focus", "blur"];
+        events.forEach((e) => {
+            const anchorCustomEvent = new CustomEvent(`anchor-${e}`, { bubbles: true, detail: { anchor: this } });
+            this.#surroundNode.addEventListener(e, () => this.#surroundNode.dispatchEvent(anchorCustomEvent));
         });
-        surroundNode.addEventListener("click", (e) => surroundNode.dispatchEvent(anchorClickEvent));
     }
 
     get value() {
@@ -124,11 +130,23 @@ class Anchor {
 
     set value(value: string) {}
 
+    get leftJoin() {
+        return this.#leftJoin;
+    }
+
     set leftJoin(leftJoin: Anchor) {
         this.#leftJoin = leftJoin;
     }
 
+    get rightJoin() {
+        return this.#rightJoin;
+    }
+
     set rightJoin(rightJoin: Anchor) {
         this.#rightJoin = rightJoin;
+    }
+
+    get surroundNode() {
+        return this.#surroundNode;
     }
 }

@@ -87,6 +87,10 @@ function highlightAnchor(uuid) {
 }
 
 document.addEventListener("anchor-click", (e) => {
-  console.log(e);
+  console.log("click", e.detail.anchor);
+});
+
+document.addEventListener("anchor-focus", (e) => {
+  console.log("focus", e.detail.anchor);
 });
 </script>
