@@ -3,6 +3,11 @@ interface WrapElement {
     attributes: { [attr: string]: string };
 }
 
+interface Props {
+    color: string;
+    data: object;
+}
+
 export class DTA {
     #rootNode: Element;
     #xmlDoc: Document;
@@ -54,6 +59,7 @@ export class DTA {
 class AnchorBlock {
     anchors: Anchor[] = [];
     #value: string = "";
+    props: Props = { color: "#ffff00", data: {} };
 
     constructor(container: Node, range: Range, wrapElement: WrapElement) {
         const intersectingTextNodes: Node[] = [];
@@ -113,22 +119,15 @@ class Anchor {
         partialRange.setEnd(node, this.endOffset);
         partialRange.surroundContents(this.#surroundNode);
 
-        this.#setEvents();
-    }
-
-    #setEvents() {
-        const events = ["click", "dblclick", "mouseenter", "mouseover", "mouseleave", "focus", "blur"];
-        events.forEach((e) => {
-            const anchorCustomEvent = new CustomEvent(`anchor-${e}`, { bubbles: true, detail: { anchor: this } });
-            this.#surroundNode.addEventListener(e, () => this.#surroundNode.dispatchEvent(anchorCustomEvent));
+        this.#surroundNode.addEventListener("click", (e) => {
+            const anchorCustomEvent = new CustomEvent("anchor-click", { bubbles: true, detail: { originalEvent: e, anchor: this } });
+            this.#surroundNode.dispatchEvent(anchorCustomEvent);
         });
     }
 
     get value() {
         return this.#value;
     }
-
-    set value(value: string) {}
 
     get leftJoin() {
         return this.#leftJoin;

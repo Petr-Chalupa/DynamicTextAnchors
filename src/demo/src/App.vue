@@ -27,10 +27,22 @@
       <h3>Anchors</h3>
       <div v-if="dta.anchorBlocks.length === 0"><i>-- No anchors yet --</i></div>
       <div v-for="anchorBlock in dta.anchorBlocks" :key="anchorBlock.value" class="anchor">
-        <div v-for="{ uuid, value } in anchorBlock.anchors" :key="uuid" @click="highlightAnchor(uuid)">
-          <h6>{{ uuid }}</h6>
-          <p>{{ value }}</p>
-        </div>
+        <details class="props">
+          <summary>Anchor properties</summary>
+          <div>
+            <input type="color" v-model="anchorBlock.props.color" />
+            <p>Data: {{ anchorBlock.props.data }}</p>
+          </div>
+        </details>
+        <details class="parts">
+          <summary>Anchor parts ({{ anchorBlock.anchors.length }})</summary>
+          <div>
+            <div v-for="{ uuid, value } in anchorBlock.anchors" :key="uuid" @click="highlightAnchor(uuid)">
+              <h6>{{ uuid }}</h6>
+              <p>{{ value }}</p>
+            </div>
+          </div>
+        </details>
       </div>
     </div>
   </div>
@@ -87,10 +99,6 @@ function highlightAnchor(uuid) {
 }
 
 document.addEventListener("anchor-click", (e) => {
-  console.log("click", e.detail.anchor);
-});
-
-document.addEventListener("anchor-focus", (e) => {
-  console.log("focus", e.detail.anchor);
+  alert(`Anchor #${e.detail.anchor.uuid} has been clicked`);
 });
 </script>
