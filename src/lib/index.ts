@@ -10,37 +10,32 @@ interface Props {
 
 export class DTA {
     #rootNode: Element;
-    #xmlDoc: Document;
-    #wrapElement: WrapElement = { tag: "mark", attributes: {} };
+    // #xmlDoc: Document;
+    wrapElement: WrapElement = { tag: "mark", attributes: {} };
     anchorBlocks: AnchorBlock[] = [];
 
     constructor() {}
 
-    setXML(rootNode: Element, xml: string) {
-        if (!rootNode) throw new Error("Missing root node!");
+    get rootNode() {
+        return this.#rootNode;
+    }
+
+    set rootNode(rootNode: Element) {
         this.#rootNode = rootNode;
-        this.#xmlDoc = this.#validateXML(xml);
     }
 
-    #validateXML(xml: string) {
-        const xmlDoc: Document = new DOMParser().parseFromString(xml, "text/xml");
-        const errNode = xmlDoc.querySelector("parsererror");
-        if (errNode) throw new Error("Validation error: Invalid XML!");
-        return xmlDoc;
-    }
+    // setXML(rootNode: Element, xml: string) {
+    //     if (!rootNode) throw new Error("Missing root node!");
+    //     this.#rootNode = rootNode;
+    //     this.#xmlDoc = this.#validateXML(xml);
+    // }
 
-    setWrapElement(tag: string, attributes: object = {}) {
-        if (!tag) throw new Error("Missing wrap element tag!");
-        this.#wrapElement.tag = tag;
-        Object.assign(this.#wrapElement.attributes, attributes);
-    }
-
-    saveAnchors() {}
-
-    loadAnchors() {
-        //load
-        return new XMLSerializer().serializeToString(this.#xmlDoc);
-    }
+    // #validateXML(xml: string) {
+    //     const xmlDoc: Document = new DOMParser().parseFromString(xml, "text/xml");
+    //     const errNode = xmlDoc.querySelector("parsererror");
+    //     if (errNode) throw new Error("Validation error: Invalid XML!");
+    //     return xmlDoc;
+    // }
 
     createAnchorBlock(selection: Selection) {
         if (!selection || selection.toString().trim().length === 0 || selection.rangeCount === 0) throw new Error("Anchor creation error: Empty selection!");
@@ -50,9 +45,19 @@ export class DTA {
             while (container.nodeType != Node.ELEMENT_NODE) container = container.parentNode;
             if (!(container.isSameNode(this.#rootNode) || this.#rootNode.contains(container))) throw new Error(`Anchor creation error: Invalid selection at range ${i}!`);
 
-            const anchorBlock = new AnchorBlock(container, range, this.#wrapElement);
+            const anchorBlock = new AnchorBlock(container, range, this.wrapElement);
             this.anchorBlocks.push(anchorBlock);
         }
+    }
+
+    serialize() {
+        return this;
+    }
+
+    deserialize(dta: DTA) {
+        this.#rootNode = dta.#rootNode;
+        this.wrapElement = dta.wrapElement;
+        this.anchorBlocks = dta.anchorBlocks;
     }
 }
 
@@ -123,6 +128,14 @@ class Anchor {
             const anchorCustomEvent = new CustomEvent("anchor-click", { bubbles: true, detail: { originalEvent: e, anchor: this } });
             this.#surroundNode.dispatchEvent(anchorCustomEvent);
         });
+
+        let parents = [];
+        let nextParent = this.#surroundNode;
+        while (nextParent.parentElement != document.documentElement) {
+            parents.push(nextParent.parentElement);
+            nextParent = nextParent.parentElement;
+        }
+        console.log(parents);
     }
 
     get value() {

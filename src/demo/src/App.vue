@@ -18,8 +18,8 @@
         <p>USE</p>
       </div>
       <LoremGenerator @genXML="genXML" />
-      <button @click="loadAnchors" :disabled="loremXML.length === 0 || !useMode">LOAD ANCHORS</button>
-      <button @click="saveAnchors" :disabled="loremXML.length === 0 || !useMode">SAVE ANCHORS</button>
+      <button @click="loadAnchors" :disabled="loremXML.length === 0 || !useMode || true">LOAD ANCHORS</button>
+      <button @click="saveAnchors" :disabled="loremXML.length === 0 || !useMode || true">SAVE ANCHORS</button>
       <button @click="createAnchorBlock" :disabled="loremXML.length === 0 || !useMode">CREATE ANCHOR</button>
     </div>
 
@@ -57,38 +57,35 @@ import LoremGenerator from "./LoremGenerator.vue";
 
 const textfield = ref(null);
 const loremXML = ref("");
-const useMode = ref(false);
+const useMode = ref(true);
 const forceTextfieldRerenderKey = ref(0);
 //
 const dta = new DTA();
-const unsavedAnchors = ref(false);
+// const unsavedAnchors = ref(false);
 const forceAnchorsRerenderKey = ref(0);
+let savedAnchors = null;
 
 watch(useMode, () => {
-  if (!useMode.value && unsavedAnchors.value) {
-    saveAnchors();
-    forceTextfieldRerenderKey.value++;
-  }
+  // if (!useMode.value && unsavedAnchors.value) saveAnchors();
+  if (!useMode.value) savedAnchors = dta.serialize();
+  else dta.deserialize(savedAnchors);
 });
 
 function genXML(XML) {
   loremXML.value = XML;
-  dta.setXML(textfield.value, XML);
+  // dta.setXML(textfield.value, XML);
+  dta.rootNode = textfield.value;
 }
 
 function loadAnchors() {
-  alert("todo: load anchors from file");
-  loremXML.value = dta.loadAnchors();
 }
 
 function saveAnchors() {
-  dta.saveAnchors();
-  unsavedAnchors.value = false;
 }
 
 function createAnchorBlock() {
   dta.createAnchorBlock(window.getSelection());
-  unsavedAnchors.value = true;
+  // unsavedAnchors.value = true;
   forceAnchorsRerenderKey.value++;
 }
 
@@ -99,6 +96,6 @@ function highlightAnchor(uuid) {
 }
 
 document.addEventListener("anchor-click", (e) => {
-  alert(`Anchor #${e.detail.anchor.uuid} has been clicked`);
+  console.info(`Anchor #${e.detail.anchor.uuid} has been clicked`);
 });
 </script>
