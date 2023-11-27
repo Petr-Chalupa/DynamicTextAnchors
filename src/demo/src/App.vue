@@ -97,5 +97,6 @@ function highlightAnchor(uuid) {
 
 document.addEventListener("anchor-click", (e) => {
   console.info(`Anchor #${e.detail.anchor.uuid} has been clicked`);
+  dta.serialize();
 });
 </script>
