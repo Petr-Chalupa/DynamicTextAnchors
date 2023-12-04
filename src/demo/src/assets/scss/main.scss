@@ -136,8 +136,12 @@ nav {
         }
     }
 
-    [data-uuid].highlighted {
-        background-color: $tertiary-color;
+    dta-anchor {
+        background-color: yellow;
+
+        &.highlighted {
+            background-color: $tertiary-color;
+        }
     }
 }
 

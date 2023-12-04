@@ -60,7 +60,7 @@ const loremXML = ref("");
 const useMode = ref(true);
 const forceTextfieldRerenderKey = ref(0);
 //
-const dta = new DTA();
+let dta = new DTA();
 // const unsavedAnchors = ref(false);
 const forceAnchorsRerenderKey = ref(0);
 let savedAnchors = null;
@@ -97,6 +97,13 @@ function highlightAnchor(uuid) {
 
 document.addEventListener("anchor-click", (e) => {
   console.info(`Anchor #${e.detail.anchor.uuid} has been clicked`);
-  dta.serialize();
+
+  const serializedData = dta.serialize();
+  console.log(serializedData);
+  console.log(dta);
+  dta = new DTA();
+  forceTextfieldRerenderKey.value++;
+  dta.deserialize(serializedData);
+  console.log(dta);
 });
 </script>
