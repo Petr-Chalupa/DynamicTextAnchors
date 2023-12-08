@@ -41,5 +41,9 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/Petr-Chalupa/DynamicTextAnchors.git"
-    }
+    },
+    "bugs": {
+        "url": "https://github.com/Petr-Chalupa/DynamicTextAnchors/issues"
+    },
+    "homepage": "https://dynamictextanchors.onrender.com"
 }
