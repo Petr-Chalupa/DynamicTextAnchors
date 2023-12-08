@@ -1,9 +1,32 @@
 # DynamicTextAnchors (DTA)
 
-### [LICENSE FILE](./LICENSE.md)
+**Table of contents**
 
-### [DOCUMENTATION FILE](/documentation/Documentation.pdf)
+-   [Annotation](#annotation)
+-   [Important files](#important-files)
+-   [Installation](#installation)
+-   [How to use](#how-to-use)
 
 ---
 
-This library is awesome...
+## Annotation
+
+> The thesis deals with the design of algorithms that would enable the storage of so-called text
+> anchors (labels, notes etc.) in static and dynamic text (XML format) so that they can be re-
+> inserted into the text even after its editing (and possibly evaluate the error during insertion). Such
+> a program should then be usable as a library for e.g., web applications.
+
+## Important files
+
+1.  #### [LICENSE FILE](./LICENSE.md)
+2.  #### [DOCUMENTATION FILE](/documentation/Documentation.pdf)
+
+## Installation
+
+`npm i dynamic-text-anchors`
+
+## How to use
+
+`import DTA from "dynamic-text-anchors";`
+
+Now you can use DTA methods

@@ -52,7 +52,7 @@
 
 <script setup>
 import { ref, watch } from "vue";
-import { DTA } from "../../../dist/index.js";
+import DTA from "../../../dist/lib/index.js";
 import LoremGenerator from "./LoremGenerator.vue";
 
 const textfield = ref(null);

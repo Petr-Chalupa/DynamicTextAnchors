@@ -8,7 +8,7 @@ interface Props {
     data: object;
 }
 
-export class DTA {
+export default class DTA {
     #rootNode: Element;
     // #xmlDoc: Document;
     // wrapElement: WrapElement = { tag: "mark", attributes: {} };
