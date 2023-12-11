@@ -19,10 +19,10 @@
       </div>
       <LoremGenerator @genXML="genXML" />
       <label class="button">LOAD XML <input type="file" accept="application/xml" @change="loadXML" ref="loadXMLInput" /></label>
-      <button @click="saveXML" :disabled="loremXML.length === 0">SAVE XML</button>
-      <label class="button" :disabled="loremXML.length === 0 || !useMode">LOAD ANCHORS <input type="file" accept="application/json" @change="loadAnchors" ref="loadAnchorsInput" /></label>
-      <button @click="saveAnchors" :disabled="loremXML.length === 0 || !useMode">SAVE ANCHORS</button>
-      <button @click="createAnchorBlock" :disabled="loremXML.length === 0 || !useMode">CREATE ANCHOR</button>
+      <button @click="saveXML" :disabled="controlsDisabled">SAVE XML</button>
+      <label class="button" :disabled="controlsDisabled">LOAD ANCHORS <input type="file" accept="application/json" :disabled="controlsDisabled" @change="loadAnchors" ref="loadAnchorsInput" /></label>
+      <button @click="saveAnchors" :disabled="controlsDisabled">SAVE ANCHORS</button>
+      <button @click="createAnchorBlock" :disabled="controlsDisabled">CREATE ANCHOR</button>
     </div>
 
     <div id="anchors" :key="forceAnchorsRerenderKey">
@@ -53,13 +53,14 @@
 <style lang="scss" src="@/assets/scss/main.scss" />
 
 <script setup>
-import { nextTick, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import LoremGenerator from "./LoremGenerator.vue";
 import DTA from "../../../dist/lib/index.js";
 
 const textfield = ref(null);
 const loremXML = ref("");
 const useMode = ref(true);
+const controlsDisabled = computed(() => (loremXML.value.length === 0 || !useMode.value));
 const forceTextfieldRerenderKey = ref(0);
 const loadXMLInput = ref(null);
 const loadAnchorsInput = ref(null);
