@@ -18,15 +18,17 @@
         <p>USE</p>
       </div>
       <LoremGenerator @genXML="genXML" />
-      <button @click="loadAnchors" :disabled="loremXML.length === 0 || !useMode || true">LOAD ANCHORS</button>
-      <button @click="saveAnchors" :disabled="loremXML.length === 0 || !useMode || true">SAVE ANCHORS</button>
+      <label class="button">LOAD XML <input type="file" accept="application/xml" @change="loadXML" ref="loadXMLInput" /></label>
+      <button @click="saveXML" :disabled="loremXML.length === 0">SAVE XML</button>
+      <label class="button" :disabled="loremXML.length === 0 || !useMode">LOAD ANCHORS <input type="file" accept="application/json" @change="loadAnchors" ref="loadAnchorsInput" /></label>
+      <button @click="saveAnchors" :disabled="loremXML.length === 0 || !useMode">SAVE ANCHORS</button>
       <button @click="createAnchorBlock" :disabled="loremXML.length === 0 || !useMode">CREATE ANCHOR</button>
     </div>
 
     <div id="anchors" :key="forceAnchorsRerenderKey">
       <h3>Anchors</h3>
-      <div v-if="dta.anchorBlocks.length === 0"><i>-- No anchors yet --</i></div>
-      <div v-for="anchorBlock in dta.anchorBlocks" :key="anchorBlock.value" class="anchor">
+      <div v-if="!dta || dta.anchorBlocks.length === 0"><i>-- No anchors yet --</i></div>
+      <div v-else v-for="anchorBlock in dta.anchorBlocks" :key="anchorBlock.value" class="anchor">
         <details class="props">
           <summary>Anchor properties</summary>
           <div>
@@ -51,16 +53,19 @@
 <style lang="scss" src="@/assets/scss/main.scss" />
 
 <script setup>
-import { ref, watch } from "vue";
-import DTA from "../../../dist/lib/index.js";
+import { nextTick, onMounted, ref, watch } from "vue";
 import LoremGenerator from "./LoremGenerator.vue";
+import DTA from "../../../dist/lib/index.js";
 
 const textfield = ref(null);
 const loremXML = ref("");
 const useMode = ref(true);
 const forceTextfieldRerenderKey = ref(0);
-//
-let dta = new DTA();
+const loadXMLInput = ref(null);
+const loadAnchorsInput = ref(null);
+
+let dta = null;
+onMounted(() => dta = new DTA(textfield.value));
 // const unsavedAnchors = ref(false);
 const forceAnchorsRerenderKey = ref(0);
 let savedAnchors = null;
@@ -74,13 +79,45 @@ watch(useMode, () => {
 function genXML(XML) {
   loremXML.value = XML;
   // dta.setXML(textfield.value, XML);
-  dta.rootNode = textfield.value;
+}
+
+function loadXML() {
+  const file = loadXMLInput.value.files[0];
+  const fileReader = new FileReader();
+  fileReader.readAsText(file);
+  fileReader.onload = (e) => {
+    loremXML.value = e.target.result;
+  }
+}
+
+function saveXML() {
+  const file = new Blob([loremXML.value], { type: "application/json" });
+
+  const link = document.createElement("A");
+  link.href = URL.createObjectURL(file);
+  link.download = "XML.xml";
+  link.click();
 }
 
 function loadAnchors() {
+  const file = loadAnchorsInput.value.files[0];
+  const fileReader = new FileReader();
+  fileReader.readAsText(file);
+  fileReader.onload = (e) => {
+    const serializedData = JSON.parse(e.target.result);
+    dta = new DTA(textfield.value);
+    dta.deserialize(serializedData);
+  }
 }
 
 function saveAnchors() {
+  const serializedData = dta.serialize();
+  const file = new Blob([JSON.stringify(serializedData)], { type: "application/json" });
+
+  const link = document.createElement("A");
+  link.href = URL.createObjectURL(file);
+  link.download = "Anchors.json";
+  link.click();
 }
 
 function createAnchorBlock() {
@@ -97,13 +134,5 @@ function highlightAnchor(uuid) {
 
 document.addEventListener("anchor-click", (e) => {
   console.info(`Anchor #${e.detail.anchor.uuid} has been clicked`);
-
-  const serializedData = dta.serialize();
-  console.log(serializedData);
-  console.log(dta);
-  dta = new DTA();
-  forceTextfieldRerenderKey.value++;
-  dta.deserialize(serializedData);
-  console.log(dta);
 });
 </script>
