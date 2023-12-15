@@ -84,6 +84,8 @@ function genXML(XML) {
 
 function loadXML() {
   const file = loadXMLInput.value.files[0];
+  if (!file) return;
+
   const fileReader = new FileReader();
   fileReader.readAsText(file);
   fileReader.onload = (e) => {
@@ -102,12 +104,13 @@ function saveXML() {
 
 function loadAnchors() {
   const file = loadAnchorsInput.value.files[0];
+  if (!file) return;
+
   const fileReader = new FileReader();
   fileReader.readAsText(file);
   fileReader.onload = (e) => {
-    const serializedData = JSON.parse(e.target.result);
     dta = new DTA(textfield.value);
-    dta.deserialize(serializedData);
+    dta.deserialize(JSON.parse(e.target.result));
   }
 }
 

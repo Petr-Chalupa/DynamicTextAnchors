@@ -12,14 +12,14 @@ export default class AnchorBlock {
     props: Props = { color: "#ffff00", data: {} };
     // #container: Node;
     rootNode: Element;
-    #xPath: string;
+    // #xPath: string;
 
     constructor(rootNode: Element, container?: Node, range?: Range) {
         this.rootNode = rootNode;
 
         if (!container || !range) return;
         // this.#container = container;
-        this.#xPath = getPathFromEl(rootNode, container);
+        // this.#xPath = getPathFromEl(rootNode, container);
 
         const intersectingTextNodes: Node[] = [];
         (function traverse(node: Node) {
@@ -61,7 +61,7 @@ export default class AnchorBlock {
             value: this.value,
             props: this.props,
             // container: this.#container,
-            xPath: this.#xPath,
+            // xPath: this.#xPath,
         };
     }
 
@@ -77,7 +77,7 @@ export default class AnchorBlock {
         });
         // this.#value = data.value;
         this.props = data.props;
-        this.#xPath = data.xPath;
+        // this.#xPath = data.xPath;
         //get container from path
         // this.#container = data.container;
     }

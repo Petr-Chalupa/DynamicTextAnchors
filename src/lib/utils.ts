@@ -1,11 +1,3 @@
-//utils metody: traverse, getElFromPath, getPathFromEl...
-
-// export const Store: {
-//     rootNode: Element;
-// } = {
-//     rootNode: null,
-// };
-
 export function getPathFromEl(rootNode: Element, el: Node) {
     const elPath = [el];
     let parent = el.parentNode;
