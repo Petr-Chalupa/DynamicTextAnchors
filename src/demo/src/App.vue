@@ -28,12 +28,12 @@
     <div id="anchors" :key="forceAnchorsRerenderKey">
       <h3>Anchors</h3>
       <div v-if="!dta || dta.anchorBlocks.length === 0"><i>-- No anchors yet --</i></div>
-      <div v-else v-for="anchorBlock in dta.anchorBlocks" :key="anchorBlock.value" class="anchor">
+      <div v-else v-for="(anchorBlock, index) in dta.anchorBlocks" :key="index" class="anchor">
         <details class="props">
           <summary>Anchor properties</summary>
           <div>
-            <input type="color" v-model="anchorBlock.props.color" />
-            <p>Data: {{ anchorBlock.props.data }}</p>
+            <input type="color" v-model="anchorBlock.color" />
+            <p>Data: {{ anchorBlock.data }}</p>
           </div>
         </details>
         <details class="parts">

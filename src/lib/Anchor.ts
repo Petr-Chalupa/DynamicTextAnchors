@@ -1,5 +1,15 @@
 import { getElFromPath, getPathFromEl } from "./utils";
 
+export interface SerializedAnchor {
+    uuid: string;
+    value: string;
+    startOffset: number;
+    endOffset: number;
+    leftJoin: string;
+    rightJoin: string;
+    xPath: string;
+}
+
 export default class Anchor extends HTMLElement {
     rootNode: Element;
     uuid: string;
@@ -8,9 +18,7 @@ export default class Anchor extends HTMLElement {
     endOffset: number;
     #leftJoin: Anchor = null;
     #rightJoin: Anchor = null;
-    // #node: Node;
     #xPath: string;
-    // #surroundNode: Element;
 
     constructor(rootNode: Element, node: Node, startOffset: number, endOffset: number, uuid?: string) {
         super();
@@ -29,7 +37,7 @@ export default class Anchor extends HTMLElement {
         });
 
         if (!node) return;
-        // this.#node = node; //set to position not Node
+
         this.#value = node.textContent.substring(startOffset, endOffset);
         this.#xPath = getPathFromEl(rootNode, node);
 
@@ -37,26 +45,6 @@ export default class Anchor extends HTMLElement {
         partialRange.setStart(node, this.startOffset);
         partialRange.setEnd(node, this.endOffset);
         partialRange.surroundContents(this);
-
-        // this.uuid = crypto.randomUUID();
-        // this.#value = node.textContent.substring(startOffset, endOffset);
-        // this.startOffset = startOffset;
-        // this.endOffset = endOffset;
-
-        // this.#surroundNode = document.createElement(wrapElement.tag);
-        // this.#surroundNode.setAttribute("data-uuid", this.uuid);
-        // this.#surroundNode.setAttribute("tabindex", "0");
-        // for (const [attr, value] of Object.entries(wrapElement.attributes)) this.#surroundNode.setAttribute(attr, value);
-
-        // const partialRange = new Range();
-        // partialRange.setStart(node, this.startOffset);
-        // partialRange.setEnd(node, this.endOffset);
-        // partialRange.surroundContents(this.#surroundNode);
-
-        // this.#surroundNode.addEventListener("click", (e) => {
-        //     const anchorCustomEvent = new CustomEvent("anchor-click", { bubbles: true, detail: { originalEvent: e, anchor: this } });
-        //     this.#surroundNode.dispatchEvent(anchorCustomEvent);
-        // });
     }
 
     get value() {
@@ -79,24 +67,24 @@ export default class Anchor extends HTMLElement {
         this.#rightJoin = rightJoin;
     }
 
-    // get surroundNode() {
-    //     return this.#surroundNode;
-    // }
+    color(color: string) {
+        this.style.backgroundColor = color;
+    }
 
     serialize() {
-        return {
+        const serializedData: SerializedAnchor = {
             uuid: this.uuid,
             value: this.#value,
             startOffset: this.startOffset,
             endOffset: this.endOffset,
             leftJoin: this.#leftJoin?.uuid,
             rightJoin: this.#rightJoin?.uuid,
-            // node: this.#node,
             xPath: this.#xPath,
         };
+        return serializedData;
     }
 
-    deserialize(data: { startOffset: number; endOffset: number; uuid: string; xPath: string }) {
+    deserialize(data: SerializedAnchor) {
         const node = getElFromPath(this.rootNode, data.xPath);
         console.log(node);
 

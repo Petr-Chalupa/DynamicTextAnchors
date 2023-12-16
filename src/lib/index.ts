@@ -1,29 +1,18 @@
-import AnchorBlock, { Props } from "./AnchorBlock";
-// import { Store } from "./utils";
+import AnchorBlock, { SerializedAnchorBlock } from "./AnchorBlock";
 
-// interface WrapElement {
-//     tag: string;
-//     attributes: { [attr: string]: string };
-// }
+interface SerializedDTA {
+    // rootNode: Element;
+    anchorBlocks: SerializedAnchorBlock[];
+}
 
 export default class DTA {
     rootNode: Element;
-    // #xmlDoc: Document;
-    // wrapElement: WrapElement = { tag: "mark", attributes: {} };
     anchorBlocks: AnchorBlock[] = [];
+    // #xmlDoc: Document;
 
     constructor(rootNode: Element) {
         this.rootNode = rootNode;
-        // Store.rootNode = rootNode;
     }
-
-    // get rootNode() {
-    //     return this.rootNode;
-    // }
-
-    // set rootNode(rootNode: Element) {
-    //     this.rootNode = rootNode;
-    // }
 
     // setXML(rootNode: Element, xml: string) {
     //     if (!rootNode) throw new Error("Missing root node!");
@@ -52,15 +41,14 @@ export default class DTA {
     }
 
     serialize() {
-        //get path to rootNode
-        return {
-            // rootNode: this.rootNode,
+        const serializedData: SerializedDTA = {
+            // rootNode: getPathFromEl(document.body, this.rootNode),
             anchorBlocks: this.anchorBlocks.map((anchorBlock) => anchorBlock.serialize()),
         };
+        return serializedData;
     }
 
-    deserialize(data: { rootNode: Element; anchorBlocks: { anchors: { xPath: string; startOffset: number; endOffset: number; uuid: string }[]; value: string; props: Props; xPath: string }[] }) {
-        //get rootNode from path
+    deserialize(data: SerializedDTA) {
         // this.rootNode = data.rootNode;
         this.anchorBlocks = data.anchorBlocks.map((anchorBlockData) => {
             const anchorBlock = new AnchorBlock(this.rootNode);

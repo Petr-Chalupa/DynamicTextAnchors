@@ -1,17 +1,19 @@
-import Anchor from "./Anchor";
-import { getElFromPath, getPathFromEl } from "./utils";
+import Anchor, { SerializedAnchor } from "./Anchor";
 
-export interface Props {
+export interface SerializedAnchorBlock {
+    anchors: SerializedAnchor[];
+    value: string;
     color: string;
     data: object;
+    // xPath: string;
 }
 
 export default class AnchorBlock {
-    anchors: Anchor[] = [];
-    // #value: string = "";
-    props: Props = { color: "#ffff00", data: {} };
-    // #container: Node;
     rootNode: Element;
+    anchors: Anchor[] = [];
+    #color: string = "#ffff00";
+    #data: object = {};
+    // #container: Node;
     // #xPath: string;
 
     constructor(rootNode: Element, container?: Node, range?: Range) {
@@ -40,6 +42,7 @@ export default class AnchorBlock {
                 anchor.leftJoin = this.anchors[index - 1];
                 this.anchors[index - 1].rightJoin = anchor;
             }
+            anchor.color(this.#color);
             this.anchors.push(anchor);
         });
 
@@ -54,18 +57,35 @@ export default class AnchorBlock {
         return value;
     }
 
-    serialize() {
-        //get path to container
-        return {
-            anchors: this.anchors.map((anchor) => anchor.serialize()),
-            value: this.value,
-            props: this.props,
-            // container: this.#container,
-            // xPath: this.#xPath,
-        };
+    get color() {
+        return this.#color;
     }
 
-    deserialize(data: { anchors: { xPath: string; startOffset: number; endOffset: number; uuid: string }[]; value: string; props: Props; xPath: string }) {
+    set color(color: string) {
+        if (!/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(color)) return; // f.e. #aa0 or #bc65af
+        this.#color = color;
+        this.anchors.forEach((anchor) => anchor.color(this.#color));
+    }
+
+    get data() {
+        return this.#data;
+    }
+
+    set data(data: object) {
+        this.#data = data;
+    }
+
+    serialize() {
+        const serializedData: SerializedAnchorBlock = {
+            anchors: this.anchors.map((anchor) => anchor.serialize()),
+            value: this.value,
+            color: this.#color,
+            data: this.#data,
+        };
+        return serializedData;
+    }
+
+    deserialize(data: SerializedAnchorBlock) {
         data.anchors.forEach((anchorData, index) => {
             const anchor = new Anchor(this.rootNode, null, anchorData.startOffset, anchorData.endOffset, anchorData.uuid);
             anchor.deserialize(anchorData);
@@ -75,10 +95,10 @@ export default class AnchorBlock {
             }
             this.anchors.push(anchor);
         });
-        // this.#value = data.value;
-        this.props = data.props;
+        this.#color = data.color;
+        this.#data = data.data;
+        // this.#value = data.value; //check if the saved value is the same
         // this.#xPath = data.xPath;
-        //get container from path
         // this.#container = data.container;
     }
 }

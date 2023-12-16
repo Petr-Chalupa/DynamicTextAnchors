@@ -15,7 +15,6 @@ export function getPathFromEl(rootNode: Element, el: Node) {
                 if (nodeSiblings[i].isSameNode(node)) break;
                 else if (nodeSiblings[i].nodeName === node.nodeName) nodePosition++;
             }
-
             const id = node.ELEMENT_NODE ? node.id : null;
 
             xPath += `/${node.nodeName}[${nodePosition}]${id ? `[@id="${id}"]` : ""}`;
