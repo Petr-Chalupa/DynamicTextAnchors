@@ -6,7 +6,7 @@
         "text",
         "anchor"
     ],
-    "version": "1.2.1",
+    "version": "1.2.2",
     "author": "Petr Chalupa",
     "license": "SEE LICENSE IN LICENSE.md",
     "type": "module",
@@ -27,8 +27,7 @@
         "publish-minor": "npm verison minor -m \"Upgrade to version %s\" && npm publish",
         "publish-major": "npm verison major -m \"Upgrade to version %s\" && npm publish"
     },
-    "dependencies": {
-    },
+    "dependencies": {},
     "devDependencies": {
         "@vitejs/plugin-vue": "^4.2.3",
         "lorem-ipsum": "^2.0.8",
