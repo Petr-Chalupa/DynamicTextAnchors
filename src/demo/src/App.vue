@@ -67,7 +67,6 @@ const loadAnchorsInput = ref(null);
 
 let dta = null;
 onMounted(() => dta = new DTA(textfield.value));
-// const unsavedAnchors = ref(false);
 const forceAnchorsRerenderKey = ref(0);
 let savedAnchors = null;
 
@@ -96,7 +95,7 @@ function loadXML() {
 function saveXML() {
   const file = new Blob([loremXML.value], { type: "application/json" });
 
-  const link = document.createElement("A");
+  const link = document.createElement("a");
   link.href = URL.createObjectURL(file);
   link.download = "XML.xml";
   link.click();
@@ -111,6 +110,7 @@ function loadAnchors() {
   fileReader.onload = (e) => {
     dta = new DTA(textfield.value);
     dta.deserialize(JSON.parse(e.target.result));
+    forceAnchorsRerenderKey.value++;
   }
 }
 
@@ -118,7 +118,7 @@ function saveAnchors() {
   const serializedData = dta.serialize();
   const file = new Blob([JSON.stringify(serializedData)], { type: "application/json" });
 
-  const link = document.createElement("A");
+  const link = document.createElement("a");
   link.href = URL.createObjectURL(file);
   link.download = "Anchors.json";
   link.click();
@@ -126,7 +126,6 @@ function saveAnchors() {
 
 function createAnchorBlock() {
   dta.createAnchorBlock(window.getSelection());
-  // unsavedAnchors.value = true;
   forceAnchorsRerenderKey.value++;
 }
 

@@ -86,6 +86,8 @@ export default class AnchorBlock {
     }
 
     deserialize(data: SerializedAnchorBlock) {
+        this.#color = data.color;
+        this.#data = data.data;
         data.anchors.forEach((anchorData, index) => {
             const anchor = new Anchor(this.rootNode, null, anchorData.startOffset, anchorData.endOffset, anchorData.uuid);
             anchor.deserialize(anchorData);
@@ -93,10 +95,9 @@ export default class AnchorBlock {
                 anchor.leftJoin = this.anchors[index - 1];
                 this.anchors[index - 1].rightJoin = anchor;
             }
+            anchor.color(this.#color);
             this.anchors.push(anchor);
         });
-        this.#color = data.color;
-        this.#data = data.data;
         // this.#value = data.value; //check if the saved value is the same
         // this.#xPath = data.xPath;
         // this.#container = data.container;
