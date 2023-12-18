@@ -8,24 +8,10 @@ interface SerializedDTA {
 export default class DTA {
     rootNode: Element;
     anchorBlocks: AnchorBlock[] = [];
-    // #xmlDoc: Document;
 
     constructor(rootNode: Element) {
         this.rootNode = rootNode;
     }
-
-    // setXML(rootNode: Element, xml: string) {
-    //     if (!rootNode) throw new Error("Missing root node!");
-    //     this.#rootNode = rootNode;
-    //     this.#xmlDoc = this.#validateXML(xml);
-    // }
-
-    // #validateXML(xml: string) {
-    //     const xmlDoc: Document = new DOMParser().parseFromString(xml, "text/xml");
-    //     const errNode = xmlDoc.querySelector("parsererror");
-    //     if (errNode) throw new Error("Validation error: Invalid XML!");
-    //     return xmlDoc;
-    // }
 
     createAnchorBlock(selection: Selection) {
         if (!selection || selection.toString().trim().length === 0 || selection.rangeCount === 0) throw new Error("Anchor creation error: Empty selection!");

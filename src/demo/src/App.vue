@@ -71,14 +71,12 @@ const forceAnchorsRerenderKey = ref(0);
 let savedAnchors = null;
 
 watch(useMode, () => {
-  // if (!useMode.value && unsavedAnchors.value) saveAnchors();
   if (!useMode.value) savedAnchors = dta.serialize();
   else dta.deserialize(savedAnchors);
 });
 
 function genXML(XML) {
   loremXML.value = XML;
-  // dta.setXML(textfield.value, XML);
 }
 
 function loadXML() {
