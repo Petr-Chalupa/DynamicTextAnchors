@@ -254,7 +254,6 @@ nav {
         border: 2px solid $tertiary-color;
         border-radius: $border-radius;
         padding: 0.25rem;
-        cursor: pointer;
 
         p {
             margin: 0;
@@ -263,13 +262,32 @@ nav {
         .props > div,
         .parts > div {
             display: grid;
-            gap: 0.5rem;
-            padding-left: 0.5rem;
+            padding: 0.5rem 0 0 0.5rem;
 
             h6 {
                 font-size: 0.85rem;
                 margin: 0;
             }
+
+            pre {
+                border: 1px solid $font-color;
+                border-radius: $border-radius $border-radius 0 0;
+                padding: 0.25rem;
+                margin-bottom: 0;
+            }
+
+            button {
+                border: 1px solid $font-color;
+                border-top: 0;
+                border-radius: 0 0 $border-radius $border-radius;
+                font-weight: bold;
+                cursor: pointer;
+            }
+        }
+
+        .parts > div {
+            gap: 0.75rem;
+            cursor: pointer;
         }
     }
 }

@@ -28,6 +28,10 @@ export default class Anchor extends HTMLElement {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
 
+        this.#surround(node);
+    }
+
+    connectedCallback() {
         this.dataset.uuid = this.uuid;
         this.tabIndex = 0;
 
@@ -35,16 +39,6 @@ export default class Anchor extends HTMLElement {
             const anchorCustomEvent = new CustomEvent("anchor-click", { bubbles: true, detail: { originalEvent: e, anchor: this } });
             this.dispatchEvent(anchorCustomEvent);
         });
-
-        if (!node) return;
-
-        this.#value = node.textContent.substring(startOffset, endOffset);
-        this.#xPath = getPathFromEl(rootNode, node);
-
-        const partialRange = new Range();
-        partialRange.setStart(node, this.startOffset);
-        partialRange.setEnd(node, this.endOffset);
-        partialRange.surroundContents(this);
     }
 
     get value() {
@@ -65,6 +59,16 @@ export default class Anchor extends HTMLElement {
 
     set rightJoin(rightJoin: Anchor) {
         this.#rightJoin = rightJoin;
+    }
+
+    #surround(node: Node) {
+        this.#value = node.textContent.substring(this.startOffset, this.endOffset);
+        this.#xPath = getPathFromEl(this.rootNode, node);
+
+        const partialRange = new Range();
+        partialRange.setStart(node, this.startOffset);
+        partialRange.setEnd(node, this.endOffset);
+        partialRange.surroundContents(this);
     }
 
     color(color: string) {
@@ -98,15 +102,7 @@ export default class Anchor extends HTMLElement {
 
     deserialize(data: SerializedAnchor) {
         const node = getElFromPath(this.rootNode, data.xPath);
-        console.log(node);
-
-        this.#xPath = data.xPath;
-        this.#value = node.textContent.substring(this.startOffset, this.endOffset);
-
-        const partialRange = new Range();
-        partialRange.setStart(node, this.startOffset);
-        partialRange.setEnd(node, this.endOffset);
-        partialRange.surroundContents(this);
+        this.#surround(node);
     }
 }
 customElements.define("dta-anchor", Anchor);

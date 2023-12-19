@@ -33,7 +33,8 @@
           <summary>Anchor properties</summary>
           <div>
             <input type="color" v-model="anchorBlock.color" />
-            <p>Data: {{ anchorBlock.data }}</p>
+            <pre contenteditable="true" title="Data">{{ JSON.stringify(anchorBlock.data, null, 2) }}</pre>
+            <button @click="(e) => saveAnchorData(anchorBlock, e.target.previousSibling.textContent)">Save data</button>
           </div>
         </details>
         <details class="parts">
@@ -125,6 +126,15 @@ function saveAnchors() {
 function createAnchorBlock() {
   dta.createAnchorBlock(window.getSelection());
   forceAnchorsRerenderKey.value++;
+}
+
+function saveAnchorData(anchorBlock, rawData) {
+  try {
+    const data = JSON.parse(rawData);
+    anchorBlock.data = data;
+  } catch (err) {
+    alert(err);
+  }
 }
 
 function highlightAnchor(uuid) {
