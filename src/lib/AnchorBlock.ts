@@ -1,11 +1,11 @@
 import Anchor, { SerializedAnchor } from "./Anchor";
+import { getElFromPath, getPathFromEl } from "./utils";
 
 export interface SerializedAnchorBlock {
     anchors: SerializedAnchor[];
     value: string;
     color: string;
     data: object;
-    // xPath: string;
 }
 
 export default class AnchorBlock {
@@ -13,15 +13,11 @@ export default class AnchorBlock {
     anchors: Anchor[] = [];
     #color: string = "#ffff00";
     #data: object = {};
-    // #container: Node;
-    // #xPath: string;
 
     constructor(rootNode: Element, container?: Node, range?: Range) {
         this.rootNode = rootNode;
 
         if (!container || !range) return;
-        // this.#container = container;
-        // this.#xPath = getPathFromEl(rootNode, container);
 
         const intersectingTextNodes: Node[] = [];
         (function traverse(node: Node) {
@@ -36,16 +32,10 @@ export default class AnchorBlock {
         intersectingTextNodes.forEach((node, index) => {
             const startOffset = index === 0 ? range.startOffset : 0;
             const endOffset = index === intersectingTextNodes.length - 1 ? range.endOffset : node.textContent.length;
-
-            const anchor = new Anchor(rootNode, node, startOffset, endOffset);
-            if (index > 0) {
-                anchor.leftJoin = this.anchors[index - 1];
-                this.anchors[index - 1].rightJoin = anchor;
-            }
-            anchor.color(this.#color);
-            this.anchors.push(anchor);
+            this.#createAnchor(node, startOffset, endOffset);
         });
 
+        this.#joinAnchors();
         range.collapse();
     }
 
@@ -75,6 +65,23 @@ export default class AnchorBlock {
         this.#data = data;
     }
 
+    #createAnchor(node: Node, startOffset: number, endOffset: number, uuid?: string, xPath?: string) {
+        xPath ??= getPathFromEl(this.rootNode, node);
+        if (/DTA-ANCHOR/gi.test(xPath)) return; // overlap
+
+        const anchor = new Anchor(this.rootNode, node, startOffset, endOffset, uuid, xPath);
+        anchor.color(this.#color);
+        this.anchors.push(anchor);
+    }
+
+    #joinAnchors() {
+        for (let i = 1; i < this.anchors.length; i++) {
+            const anchor = this.anchors[i];
+            anchor.leftJoin = this.anchors[i - 1];
+            this.anchors[i - 1].rightJoin = anchor;
+        }
+    }
+
     serialize() {
         const serializedData: SerializedAnchorBlock = {
             anchors: this.anchors.map((anchor) => anchor.serialize()),
@@ -88,18 +95,9 @@ export default class AnchorBlock {
     deserialize(data: SerializedAnchorBlock) {
         this.#color = data.color;
         this.#data = data.data;
-        data.anchors.forEach((anchorData, index) => {
-            const anchor = new Anchor(this.rootNode, null, anchorData.startOffset, anchorData.endOffset, anchorData.uuid);
-            anchor.deserialize(anchorData);
-            if (index > 0) {
-                anchor.leftJoin = this.anchors[index - 1];
-                this.anchors[index - 1].rightJoin = anchor;
-            }
-            anchor.color(this.#color);
-            this.anchors.push(anchor);
+        data.anchors.forEach((anchorData) => {
+            this.#createAnchor(getElFromPath(this.rootNode, anchorData.xPath), anchorData.startOffset, anchorData.endOffset, anchorData.uuid, anchorData.xPath);
         });
-        // this.#value = data.value; //check if the saved value is the same
-        // this.#xPath = data.xPath;
-        // this.#container = data.container;
+        this.#joinAnchors();
     }
 }

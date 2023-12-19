@@ -20,15 +20,23 @@ export default class Anchor extends HTMLElement {
     #rightJoin: Anchor = null;
     #xPath: string;
 
-    constructor(rootNode: Element, node: Node, startOffset: number, endOffset: number, uuid?: string) {
+    constructor(rootNode: Element, node: Node, startOffset: number, endOffset: number, uuid?: string, xPath?: string) {
         super();
 
+        uuid ??= crypto.randomUUID();
+        xPath ??= getPathFromEl(this.rootNode, node);
+
         this.rootNode = rootNode;
-        this.uuid = uuid ?? crypto.randomUUID();
+        this.uuid = uuid;
+        this.#value = node.textContent.substring(this.startOffset, this.endOffset);
         this.startOffset = startOffset;
         this.endOffset = endOffset;
+        this.#xPath = xPath;
 
-        this.#surround(node);
+        const partialRange = new Range();
+        partialRange.setStart(node, this.startOffset);
+        partialRange.setEnd(node, this.endOffset);
+        partialRange.surroundContents(this);
     }
 
     connectedCallback() {
@@ -61,16 +69,6 @@ export default class Anchor extends HTMLElement {
         this.#rightJoin = rightJoin;
     }
 
-    #surround(node: Node) {
-        this.#value = node.textContent.substring(this.startOffset, this.endOffset);
-        this.#xPath = getPathFromEl(this.rootNode, node);
-
-        const partialRange = new Range();
-        partialRange.setStart(node, this.startOffset);
-        partialRange.setEnd(node, this.endOffset);
-        partialRange.surroundContents(this);
-    }
-
     color(color: string) {
         this.style.backgroundColor = color;
         this.style.color = this.#invertColor(color);
@@ -98,11 +96,6 @@ export default class Anchor extends HTMLElement {
             xPath: this.#xPath,
         };
         return serializedData;
-    }
-
-    deserialize(data: SerializedAnchor) {
-        const node = getElFromPath(this.rootNode, data.xPath);
-        this.#surround(node);
     }
 }
 customElements.define("dta-anchor", Anchor);
