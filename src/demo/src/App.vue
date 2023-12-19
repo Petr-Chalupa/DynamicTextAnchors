@@ -6,17 +6,9 @@
   </nav>
 
   <div id="container">
-    <div id="textfield" v-html="loremXML" :contenteditable="!useMode" :key="forceTextfieldRerenderKey" ref="textfield"></div>
+    <div id="textfield" v-html="loremXML" :contenteditable="!useMode" ref="textfield"></div>
 
     <div id="controls">
-      <div id="text-html">
-        <p>EDIT</p>
-        <label class="switch">
-          <input type="checkbox" v-model="useMode" />
-          <span class="slider"></span>
-        </label>
-        <p>USE</p>
-      </div>
       <LoremGenerator @genXML="genXML" />
       <label class="button">LOAD XML <input type="file" accept="application/xml" @change="loadXML" ref="loadXMLInput" /></label>
       <button @click="saveXML" :disabled="controlsDisabled">SAVE XML</button>
@@ -54,7 +46,7 @@
 <style lang="scss" src="@/assets/scss/main.scss" />
 
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import LoremGenerator from "./LoremGenerator.vue";
 import DTA from "../../../dist/lib/index.js";
 
@@ -62,19 +54,12 @@ const textfield = ref(null);
 const loremXML = ref("");
 const useMode = ref(true);
 const controlsDisabled = computed(() => (loremXML.value.length === 0 || !useMode.value));
-const forceTextfieldRerenderKey = ref(0);
 const loadXMLInput = ref(null);
 const loadAnchorsInput = ref(null);
 
 let dta = null;
 onMounted(() => dta = new DTA(textfield.value));
 const forceAnchorsRerenderKey = ref(0);
-let savedAnchors = null;
-
-watch(useMode, () => {
-  if (!useMode.value) savedAnchors = dta.serialize();
-  else dta.deserialize(savedAnchors);
-});
 
 function genXML(XML) {
   loremXML.value = XML;
