@@ -1,4 +1,5 @@
-import { getElFromPath, getPathFromEl } from "./utils";
+import AnchorBlock from "./AnchorBlock";
+import { getPathFromEl } from "./utils";
 
 export interface SerializedAnchor {
     uuid: string;
@@ -11,7 +12,7 @@ export interface SerializedAnchor {
 }
 
 export default class Anchor extends HTMLElement {
-    rootNode: Element;
+    #anchorBlock: AnchorBlock;
     uuid: string;
     #value: string;
     startOffset: number;
@@ -20,15 +21,15 @@ export default class Anchor extends HTMLElement {
     #rightJoin: Anchor = null;
     #xPath: string;
 
-    constructor(rootNode: Element, node: Node, startOffset: number, endOffset: number, uuid?: string, xPath?: string) {
+    constructor(anchorBlock: AnchorBlock, node: Node, startOffset: number, endOffset: number, uuid?: string, xPath?: string) {
         super();
 
         uuid ??= crypto.randomUUID();
-        xPath ??= getPathFromEl(this.rootNode, node);
+        xPath ??= getPathFromEl(anchorBlock.rootNode, node);
 
-        this.rootNode = rootNode;
+        this.#anchorBlock = anchorBlock;
         this.uuid = uuid;
-        this.#value = node.textContent.substring(this.startOffset, this.endOffset);
+        this.#value = node.textContent.substring(startOffset, endOffset);
         this.startOffset = startOffset;
         this.endOffset = endOffset;
         this.#xPath = xPath;
@@ -41,12 +42,17 @@ export default class Anchor extends HTMLElement {
 
     connectedCallback() {
         this.dataset.uuid = this.uuid;
-        this.tabIndex = 0;
+        this.tabIndex = -1;
+        this.setAttribute("aria-label", "Anchor");
 
         this.addEventListener("click", (e) => {
             const anchorCustomEvent = new CustomEvent("anchor-click", { bubbles: true, detail: { originalEvent: e, anchor: this } });
             this.dispatchEvent(anchorCustomEvent);
         });
+    }
+
+    get anchorBlock() {
+        return this.#anchorBlock;
     }
 
     get value() {

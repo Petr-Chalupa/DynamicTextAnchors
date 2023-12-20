@@ -2,6 +2,7 @@ import Anchor, { SerializedAnchor } from "./Anchor";
 import { getElFromPath, getPathFromEl } from "./utils";
 
 export interface SerializedAnchorBlock {
+    uuid: string;
     anchors: SerializedAnchor[];
     value: string;
     color: string;
@@ -10,12 +11,16 @@ export interface SerializedAnchorBlock {
 
 export default class AnchorBlock {
     rootNode: Element;
+    uuid: string;
     anchors: Anchor[] = [];
     #color: string = "#ffff00";
     #data: object = {};
 
-    constructor(rootNode: Element, container?: Node, range?: Range) {
+    constructor(rootNode: Element, container?: Node, range?: Range, uuid?: string) {
+        uuid ??= crypto.randomUUID();
+
         this.rootNode = rootNode;
+        this.uuid = uuid;
 
         if (!container || !range) return;
 
@@ -40,10 +45,7 @@ export default class AnchorBlock {
     }
 
     get value() {
-        let value = "";
-        this.anchors.forEach((anchor) => {
-            value += anchor.value;
-        });
+        const value = this.anchors.reduce((acc, curr) => acc + curr.value, "");
         return value;
     }
 
@@ -69,7 +71,7 @@ export default class AnchorBlock {
         xPath ??= getPathFromEl(this.rootNode, node);
         if (/DTA-ANCHOR/gi.test(xPath)) return; // overlap
 
-        const anchor = new Anchor(this.rootNode, node, startOffset, endOffset, uuid, xPath);
+        const anchor = new Anchor(this, node, startOffset, endOffset, uuid, xPath);
         anchor.color(this.#color);
         this.anchors.push(anchor);
     }
@@ -82,8 +84,17 @@ export default class AnchorBlock {
         }
     }
 
+    remove() {
+        this.anchors.forEach((anchor) => {
+            const parentNode = anchor.parentNode;
+            anchor.replaceWith(document.createTextNode(anchor.value));
+            parentNode.normalize();
+        });
+    }
+
     serialize() {
         const serializedData: SerializedAnchorBlock = {
+            uuid: this.uuid,
             anchors: this.anchors.map((anchor) => anchor.serialize()),
             value: this.value,
             color: this.#color,

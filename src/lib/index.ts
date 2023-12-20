@@ -26,6 +26,12 @@ export default class DTA {
         }
     }
 
+    removeAnchorBlock(uuid: string) {
+        const index = this.anchorBlocks.findIndex((anchorBlock) => anchorBlock.uuid === uuid);
+        this.anchorBlocks[index]?.remove();
+        this.anchorBlocks.splice(index, 1);
+    }
+
     serialize() {
         const serializedData: SerializedDTA = {
             // rootNode: getPathFromEl(document.body, this.rootNode),
@@ -37,7 +43,7 @@ export default class DTA {
     deserialize(data: SerializedDTA) {
         // this.rootNode = data.rootNode;
         this.anchorBlocks = data.anchorBlocks.map((anchorBlockData) => {
-            const anchorBlock = new AnchorBlock(this.rootNode);
+            const anchorBlock = new AnchorBlock(this.rootNode, null, null, anchorBlockData.uuid);
             anchorBlock.deserialize(anchorBlockData);
             return anchorBlock;
         });

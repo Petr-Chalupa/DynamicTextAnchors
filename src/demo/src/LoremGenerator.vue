@@ -65,6 +65,7 @@ function generateXML() {
     }, "plain", "\n");
 
     const genRandomTag = (value = "") => {
+        if (value.length === 0) value = lorem.generateSentences(1);
         let tag = ["p", "div", "span"][randomInt(0, 2)]; // default normal tag
         if (randomInt(0, 3) === 0) { // 25% chance for additional tag
             if (randomInt(0, 3) === 0) { // 6,25% chance for special tag
