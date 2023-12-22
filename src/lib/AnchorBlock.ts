@@ -37,7 +37,7 @@ export default class AnchorBlock {
         intersectingTextNodes.forEach((node, index) => {
             const startOffset = index === 0 ? range.startOffset : 0;
             const endOffset = index === intersectingTextNodes.length - 1 ? range.endOffset : node.textContent.length;
-            this.#createAnchor(node, startOffset, endOffset);
+            this.createAnchor(node, startOffset, endOffset);
         });
 
         this.#joinAnchors();
@@ -67,7 +67,7 @@ export default class AnchorBlock {
         this.#data = data;
     }
 
-    #createAnchor(node: Node, startOffset: number, endOffset: number, uuid?: string, xPath?: string) {
+    createAnchor(node: Node, startOffset: number, endOffset: number, uuid?: string, xPath?: string) {
         xPath ??= getPathFromEl(this.rootNode, node);
         if (/DTA-ANCHOR/gi.test(xPath)) return; // overlap
 
@@ -77,19 +77,24 @@ export default class AnchorBlock {
     }
 
     #joinAnchors() {
+        // this.anchors[0].focusable = true;
         for (let i = 1; i < this.anchors.length; i++) {
             const anchor = this.anchors[i];
             anchor.leftJoin = this.anchors[i - 1];
             this.anchors[i - 1].rightJoin = anchor;
+            // anchor.focusable = false;
         }
     }
 
-    remove() {
-        this.anchors.forEach((anchor) => {
-            const parentNode = anchor.parentNode;
-            anchor.replaceWith(document.createTextNode(anchor.value));
-            parentNode.normalize();
-        });
+    // destroyAnchor(uuid: string) {
+    //     const index = this.anchors.findIndex((anchor) => anchor.uuid === uuid);
+    //     this.anchors[index]?.destroy();
+    //     this.anchors.splice(index, 1);
+    // }
+
+    destroyAnchors() {
+        this.anchors.forEach((anchor) => anchor.destroy());
+        this.anchors = [];
     }
 
     serialize() {
@@ -103,12 +108,14 @@ export default class AnchorBlock {
         return serializedData;
     }
 
-    deserialize(data: SerializedAnchorBlock) {
-        this.#color = data.color;
-        this.#data = data.data;
-        data.anchors.forEach((anchorData) => {
-            this.#createAnchor(getElFromPath(this.rootNode, anchorData.xPath), anchorData.startOffset, anchorData.endOffset, anchorData.uuid, anchorData.xPath);
-        });
-        this.#joinAnchors();
-    }
+    // deserialize(data: SerializedAnchorBlock) {
+    //     this.#color = data.color;
+    //     this.#data = data.data;
+    //     data.anchors.forEach((anchorData) => {
+    //         const { uuid, startOffset, endOffset, xPath } = anchorData;
+    //         const node = getElFromPath(this.rootNode, xPath);
+    //         this.createAnchor(node, startOffset, endOffset, uuid, xPath);
+    //     });
+    //     this.#joinAnchors();
+    // }
 }

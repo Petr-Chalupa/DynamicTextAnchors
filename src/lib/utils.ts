@@ -29,6 +29,10 @@ export function getPathFromEl(rootNode: Element, el: Node) {
 
 export function getElFromPath(rootNode: Element, xPath: string) {
     console.log(rootNode, xPath);
-    const result = document.evaluate(xPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    return result.singleNodeValue;
+    try {
+        const result = document.evaluate(xPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        return result.singleNodeValue;
+    } catch (err) {
+        return null;
+    }
 }

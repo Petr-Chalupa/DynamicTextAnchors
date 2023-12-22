@@ -1,4 +1,5 @@
 import AnchorBlock, { SerializedAnchorBlock } from "./AnchorBlock";
+import { getElFromPath } from "./utils";
 
 interface SerializedDTA {
     // rootNode: Element;
@@ -26,9 +27,9 @@ export default class DTA {
         }
     }
 
-    removeAnchorBlock(uuid: string) {
+    destroyAnchorBlock(uuid: string) {
         const index = this.anchorBlocks.findIndex((anchorBlock) => anchorBlock.uuid === uuid);
-        this.anchorBlocks[index]?.remove();
+        this.anchorBlocks[index]?.destroyAnchors();
         this.anchorBlocks.splice(index, 1);
     }
 
@@ -41,11 +42,50 @@ export default class DTA {
     }
 
     deserialize(data: SerializedDTA) {
-        // this.rootNode = data.rootNode;
-        this.anchorBlocks = data.anchorBlocks.map((anchorBlockData) => {
-            const anchorBlock = new AnchorBlock(this.rootNode, null, null, anchorBlockData.uuid);
-            anchorBlock.deserialize(anchorBlockData);
-            return anchorBlock;
+        function searchForOccurences(value: string) {}
+
+        data.anchorBlocks.forEach((anchorBlockData) => {
+            const { uuid, anchors, value, color, data } = anchorBlockData;
+            const anchorBlock = new AnchorBlock(this.rootNode, null, null, uuid);
+            anchorBlock.color = color;
+            anchorBlock.data = data;
+
+            anchors.forEach((anchorData) => {
+                const { uuid, startOffset, endOffset, xPath } = anchorData;
+
+                const node = getElFromPath(this.rootNode, xPath);
+                if (!node) {
+                    //search for occurences
+                }
+
+                const actualValue = node.textContent.substring(startOffset, endOffset);
+                if (actualValue != value) {
+                    console.log("Values not matching");
+                    //check fo occurences
+                }
+
+                return;
+                anchorBlock.createAnchor(node, startOffset, endOffset, uuid, xPath);
+            });
+
+            if (anchorBlock.anchors.length > 0) this.anchorBlocks.push(anchorBlock);
         });
+
+        //checks
+        // function canDeserializeAnchor(node: Node, anchorData: any) {
+        //     const { uuid, value, startOffset, endOffset, xPath } = anchorData;
+
+        //     const actualValue = node.textContent.substring(startOffset, endOffset);
+        //     if (actualValue != value) return false;
+
+        //     return true;
+        // }
+
+        // // this.rootNode = data.rootNode;
+        // this.anchorBlocks = data.anchorBlocks.map((anchorBlockData) => {
+        //     const anchorBlock = new AnchorBlock(this.rootNode, null, null, anchorBlockData.uuid);
+        //     anchorBlock.deserialize(anchorBlockData);
+        //     return anchorBlock;
+        // });
     }
 }

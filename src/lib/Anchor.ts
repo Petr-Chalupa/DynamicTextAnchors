@@ -75,6 +75,22 @@ export default class Anchor extends HTMLElement {
         this.#rightJoin = rightJoin;
     }
 
+    // set focusable(focusable: boolean) {
+    //     if (focusable) {
+    //         this.tabIndex = 0;
+    //         this.setAttribute("aria-label", this.wholeValue);
+    //     } else {
+    //         this.removeAttribute("tabindex");
+    //         this.removeAttribute("aria-label");
+    //     }
+    // }
+
+    destroy() {
+        const parentNode = this.parentNode;
+        this.replaceWith(document.createTextNode(this.value));
+        parentNode.normalize();
+    }
+
     color(color: string) {
         this.style.backgroundColor = color;
         this.style.color = this.#invertColor(color);

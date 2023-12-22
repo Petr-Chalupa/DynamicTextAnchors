@@ -21,7 +21,7 @@
       <h3>Anchors</h3>
       <div v-if="!dta || dta.anchorBlocks.length === 0"><i>-- No anchors yet --</i></div>
       <div v-else v-for="(anchorBlock, index) in dta.anchorBlocks" :key="index" class="anchor">
-        <button @click="removeAnchorBlock(anchorBlock.uuid)">REMOVE</button>
+        <button @click="destroyAnchorBlock(anchorBlock.uuid)">DESTROY</button>
         <details class="props">
           <summary>Anchor properties</summary>
           <div>
@@ -129,8 +129,8 @@ function highlightAnchor(uuid) {
   if (highlightedAnchor?.dataset.uuid != uuid) textfield.value.querySelector(`[data-uuid="${uuid}"]`).classList.add("highlighted");
 }
 
-function removeAnchorBlock(uuid) {
-  dta.removeAnchorBlock(uuid);
+function destroyAnchorBlock(uuid) {
+  dta.destroyAnchorBlock(uuid);
   forceAnchorsRerenderKey.value++;
 }
 
