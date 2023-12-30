@@ -6,6 +6,7 @@
   - [Annotation](#annotation)
   - [Important files](#important-files)
   - [Installation](#installation)
+  - [Technologies used](#technologies-used)
   - [How to use](#how-to-use)
 
 ---
@@ -25,6 +26,14 @@
 ## Installation
 
 `npm i dynamic-text-anchors`
+
+## Technologies used
+
+- lib
+  - TS
+- demo
+  - Vue.JS
+  - SCSS
 
 ## How to use
 
