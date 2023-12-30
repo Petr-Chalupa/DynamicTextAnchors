@@ -1,49 +1,41 @@
 import AnchorBlock from "./AnchorBlock";
 import { getPathFromEl } from "./utils";
 
-export interface SerializedAnchor {
-    uuid: string;
-    value: string;
+export type SerializedAnchor = {
     startOffset: number;
     endOffset: number;
-    leftJoin: string;
-    rightJoin: string;
     xPath: string;
-}
+};
 
 export default class Anchor extends HTMLElement {
-    #anchorBlock: AnchorBlock;
     uuid: string;
-    #value: string;
     startOffset: number;
     endOffset: number;
+    #anchorBlock: AnchorBlock;
+    #xPath: string;
+    #value: string;
     #leftJoin: Anchor = null;
     #rightJoin: Anchor = null;
-    #xPath: string;
 
-    constructor(anchorBlock: AnchorBlock, node: Node, startOffset: number, endOffset: number, uuid?: string, xPath?: string) {
+    constructor(anchorBlock: AnchorBlock, node: Node, startOffset: number, endOffset: number) {
         super();
 
-        uuid ??= crypto.randomUUID();
-        xPath ??= getPathFromEl(anchorBlock.rootNode, node);
-
-        this.#anchorBlock = anchorBlock;
-        this.uuid = uuid;
-        this.#value = node.textContent.substring(startOffset, endOffset);
+        this.uuid = crypto.randomUUID();
         this.startOffset = startOffset;
         this.endOffset = endOffset;
-        this.#xPath = xPath;
+        this.#anchorBlock = anchorBlock;
+        this.#xPath = getPathFromEl(anchorBlock.dta.rootNode, node);
+        this.#value = node.textContent.substring(startOffset, endOffset);
 
-        const partialRange = new Range();
-        partialRange.setStart(node, this.startOffset);
-        partialRange.setEnd(node, this.endOffset);
-        partialRange.surroundContents(this);
+        const range = new Range();
+        range.setStart(node, this.startOffset);
+        range.setEnd(node, this.endOffset);
+        range.surroundContents(this);
     }
 
     connectedCallback() {
         this.dataset.uuid = this.uuid;
         this.tabIndex = -1;
-        this.setAttribute("aria-label", "Anchor");
 
         this.addEventListener("click", (e) => {
             const anchorCustomEvent = new CustomEvent("anchor-click", { bubbles: true, detail: { originalEvent: e, anchor: this } });
@@ -75,20 +67,15 @@ export default class Anchor extends HTMLElement {
         this.#rightJoin = rightJoin;
     }
 
-    // set focusable(focusable: boolean) {
-    //     if (focusable) {
-    //         this.tabIndex = 0;
-    //         this.setAttribute("aria-label", this.wholeValue);
-    //     } else {
-    //         this.removeAttribute("tabindex");
-    //         this.removeAttribute("aria-label");
-    //     }
-    // }
-
     destroy() {
         const parentNode = this.parentNode;
         this.replaceWith(document.createTextNode(this.value));
         parentNode.normalize();
+    }
+
+    setChanged(changed: boolean) {
+        if (changed) this.setAttribute("data-changed", "true");
+        else this.removeAttribute("data-changed");
     }
 
     color(color: string) {
@@ -99,7 +86,6 @@ export default class Anchor extends HTMLElement {
     #invertColor(hex: string) {
         if (hex.indexOf("#") === 0) hex = hex.slice(1);
         if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]; // convert 3-digit hex to 6-digits
-        if (hex.length !== 6) throw new Error("Invalid HEX color!");
 
         const r = parseInt(hex.slice(0, 2), 16),
             g = parseInt(hex.slice(2, 4), 16),
@@ -109,12 +95,8 @@ export default class Anchor extends HTMLElement {
 
     serialize() {
         const serializedData: SerializedAnchor = {
-            uuid: this.uuid,
-            value: this.#value,
             startOffset: this.startOffset,
             endOffset: this.endOffset,
-            leftJoin: this.#leftJoin?.uuid,
-            rightJoin: this.#rightJoin?.uuid,
             xPath: this.#xPath,
         };
         return serializedData;

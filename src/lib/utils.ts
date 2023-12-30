@@ -36,3 +36,17 @@ export function getElFromPath(rootNode: Element, xPath: string) {
         return null;
     }
 }
+
+export function splitArrayToChunks(array: any[], del: any) {
+    const chunks: any[][] = [[]];
+    let chunkIndex = 0;
+
+    array.forEach((item) => {
+        if (item != del) {
+            if (!chunks[chunkIndex]) chunks[chunkIndex] = [];
+            chunks[chunkIndex].push(item);
+        } else chunkIndex++;
+    });
+
+    return chunks;
+}

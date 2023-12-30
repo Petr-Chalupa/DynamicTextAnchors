@@ -2,10 +2,11 @@
 
 **Table of contents**
 
--   [Annotation](#annotation)
--   [Important files](#important-files)
--   [Installation](#installation)
--   [How to use](#how-to-use)
+- [DynamicTextAnchors (DTA)](#dynamictextanchors-dta)
+  - [Annotation](#annotation)
+  - [Important files](#important-files)
+  - [Installation](#installation)
+  - [How to use](#how-to-use)
 
 ---
 

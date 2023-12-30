@@ -10,9 +10,9 @@
 
     <div id="controls">
       <LoremGenerator @genXML="genXML" />
-      <label class="button">LOAD XML <input type="file" accept="application/xml" @change="loadXML" ref="loadXMLInput" /></label>
+      <label class="button">LOAD XML <input type="file" accept="application/xml" @input="loadXML" ref="loadXMLInput" /></label>
       <button @click="saveXML" :disabled="controlsDisabled">SAVE XML</button>
-      <label class="button" :disabled="controlsDisabled">LOAD ANCHORS <input type="file" accept="application/json" :disabled="controlsDisabled" @change="loadAnchors" ref="loadAnchorsInput" /></label>
+      <label class="button" :disabled="controlsDisabled">LOAD ANCHORS <input type="file" accept="application/json" :disabled="controlsDisabled" @input="loadAnchors" ref="loadAnchorsInput" /></label>
       <button @click="saveAnchors" :disabled="controlsDisabled">SAVE ANCHORS</button>
       <button @click="createAnchorBlock" :disabled="controlsDisabled">CREATE ANCHOR</button>
     </div>
@@ -21,13 +21,14 @@
       <h3>Anchors</h3>
       <div v-if="!dta || dta.anchorBlocks.length === 0"><i>-- No anchors yet --</i></div>
       <div v-else v-for="(anchorBlock, index) in dta.anchorBlocks" :key="index" class="anchor">
-        <button @click="destroyAnchorBlock(anchorBlock.uuid)">DESTROY</button>
-        <details class="props">
-          <summary>Anchor properties</summary>
+        <h6>{{ anchorBlock.uuid }}</h6>
+        <details class="settings">
+          <summary>Anchor settings</summary>
           <div>
             <input type="color" v-model="anchorBlock.color" />
             <pre contenteditable="true" title="Data">{{ JSON.stringify(anchorBlock.data, null, 2) }}</pre>
-            <button @click="(e) => saveAnchorData(anchorBlock, e.target.previousSibling.textContent)">Save data</button>
+            <button @click="(e) => saveAnchorData(anchorBlock, e.target.previousSibling.textContent)" class="saveDataBtn">Save data</button>
+            <button @click="destroyAnchorBlock(anchorBlock.uuid)" class="destroyBtn">DESTROY</button>
           </div>
         </details>
         <details class="parts">
@@ -74,6 +75,8 @@ function loadXML() {
   fileReader.readAsText(file);
   fileReader.onload = (e) => {
     loremXML.value = e.target.result;
+    dta = new DTA(textfield.value);
+    forceAnchorsRerenderKey.value++;
   }
 }
 
@@ -93,7 +96,6 @@ function loadAnchors() {
   const fileReader = new FileReader();
   fileReader.readAsText(file);
   fileReader.onload = (e) => {
-    dta = new DTA(textfield.value);
     dta.deserialize(JSON.parse(e.target.result));
     forceAnchorsRerenderKey.value++;
   }
@@ -110,7 +112,7 @@ function saveAnchors() {
 }
 
 function createAnchorBlock() {
-  dta.createAnchorBlock(window.getSelection());
+  dta.createAnchorBlockFromSelection();
   forceAnchorsRerenderKey.value++;
 }
 
@@ -119,19 +121,20 @@ function saveAnchorData(anchorBlock, rawData) {
     const data = JSON.parse(rawData);
     anchorBlock.data = data;
   } catch (err) {
-    alert(err);
+    console.error(err);
   }
+}
+
+function destroyAnchorBlock(uuid) {
+  if (!confirm("Really?")) return;
+  dta.destroyAnchorBlock(uuid);
+  forceAnchorsRerenderKey.value++;
 }
 
 function highlightAnchor(uuid) {
   const highlightedAnchor = textfield.value.querySelector(".highlighted");
   highlightedAnchor?.classList.remove("highlighted");
   if (highlightedAnchor?.dataset.uuid != uuid) textfield.value.querySelector(`[data-uuid="${uuid}"]`).classList.add("highlighted");
-}
-
-function destroyAnchorBlock(uuid) {
-  dta.destroyAnchorBlock(uuid);
-  forceAnchorsRerenderKey.value++;
 }
 
 document.addEventListener("anchor-click", (e) => {
