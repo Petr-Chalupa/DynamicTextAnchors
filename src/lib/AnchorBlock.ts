@@ -1,5 +1,6 @@
 import Anchor, { SerializedAnchor } from "./Anchor";
 import DTA from "./index";
+import { isValidHexColor } from "./utils";
 
 type AnchorBlockData = { [key: string]: any };
 export type SerializedAnchorBlock = {
@@ -12,7 +13,7 @@ export type SerializedAnchorBlock = {
 
 export default class AnchorBlock {
     uuid: string;
-    anchors: Anchor[] = [];
+    #anchors: Anchor[] = [];
     #dta: DTA;
     #color: string = "#ffff00";
     #data: AnchorBlockData = {};
@@ -23,8 +24,12 @@ export default class AnchorBlock {
     }
 
     get value() {
-        const value = this.anchors.reduce((acc, curr) => acc + curr.value, "");
+        const value = this.#anchors.reduce((acc, curr) => acc + curr.value, "");
         return value;
+    }
+
+    get anchors() {
+        return this.#anchors;
     }
 
     get dta() {
@@ -36,9 +41,9 @@ export default class AnchorBlock {
     }
 
     set color(color: string) {
-        if (!/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(color)) return; // f.e. #aa0 or #bc65af
+        if (!isValidHexColor(color)) return;
         this.#color = color;
-        this.anchors.forEach((anchor) => anchor.color(this.#color));
+        this.#anchors.forEach((anchor) => anchor.color(color));
     }
 
     get data() {
@@ -55,29 +60,29 @@ export default class AnchorBlock {
 
         const anchor = new Anchor(this, node, startOffset, endOffset);
         anchor.color(this.#color);
-        this.anchors.push(anchor);
+        this.#anchors.push(anchor);
     }
 
     joinAnchors() {
-        for (let i = 1; i < this.anchors.length; i++) {
-            const anchor = this.anchors[i];
-            anchor.leftJoin = this.anchors[i - 1];
-            this.anchors[i - 1].rightJoin = anchor;
+        for (let i = 1; i < this.#anchors.length; i++) {
+            const anchor = this.#anchors[i];
+            anchor.leftJoin = this.#anchors[i - 1];
+            this.#anchors[i - 1].rightJoin = anchor;
         }
     }
 
-    destroyAnchors(anchors: Anchor[] = this.anchors) {
+    destroyAnchors(anchors: Anchor[] = this.#anchors) {
         anchors.forEach((anchor) => anchor.destroy());
     }
 
-    setChanged(changed: boolean, anchors: Anchor[] = this.anchors) {
+    setChanged(changed: boolean, anchors: Anchor[] = this.#anchors) {
         anchors.forEach((anchor) => anchor.setChanged(changed));
     }
 
     serialize() {
         const serializedData: SerializedAnchorBlock = {
-            startAnchor: this.anchors[0].serialize(),
-            endAnchor: this.anchors.at(-1).serialize(),
+            startAnchor: this.#anchors[0].serialize(),
+            endAnchor: this.#anchors.at(-1).serialize(),
             value: this.value,
             color: this.#color,
             data: this.#data,

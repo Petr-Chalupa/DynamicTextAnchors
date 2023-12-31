@@ -6,18 +6,26 @@ type SerializedDTA = {
 };
 
 export default class DTA {
-    rootNode: Element;
-    anchorBlocks: AnchorBlock[] = [];
+    #rootNode: Element;
+    #anchorBlocks: AnchorBlock[] = [];
 
     constructor(rootNode: Element) {
-        this.rootNode = rootNode;
+        this.#rootNode = rootNode;
+    }
+
+    get rootNode() {
+        return this.#rootNode;
+    }
+
+    get anchorBlocks() {
+        return this.#anchorBlocks;
     }
 
     createAnchorBlockFromSelection(selection: Selection = window.getSelection(), checkValue?: string) {
         const anchorBlocks: AnchorBlock[] = [];
 
         if (selection.rangeCount === 0 || selection.toString().trim().length === 0) {
-            console.error("Anchor creation error: Empty selection!");
+            console.error(new Error("Anchor creation error: Empty selection!"));
             return anchorBlocks;
         }
 
@@ -26,8 +34,8 @@ export default class DTA {
             let container = range.commonAncestorContainer;
 
             while (container.nodeType != Node.ELEMENT_NODE) container = container.parentNode;
-            if (!(container.isSameNode(this.rootNode) || this.rootNode.contains(container))) {
-                console.error(`Anchor creation error: Invalid selection at range ${i}!`);
+            if (!(container.isSameNode(this.#rootNode) || this.#rootNode.contains(container))) {
+                console.error(new Error(`Anchor creation error: Invalid selection at range ${i}!`));
                 continue;
             }
 
@@ -42,7 +50,7 @@ export default class DTA {
             })(container);
 
             textNodes = textNodes.map((node) => {
-                const xPath = getPathFromEl(this.rootNode, node);
+                const xPath = getPathFromEl(this.#rootNode, node);
                 return /DTA-ANCHOR/gi.test(xPath) ? null : node;
             });
             const ignoreStartOffset = textNodes[0] === null;
@@ -77,6 +85,8 @@ export default class DTA {
                     if (indexes === undefined) {
                         changedAnchors.push(anchorBlocks[0].anchors[i]);
                         i++; // skip the next indexes
+                    } else if ((i === 0 && indexes[0] != 0) || (i === valueIndexes.length - 1 && indexes[1] != checkValue.length)) {
+                        changedAnchors.push(anchorBlocks[0].anchors[i]);
                     } else if (i != 0 && indexes[0] != valueIndexes[i - 1][1]) {
                         changedAnchors.push(anchorBlocks[0].anchors[i], anchorBlocks[0].anchors[i - 1]);
                     }
@@ -86,20 +96,20 @@ export default class DTA {
             }
         }
 
-        this.anchorBlocks = this.anchorBlocks.concat(anchorBlocks);
+        this.#anchorBlocks = this.#anchorBlocks.concat(anchorBlocks);
         selection.collapseToEnd();
         return anchorBlocks;
     }
 
     destroyAnchorBlock(uuid: string) {
-        const index = this.anchorBlocks.findIndex((anchorBlock) => anchorBlock.uuid === uuid);
-        this.anchorBlocks[index]?.destroyAnchors();
-        this.anchorBlocks.splice(index, 1);
+        const index = this.#anchorBlocks.findIndex((anchorBlock) => anchorBlock.uuid === uuid);
+        this.#anchorBlocks[index]?.destroyAnchors();
+        this.#anchorBlocks.splice(index, 1);
     }
 
     serialize() {
         const serializedData: SerializedDTA = {
-            anchorBlocks: this.anchorBlocks.map((anchorBlock) => anchorBlock.serialize()),
+            anchorBlocks: this.#anchorBlocks.map((anchorBlock) => anchorBlock.serialize()),
         };
         return serializedData;
     }
@@ -108,12 +118,14 @@ export default class DTA {
         return data.anchorBlocks.flatMap((anchorBlockData) => {
             const { startAnchor, endAnchor, color, data, value } = anchorBlockData;
 
-            const startNode = getElFromPath(this.rootNode, startAnchor.xPath);
-            const endNode = getElFromPath(this.rootNode, endAnchor.xPath);
+            const startNode = getElFromPath(this.#rootNode, startAnchor.xPath);
+            const endNode = getElFromPath(this.#rootNode, endAnchor.xPath);
             if (!startNode || !endNode) {
-                console.error("Anchor deserialization error: Missing start or end node!");
+                console.error(new Error("Anchor deserialization error: Missing start or end node!"));
                 return;
             }
+            if (startAnchor.startOffset > startNode.textContent.length) startAnchor.startOffset = startNode.textContent.length - 5; //random number
+            if (endAnchor.endOffset > endNode.textContent.length) endAnchor.endOffset = endNode.textContent.length;
 
             const range = new Range();
             range.setStart(startNode, startAnchor.startOffset);
