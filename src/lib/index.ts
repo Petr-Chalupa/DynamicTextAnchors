@@ -101,10 +101,12 @@ export default class DTA {
         return anchorBlocks;
     }
 
-    destroyAnchorBlock(uuid: string) {
-        const index = this.#anchorBlocks.findIndex((anchorBlock) => anchorBlock.uuid === uuid);
-        this.#anchorBlocks[index]?.destroyAnchors();
-        this.#anchorBlocks.splice(index, 1);
+    destroyAnchorBlocks(anchorBlocks: AnchorBlock[] = [...this.#anchorBlocks]) {
+        anchorBlocks.forEach((anchorBlock) => {
+            const anchorBlockIndex = this.#anchorBlocks.findIndex(({ uuid }) => uuid === anchorBlock.uuid);
+            anchorBlock.destroyAnchors();
+            this.#anchorBlocks.splice(anchorBlockIndex, 1);
+        });
     }
 
     serialize() {

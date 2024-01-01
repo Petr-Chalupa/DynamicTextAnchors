@@ -71,8 +71,12 @@ export default class AnchorBlock {
         }
     }
 
-    destroyAnchors(anchors: Anchor[] = this.#anchors) {
-        anchors.forEach((anchor) => anchor.destroy());
+    destroyAnchors(anchors: Anchor[] = [...this.#anchors]) {
+        anchors.forEach((anchor) => {
+            const anchorIndex = this.#anchors.findIndex(({ uuid }) => uuid === anchor.uuid);
+            anchor.destroy();
+            this.#anchors.splice(anchorIndex, 1);
+        });
     }
 
     setChanged(changed: boolean, anchors: Anchor[] = this.#anchors) {

@@ -6,19 +6,19 @@
         <div>
             <label class="slider">
                 Sentences per paragraph MIN<b>({{ settings.sentencesPerParagraph.min }})</b>
-                <input type="range" min="3" :max="settings.sentencesPerParagraph.max" v-model="settings.sentencesPerParagraph.min" />
+                <input type="range" min="3" :max="settings.sentencesPerParagraph.max" v-model.number="settings.sentencesPerParagraph.min" />
                 Sentences per paragraph MAX<b>({{ settings.sentencesPerParagraph.max }})</b>
-                <input type="range" :min="settings.sentencesPerParagraph.min" max="16" v-model="settings.sentencesPerParagraph.max" />
+                <input type="range" :min="settings.sentencesPerParagraph.min" max="16" v-model.number="settings.sentencesPerParagraph.max" />
             </label>
             <label class="slider">
                 Words per sentence MIN<b>({{ settings.wordsPerSentence.min }})</b>
-                <input type="range" min="1" :max="settings.wordsPerSentence.max" v-model="settings.wordsPerSentence.min" />
+                <input type="range" min="1" :max="settings.wordsPerSentence.max" v-model.number="settings.wordsPerSentence.min" />
                 Words per sentence MAX<b>({{ settings.wordsPerSentence.max }})</b>
-                <input type="range" :min="settings.wordsPerSentence.min" max="10" v-model="settings.wordsPerSentence.max" />
+                <input type="range" :min="settings.wordsPerSentence.min" max="10" v-model.number="settings.wordsPerSentence.max" />
             </label>
             <label class="slider">
                 Maximal depth<b>({{ settings.maxDepth }})</b>
-                <input type="range" min="1" max="10" v-model="settings.maxDepth" />
+                <input type="range" min="1" max="10" v-model.number="settings.maxDepth" />
             </label>
 
             <button @click="closeDialog">CLOSE</button>
@@ -59,10 +59,7 @@ function closeDialog() {
 function randomInt(min = 0, max = 1) { return Math.floor(Math.random() * (max - min + 1)) << 0 }
 
 function generateXML() {
-    const lorem = new LoremIpsum({
-        ...settings.sentencesPerParagraph,
-        ...settings.wordsPerSentence,
-    }, "plain", "\n");
+    const lorem = new LoremIpsum(settings, "plain", "\n");
 
     const genRandomTag = (value = "") => {
         if (value.length === 0) value = lorem.generateSentences(1);

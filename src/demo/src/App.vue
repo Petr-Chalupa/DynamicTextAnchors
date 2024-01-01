@@ -127,7 +127,8 @@ function saveAnchorData(anchorBlock, rawData) {
 
 function destroyAnchorBlock(uuid) {
   if (!confirm("Really?")) return;
-  dta.destroyAnchorBlock(uuid);
+  const anchorBlock = dta.anchorBlocks.find((anchorBlock) => anchorBlock.uuid === uuid);
+  dta.destroyAnchorBlocks([anchorBlock]);
   forceAnchorsRerenderKey.value++;
 }
 
