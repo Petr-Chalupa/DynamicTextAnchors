@@ -8,6 +8,10 @@
   - [Installation](#installation)
   - [Technologies used](#technologies-used)
   - [How to use](#how-to-use)
+    - [createAnchorBlockFromSelection()](#createanchorblockfromselection)
+    - [destroyAnchorBlocks()](#destroyanchorblocks)
+    - [serialize()](#serialize)
+    - [deserialize()](#deserialize)
 
 ---
 
@@ -40,3 +44,19 @@
 `import DTA from "dynamic-text-anchors";`
 
 Now you can use DTA methods
+
+### createAnchorBlockFromSelection()
+
+Creates AnchorBlock from given selection or from the user's current selection. Selection must be contained within the configured rootNode. Multiple selection ranges _are_ supported.
+
+### destroyAnchorBlocks()
+
+Destroys the specified AnchorBlocks and their Anchors, or destroys all AnchorBlocks if none are specified.
+
+### serialize()
+
+Returns the DTA data ready to be saved.
+
+### deserialize()
+
+Attempts to reconstruct AnchorBlocks and Anchors from the given data.
