@@ -6,6 +6,7 @@
         "declaration": true,
         "sourceMap": true,
         "noImplicitAny": true,
+        "moduleResolution": "Node",
         "lib": [
             "ES2023",
             "DOM",

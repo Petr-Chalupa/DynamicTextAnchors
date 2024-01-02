@@ -19,10 +19,11 @@
         "package.json"
     ],
     "scripts": {
-        "build-tsc-watch": "tsc --watch",
-        "build-all": "tsc && vite build ./src/demo",
+        "build-lib": "tsc",
+        "build-lib-watch": "tsc --watch",
+        "build-demo": "vite build ./src/demo",
+        "build-all": "npm run build-lib && npm run build-demo",
         "demo-dev": "vite ./src/demo",
-        "demo-preview": "vite preview ./src/demo",
         "version-patch": "npm version patch -m \"Upgrade to version %s\"",
         "version-minor": "npm version minor -m \"Upgrade to version %s\"",
         "version-major": "npm version major -m \"Upgrade to version %s\"",
