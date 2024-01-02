@@ -10,9 +10,9 @@
 
     <div id="controls">
       <LoremGenerator @genXML="genXML" />
-      <label class="button">LOAD XML <input type="file" accept="application/xml" @input="loadXML" ref="loadXMLInput" /></label>
+      <label class="button" tabindex="0">LOAD XML <input type="file" accept="application/xml" @input="loadXML" ref="loadXMLInput" /></label>
       <button @click="saveXML" :disabled="controlsDisabled">SAVE XML</button>
-      <label class="button" :disabled="controlsDisabled">LOAD ANCHORS <input type="file" accept="application/json" :disabled="controlsDisabled" @input="loadAnchors" ref="loadAnchorsInput" /></label>
+      <label class="button" :disabled="controlsDisabled" tabindex="0">LOAD ANCHORS <input type="file" accept="application/json" @input="loadAnchors" ref="loadAnchorsInput" /></label>
       <button @click="saveAnchors" :disabled="controlsDisabled">SAVE ANCHORS</button>
       <button @click="createAnchorBlock" :disabled="controlsDisabled">CREATE ANCHOR</button>
     </div>
