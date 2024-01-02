@@ -18,12 +18,12 @@
     </div>
 
     <div id="anchors" :key="forceAnchorsRerenderKey">
-      <h3>Anchors</h3>
+      <h3>Anchor Blocks</h3>
       <div v-if="!dta || dta.anchorBlocks.length === 0"><i>-- No anchors yet --</i></div>
       <div v-else v-for="(anchorBlock, index) in dta.anchorBlocks" :key="index" class="anchor">
         <h6>{{ anchorBlock.uuid }}</h6>
         <details class="settings">
-          <summary>Anchor settings</summary>
+          <summary>Settings</summary>
           <div>
             <input type="color" v-model="anchorBlock.color" />
             <pre contenteditable="true" title="Data">{{ JSON.stringify(anchorBlock.data, null, 2) }}</pre>
@@ -32,7 +32,7 @@
           </div>
         </details>
         <details class="parts">
-          <summary>Anchor parts ({{ anchorBlock.anchors.length }})</summary>
+          <summary>Anchors ({{ anchorBlock.anchors.length }})</summary>
           <div>
             <div v-for="{ uuid, value } in anchorBlock.anchors" :key="uuid" @click="focusAnchor(uuid)">
               <h6>{{ uuid }}</h6>
