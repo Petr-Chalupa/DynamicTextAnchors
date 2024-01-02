@@ -34,7 +34,7 @@
         <details class="parts">
           <summary>Anchor parts ({{ anchorBlock.anchors.length }})</summary>
           <div>
-            <div v-for="{ uuid, value } in anchorBlock.anchors" :key="uuid" @click="highlightAnchor(uuid)">
+            <div v-for="{ uuid, value } in anchorBlock.anchors" :key="uuid" @click="focusAnchor(uuid)">
               <h6>{{ uuid }}</h6>
               <p>{{ value }}</p>
             </div>
@@ -132,10 +132,10 @@ function destroyAnchorBlock(uuid) {
   forceAnchorsRerenderKey.value++;
 }
 
-function highlightAnchor(uuid) {
-  const highlightedAnchor = textfield.value.querySelector(".highlighted");
-  highlightedAnchor?.classList.remove("highlighted");
-  if (highlightedAnchor?.dataset.uuid != uuid) textfield.value.querySelector(`[data-uuid="${uuid}"]`).classList.add("highlighted");
+function focusAnchor(uuid) {
+  const highlightedAnchor = textfield.value.querySelector("[data-focused]");
+  highlightedAnchor?.removeAttribute("data-focused");
+  if (highlightedAnchor?.dataset.uuid != uuid) textfield.value.querySelector(`[data-uuid="${uuid}"]`).setAttribute("data-focused", "true");
 }
 
 document.addEventListener("anchor-click", (e) => {

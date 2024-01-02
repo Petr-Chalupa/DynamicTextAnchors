@@ -64,6 +64,9 @@ export default class AnchorBlock {
     }
 
     joinAnchors() {
+        this.#anchors[0].tabIndex = 0;
+        this.#anchors[0].setAttribute("aria-label", this.value);
+
         for (let i = 1; i < this.#anchors.length; i++) {
             const anchor = this.#anchors[i];
             anchor.leftJoin = this.#anchors[i - 1];
@@ -81,6 +84,10 @@ export default class AnchorBlock {
 
     setChanged(changed: boolean, anchors: Anchor[] = this.#anchors) {
         anchors.forEach((anchor) => anchor.setChanged(changed));
+    }
+
+    setFocused(focused: boolean) {
+        this.#anchors.forEach((anchor) => anchor.setFocused(focused));
     }
 
     serialize() {

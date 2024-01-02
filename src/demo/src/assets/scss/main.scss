@@ -143,10 +143,11 @@ nav {
     }
 
     dta-anchor {
-        &.highlighted {
+        &[data-focused] {
             background-color: $tertiary-color !important;
             border: 2px dotted $font-color !important;
             border-radius: $border-radius !important;
+            outline: none;
         }
 
         &[data-changed] {
