@@ -23,9 +23,9 @@
         "build-all": "tsc && vite build ./src/demo",
         "demo-dev": "vite ./src/demo",
         "demo-preview": "vite preview ./src/demo",
-        "publish-patch": "npm verison patch -m \"Upgrade to version %s\" && npm publish",
-        "publish-minor": "npm verison minor -m \"Upgrade to version %s\" && npm publish",
-        "publish-major": "npm verison major -m \"Upgrade to version %s\" && npm publish"
+        "version-patch": "npm version patch -m \"Upgrade to version %s\"",
+        "version-minor": "npm version minor -m \"Upgrade to version %s\"",
+        "version-major": "npm version major -m \"Upgrade to version %s\""
     },
     "dependencies": {},
     "devDependencies": {
