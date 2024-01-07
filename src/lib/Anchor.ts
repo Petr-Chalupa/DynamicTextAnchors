@@ -1,5 +1,5 @@
 import AnchorBlock from "./AnchorBlock";
-import { getPathFromEl, invertHexColor, isValidHexColor } from "./utils";
+import { getPathFromNode, invertHexColor, isValidHexColor } from "./utils";
 
 export type SerializedAnchor = {
     startOffset: number;
@@ -24,7 +24,7 @@ export default class Anchor extends HTMLElement {
         this.#startOffset = startOffset;
         this.#endOffset = endOffset;
         this.#anchorBlock = anchorBlock;
-        this.#xPath = getPathFromEl(anchorBlock.dta.rootNode, node);
+        this.#xPath = getPathFromNode(anchorBlock.dta.rootNode, node);
         this.#value = node.textContent.substring(startOffset, endOffset);
 
         const range = new Range();
@@ -55,6 +55,11 @@ export default class Anchor extends HTMLElement {
 
     get anchorBlock() {
         return this.#anchorBlock;
+    }
+
+    set anchorBlock(anchorBlock: AnchorBlock) {
+        this.#anchorBlock.destroyAnchors([this], false);
+        this.#anchorBlock = anchorBlock;
     }
 
     get value() {

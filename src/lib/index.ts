@@ -1,5 +1,5 @@
 import AnchorBlock, { SerializedAnchorBlock } from "./AnchorBlock";
-import { getElFromPath, getPathFromEl, splitArrayToChunks } from "./utils";
+import { getNodeFromPath, getPathFromNode, splitArrayToChunks } from "./utils";
 
 type SerializedDTA = {
     anchorBlocks: SerializedAnchorBlock[];
@@ -50,7 +50,7 @@ export default class DTA {
             })(container);
 
             textNodes = textNodes.map((node) => {
-                const xPath = getPathFromEl(this.#rootNode, node);
+                const xPath = getPathFromNode(this.#rootNode, node);
                 return /DTA-ANCHOR/gi.test(xPath) ? null : node;
             });
             const ignoreStartOffset = textNodes[0] === null;
@@ -101,12 +101,21 @@ export default class DTA {
         return anchorBlocks;
     }
 
-    destroyAnchorBlocks(anchorBlocks: AnchorBlock[] = [...this.#anchorBlocks]) {
+    removeAnchorBlocks(anchorBlocks: AnchorBlock[] = [...this.#anchorBlocks], destroy: boolean = true) {
         anchorBlocks.forEach((anchorBlock) => {
             const anchorBlockIndex = this.#anchorBlocks.findIndex(({ uuid }) => uuid === anchorBlock.uuid);
-            anchorBlock.destroyAnchors();
+            anchorBlock.destroyAnchors(undefined, destroy);
             this.#anchorBlocks.splice(anchorBlockIndex, 1);
         });
+    }
+
+    containsTextNode(node: Node) {
+        for (const anchorBlock of this.#anchorBlocks) {
+            for (const anchor of anchorBlock.anchors) {
+                if (anchor.textContent === node.textContent) return anchorBlock;
+            }
+        }
+        return null;
     }
 
     serialize() {
@@ -120,8 +129,8 @@ export default class DTA {
         return data.anchorBlocks.flatMap((anchorBlockData) => {
             const { startAnchor, endAnchor, color, data, value } = anchorBlockData;
 
-            const startNode = getElFromPath(this.#rootNode, startAnchor.xPath);
-            const endNode = getElFromPath(this.#rootNode, endAnchor.xPath);
+            const startNode = getNodeFromPath(this.#rootNode, startAnchor.xPath);
+            const endNode = getNodeFromPath(this.#rootNode, endAnchor.xPath);
             if (!startNode || !endNode) {
                 console.error(new Error("Anchor deserialization error: Missing start or end node!"));
                 return;

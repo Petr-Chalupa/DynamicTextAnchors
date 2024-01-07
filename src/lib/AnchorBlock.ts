@@ -1,6 +1,6 @@
 import Anchor, { SerializedAnchor } from "./Anchor";
 import DTA from "./index";
-import { isValidHexColor } from "./utils";
+import { getConnectingTextNode, isValidHexColor } from "./utils";
 
 type AnchorBlockData = { [key: string]: any };
 export type SerializedAnchorBlock = {
@@ -74,10 +74,10 @@ export default class AnchorBlock {
         }
     }
 
-    destroyAnchors(anchors: Anchor[] = [...this.#anchors]) {
+    destroyAnchors(anchors: Anchor[] = [...this.#anchors], destroy: boolean = true) {
         anchors.forEach((anchor) => {
             const anchorIndex = this.#anchors.findIndex(({ uuid }) => uuid === anchor.uuid);
-            anchor.destroy();
+            if (destroy) anchor.destroy();
             this.#anchors.splice(anchorIndex, 1);
         });
     }
@@ -86,8 +86,29 @@ export default class AnchorBlock {
         anchors.forEach((anchor) => anchor.setChanged(changed));
     }
 
-    setFocused(focused: boolean) {
-        this.#anchors.forEach((anchor) => anchor.setFocused(focused));
+    setFocused(focused: boolean, anchors: Anchor[] = this.#anchors) {
+        anchors.forEach((anchor) => anchor.setFocused(focused));
+    }
+
+    merge(to: "left" | "right") {
+        let textNode = null;
+        if (to === "left") textNode = getConnectingTextNode(this.#dta.rootNode, this.#anchors.at(0), "preceding");
+        if (to === "right") textNode = getConnectingTextNode(this.#dta.rootNode, this.#anchors.at(-1), "following");
+        if (!textNode) return;
+        const toAnchorBlock = this.#dta.containsTextNode(textNode);
+        if (!toAnchorBlock) return;
+
+        const mergeAnchors = to === "left" ? [...toAnchorBlock.anchors].reverse() : [...toAnchorBlock.anchors];
+        mergeAnchors.forEach((anchor) => {
+            if (to === "left") this.#anchors.unshift(anchor);
+            if (to === "right") this.#anchors.push(anchor);
+            anchor.anchorBlock = this;
+            anchor.color(this.#color);
+        });
+
+        console.log("//TODO data merge, merge cleanup (connected anchors)");
+        this.joinAnchors();
+        this.#dta.removeAnchorBlocks([toAnchorBlock]);
     }
 
     serialize() {

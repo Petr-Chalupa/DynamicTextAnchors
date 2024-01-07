@@ -1,6 +1,6 @@
-export function getPathFromEl(rootNode: Element, el: Node) {
-    const elPath = [el];
-    let parent = el.parentNode;
+export function getPathFromNode(rootNode: Element, node: Node) {
+    const elPath = [node];
+    let parent = node.parentNode;
     while (parent != null && parent != rootNode) {
         elPath.push(parent);
         parent = parent.parentNode;
@@ -27,11 +27,20 @@ export function getPathFromEl(rootNode: Element, el: Node) {
     return xPath;
 }
 
-export function getElFromPath(rootNode: Element, xPath: string) {
-    console.log(rootNode, xPath);
+export function getNodeFromPath(rootNode: Element, xPath: string) {
     try {
         const result = document.evaluate(xPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
         return result.singleNodeValue;
+    } catch (err) {
+        return null;
+    }
+}
+
+export function getConnectingTextNode(rootNode: Element, node: Node, position: "preceding" | "following") {
+    try {
+        const xPath = getPathFromNode(rootNode, node) + "/" + position + "::*[text()]/text()[1]";
+        const result = document.evaluate(xPath, rootNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        return result.snapshotItem(position === "preceding" ? result.snapshotLength - 1 : 0);
     } catch (err) {
         return null;
     }

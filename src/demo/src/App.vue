@@ -20,7 +20,7 @@
     <div id="anchors" :key="forceAnchorsRerenderKey">
       <h3>Anchor Blocks</h3>
       <div v-if="!dta || dta.anchorBlocks.length === 0"><i>-- No anchors yet --</i></div>
-      <div v-else v-for="(anchorBlock, index) in dta.anchorBlocks" :key="index" class="anchor">
+      <div v-else v-for="anchorBlock in dta.anchorBlocks" :key="anchorBlock.uuid" class="anchor">
         <h6>{{ anchorBlock.uuid }}</h6>
         <details class="settings">
           <summary>Settings</summary>
@@ -49,6 +49,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from "vue";
+import hotkeys from "hotkeys-js";
 import LoremGenerator from "./LoremGenerator.vue";
 import DTA from "../../../dist/lib/index.js";
 
@@ -140,5 +141,21 @@ function focusAnchor(uuid) {
 
 document.addEventListener("anchor-click", (e) => {
   console.info(`Anchor #${e.detail.anchor.uuid} has been clicked`);
+});
+
+hotkeys('ctrl+m+l, ctrl+m+r', (e, handler) => {
+  e.preventDefault();
+  if (!/DTA-ANCHOR/i.test(e.target.nodeName)) return;
+
+  for (const anchorBlock of dta.anchorBlocks) {
+    for (const anchor of anchorBlock.anchors) {
+      if (anchor.uuid === e.target.dataset.uuid) {
+        if (handler.key === "ctrl+m+l") anchorBlock.merge("left");
+        if (handler.key === "ctrl+m+r") anchorBlock.merge("right");
+        forceAnchorsRerenderKey.value++;
+        return;
+      }
+    }
+  }
 });
 </script>
