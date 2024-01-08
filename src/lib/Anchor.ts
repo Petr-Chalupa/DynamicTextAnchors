@@ -33,17 +33,6 @@ export default class Anchor extends HTMLElement {
         range.surroundContents(this);
     }
 
-    connectedCallback() {
-        this.dataset.uuid = this.uuid;
-
-        this.addEventListener("click", (e) => {
-            const anchorCustomEvent = new CustomEvent("anchor-click", { bubbles: true, detail: { originalEvent: e, anchor: this } });
-            this.dispatchEvent(anchorCustomEvent);
-        });
-        this.addEventListener("focusin", () => this.#anchorBlock.setFocused(true));
-        this.addEventListener("focusout", () => this.#anchorBlock.setFocused(false));
-    }
-
     get startOffset() {
         return this.#startOffset;
     }
@@ -79,6 +68,17 @@ export default class Anchor extends HTMLElement {
 
     set rightJoin(rightJoin: Anchor) {
         this.#rightJoin = rightJoin;
+    }
+
+    connectedCallback() {
+        this.dataset.uuid = this.uuid;
+
+        this.addEventListener("click", (e) => {
+            const anchorCustomEvent = new CustomEvent("anchor-click", { bubbles: true, detail: { originalEvent: e, anchor: this } });
+            this.dispatchEvent(anchorCustomEvent);
+        });
+        this.addEventListener("focusin", () => this.#anchorBlock.setFocused(true));
+        this.addEventListener("focusout", () => this.#anchorBlock.setFocused(false));
     }
 
     destroy() {

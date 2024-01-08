@@ -8,10 +8,13 @@
   - [Installation](#installation)
   - [Technologies used](#technologies-used)
   - [How to use](#how-to-use)
-    - [createAnchorBlockFromSelection()](#createanchorblockfromselection)
-    - [destroyAnchorBlocks()](#destroyanchorblocks)
-    - [serialize()](#serialize)
-    - [deserialize()](#deserialize)
+    - [DTA methods](#dta-methods)
+      - [`createAnchorBlockFromSelection()`](#createanchorblockfromselection)
+      - [`destroyAnchorBlocks()`](#destroyanchorblocks)
+      - [`serialize()`](#serialize)
+      - [`deserialize()`](#deserialize)
+    - [AnchorBlock methods](#anchorblock-methods)
+      - [`merge()`](#merge)
 
 ---
 
@@ -33,30 +36,38 @@
 
 ## Technologies used
 
-- lib
-  - TS
-- demo
-  - Vue.JS
-  - SCSS
+-   lib
+    -   TS
+-   demo
+    -   Vue.JS
+    -   SCSS
 
 ## How to use
 
 `import DTA from "dynamic-text-anchors";`
 
-Now you can use DTA methods
+Now you can use all public methods.
 
-### createAnchorBlockFromSelection()
+### DTA methods
+
+#### `createAnchorBlockFromSelection()`
 
 Creates AnchorBlock from given selection or from the user's current selection. Selection must be contained within the configured rootNode. Multiple selection ranges _are_ supported.
 
-### destroyAnchorBlocks()
+#### `destroyAnchorBlocks()`
 
 Destroys the specified AnchorBlocks and their Anchors, or destroys all AnchorBlocks if none are specified.
 
-### serialize()
+#### `serialize()`
 
 Returns the DTA data ready to be saved.
 
-### deserialize()
+#### `deserialize()`
 
 Attempts to reconstruct AnchorBlocks and Anchors from the given data.
+
+### AnchorBlock methods
+
+#### `merge()`
+
+Attempts to merge AnchorBlock with following or preceding AnchorBlock (specified by parameter "left" or "right"). Both of the AchorBlocks must be touching. The merging AnchorBlock overrides, when there is conflict in properties and/or data.
