@@ -35,7 +35,6 @@ export default class Anchor extends HTMLElement {
 
     connectedCallback() {
         this.dataset.uuid = this.uuid;
-        this.tabIndex = -1;
 
         this.addEventListener("click", (e) => {
             const anchorCustomEvent = new CustomEvent("anchor-click", { bubbles: true, detail: { originalEvent: e, anchor: this } });

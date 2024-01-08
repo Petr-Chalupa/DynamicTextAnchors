@@ -64,13 +64,17 @@ export default class AnchorBlock {
     }
 
     joinAnchors() {
-        this.#anchors[0].tabIndex = 0;
-        this.#anchors[0].setAttribute("aria-label", this.value);
-
-        for (let i = 1; i < this.#anchors.length; i++) {
+        for (let i = 0; i < this.#anchors.length; i++) {
             const anchor = this.#anchors[i];
-            anchor.leftJoin = this.#anchors[i - 1];
-            this.#anchors[i - 1].rightJoin = anchor;
+            if (i === 0) {
+                anchor.tabIndex = 0;
+                anchor.ariaLabel = this.value;
+            } else {
+                anchor.tabIndex = -1;
+                anchor.removeAttribute("aria-label");
+                anchor.leftJoin = this.#anchors[i - 1];
+                this.#anchors[i - 1].rightJoin = anchor;
+            }
         }
     }
 
