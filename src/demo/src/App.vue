@@ -21,7 +21,7 @@
       <h3>Anchor Blocks</h3>
       <div v-if="!dta || dta.anchorBlocks.length === 0"><i>-- No anchor blocks yet --</i></div>
       <div v-else v-for="anchorBlock in dta.anchorBlocks" :key="anchorBlock.uuid" class="anchor">
-        <h6>{{ anchorBlock.uuid }}</h6>
+        <h6 @click="focusAnchorBlock(anchorBlock.anchors)">{{ anchorBlock.uuid }}</h6>
         <details class="settings">
           <summary>Settings</summary>
           <div>
@@ -34,9 +34,9 @@
         <details class="parts">
           <summary>Anchors ({{ anchorBlock.anchors.length }})</summary>
           <div>
-            <div v-for="{ uuid, value } in anchorBlock.anchors" :key="uuid" @click="focusAnchor(uuid)">
-              <h6>{{ uuid }}</h6>
-              <p>{{ value }}</p>
+            <div v-for="anchor in anchorBlock.anchors" :key="anchor.uuid" @click="focusAnchorBlock([anchor])">
+              <h6>{{ anchor.uuid }}</h6>
+              <p>{{ anchor.value }}</p>
             </div>
           </div>
         </details>
@@ -133,10 +133,15 @@ function destroyAnchorBlock(uuid) {
   forceAnchorsRerenderKey.value++;
 }
 
-function focusAnchor(uuid) {
-  const highlightedAnchor = textfield.value.querySelector("[data-focused]");
-  highlightedAnchor?.removeAttribute("data-focused");
-  if (highlightedAnchor?.dataset.uuid != uuid) textfield.value.querySelector(`[data-uuid="${uuid}"]`).setAttribute("data-focused", "true");
+function focusAnchorBlock(anchors = []) {
+  const focused = [...textfield.value.querySelectorAll("[data-focused]")].map((anchor) => {
+    anchor.removeAttribute("data-focused");
+    return anchor.dataset.uuid;
+  });
+  anchors.forEach((anchor) => {
+    if (focused.includes(anchor.uuid)) return;
+    textfield.value.querySelector(`[data-uuid="${anchor.uuid}"]`).setAttribute("data-focused", "true")
+  });
 }
 
 document.addEventListener("anchor-click", (e) => {
