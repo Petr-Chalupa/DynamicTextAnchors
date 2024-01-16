@@ -76,10 +76,6 @@ export default class Anchor extends HTMLElement {
         this.addEventListener("click", (e) => {
             this.dispatchEvent(new CustomEvent("anchor-click", { bubbles: true, detail: { originalEvent: e, anchor: this } }));
         });
-        this.addEventListener("dblclick", (e) => {
-            this.dispatchEvent(new CustomEvent("anchor-dblclick", { bubbles: true, detail: { originalEvent: e, anchor: this } }));
-            alert("TODo EDIT");
-        });
         this.addEventListener("focusin", () => this.#anchorBlock.setFocused(true));
         this.addEventListener("focusout", () => this.#anchorBlock.setFocused(false));
     }

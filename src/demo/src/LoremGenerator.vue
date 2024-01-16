@@ -4,21 +4,21 @@
 
     <dialog ref="dialog">
         <div>
-            <label class="slider">
-                Sentences per paragraph MIN<b>({{ settings.sentencesPerParagraph.min }})</b>
-                <input type="range" min="3" :max="settings.sentencesPerParagraph.max" v-model.number="settings.sentencesPerParagraph.min" />
-                Sentences per paragraph MAX<b>({{ settings.sentencesPerParagraph.max }})</b>
-                <input type="range" :min="settings.sentencesPerParagraph.min" max="16" v-model.number="settings.sentencesPerParagraph.max" />
+            <label class="section">
+                <p>Sentences per paragraph MIN <b>3 - {{ settings.sentencesPerParagraph.max }}</b></p>
+                <input type="number" min="3" :max="settings.sentencesPerParagraph.max" v-model.number="settings.sentencesPerParagraph.min" />
+                <p>Sentences per paragraph MAX <b>{{ settings.sentencesPerParagraph.min }} - 16</b></p>
+                <input type="number" :min="settings.sentencesPerParagraph.min" max="16" v-model.number="settings.sentencesPerParagraph.max" />
             </label>
-            <label class="slider">
-                Words per sentence MIN<b>({{ settings.wordsPerSentence.min }})</b>
-                <input type="range" min="1" :max="settings.wordsPerSentence.max" v-model.number="settings.wordsPerSentence.min" />
-                Words per sentence MAX<b>({{ settings.wordsPerSentence.max }})</b>
-                <input type="range" :min="settings.wordsPerSentence.min" max="10" v-model.number="settings.wordsPerSentence.max" />
+            <label class="section">
+                <p>Words per sentence MIN <b>1 - {{ settings.wordsPerSentence.max }}</b></p>
+                <input type="number" min="1" :max="settings.wordsPerSentence.max" v-model.number="settings.wordsPerSentence.min" />
+                <p>Words per sentence MAX <b>{{ settings.wordsPerSentence.min }} - 9</b></p>
+                <input type="number" :min="settings.wordsPerSentence.min" max="9" v-model.number="settings.wordsPerSentence.max" />
             </label>
-            <label class="slider">
-                Maximal depth<b>({{ settings.maxDepth }})</b>
-                <input type="range" min="1" max="10" v-model.number="settings.maxDepth" />
+            <label class="section">
+                <p>Maximal depth <b>1 - 10</b></p>
+                <input type="number" min="1" max="10" v-model.number="settings.maxDepth" />
             </label>
 
             <button @click="closeDialog">CLOSE</button>

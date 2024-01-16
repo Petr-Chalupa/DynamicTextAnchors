@@ -144,8 +144,7 @@ nav {
 
     dta-anchor {
         &[data-focused] {
-            background-color: $tertiary-color !important;
-            border: 2px dotted $font-color !important;
+            border: 2px solid $font-color !important;
             border-radius: $border-radius !important;
             outline: none;
         }

@@ -19,7 +19,7 @@
 
     <div id="anchors" :key="forceAnchorsRerenderKey">
       <h3>Anchor Blocks</h3>
-      <div v-if="!dta || dta.anchorBlocks.length === 0"><i>-- No anchors yet --</i></div>
+      <div v-if="!dta || dta.anchorBlocks.length === 0"><i>-- No anchor blocks yet --</i></div>
       <div v-else v-for="anchorBlock in dta.anchorBlocks" :key="anchorBlock.uuid" class="anchor">
         <h6>{{ anchorBlock.uuid }}</h6>
         <details class="settings">
@@ -143,7 +143,7 @@ document.addEventListener("anchor-click", (e) => {
   console.info(`Anchor #${e.detail.anchor.uuid} has been clicked`);
 });
 
-hotkeys('ctrl+m+l, ctrl+m+r', (e, handler) => {
+hotkeys("ctrl+m+l, ctrl+m+r", (e, handler) => {
   e.preventDefault();
   if (!/DTA-ANCHOR/i.test(e.target.nodeName)) return;
 
