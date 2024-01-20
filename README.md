@@ -46,6 +46,8 @@
 
 `import DTA from "dynamic-text-anchors";`
 
+`const dta = new DTA(rootElement);`
+
 Now you can use all public methods.
 
 ### DTA methods
