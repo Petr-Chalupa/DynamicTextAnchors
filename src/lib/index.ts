@@ -72,8 +72,9 @@ export default class DTA {
         }
 
         if (checkValue) {
-            if (anchorBlocks.length != 1) anchorBlocks.forEach((anchorBlock) => anchorBlock.setChanged(true));
+            if (anchorBlocks.length != 1) anchorBlocks.forEach((anchorBlock) => anchorBlock.setChanged(true)); // one AnchorBlock got split into more
             else if (anchorBlocks[0].value != checkValue) {
+                // gets start and end indexes of Anchor values inside the original value (if present)
                 const valueIndexes = anchorBlocks[0].anchors.map((anchor) => {
                     const split = checkValue.split(anchor.value, 2);
                     return split.length === 2 ? [split[0].length, split[0].length + anchor.value.length] : undefined;
@@ -84,10 +85,12 @@ export default class DTA {
                     const indexes = valueIndexes[i];
                     if (indexes === undefined) {
                         changedAnchors.push(anchorBlocks[0].anchors[i]);
-                        i++; // skip the next indexes
+                        i++; // skip the next indexes, for it could not verify touching
                     } else if ((i === 0 && indexes[0] != 0) || (i === valueIndexes.length - 1 && indexes[1] != checkValue.length)) {
+                        // start or end of value is different from the original value
                         changedAnchors.push(anchorBlocks[0].anchors[i]);
                     } else if (i != 0 && indexes[0] != valueIndexes[i - 1][1]) {
+                        // two following Anchors are not touching
                         changedAnchors.push(anchorBlocks[0].anchors[i], anchorBlocks[0].anchors[i - 1]);
                     }
                 }

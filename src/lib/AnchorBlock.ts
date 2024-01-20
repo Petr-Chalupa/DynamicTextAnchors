@@ -63,6 +63,18 @@ export default class AnchorBlock {
         this.#anchors.push(anchor);
     }
 
+    cleanAnchors() {
+        for (let i = 0; i < this.#anchors.length - 1; i++) {
+            const anchor = this.#anchors[i];
+            const nextAnchor = this.#anchors[i + 1];
+            if (anchor.nextElementSibling === nextAnchor) {
+                anchor.textContent += nextAnchor.value;
+                nextAnchor.remove();
+                this.#anchors.splice(i + 1, 1);
+            }
+        }
+    }
+
     joinAnchors() {
         for (let i = 0; i < this.#anchors.length; i++) {
             const anchor = this.#anchors[i];
@@ -110,7 +122,10 @@ export default class AnchorBlock {
             anchor.color(this.#color);
         });
 
-        console.log("//TODO data merge, merge cleanup (connected anchors)");
+        // data merging; data of toAnchorBlock may be overwritten
+        this.data = { ...toAnchorBlock.data, ...this.#data };
+
+        this.cleanAnchors();
         this.joinAnchors();
         this.#dta.removeAnchorBlocks([toAnchorBlock]);
     }
