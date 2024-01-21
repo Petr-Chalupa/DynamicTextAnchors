@@ -51,7 +51,7 @@ export default class DTA {
 
             textNodes = textNodes.map((node) => {
                 const xPath = getPathFromNode(this.#rootNode, node);
-                return /DTA-ANCHOR/gi.test(xPath) ? null : node;
+                return /DTA-ANCHOR/gi.test(xPath) ? null : node; // null will signal split between AnchorBlocks
             });
             const ignoreStartOffset = textNodes[0] === null;
             const ignoreEndOffset = textNodes.at(-1) === null;

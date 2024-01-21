@@ -63,29 +63,26 @@ export default class AnchorBlock {
         this.#anchors.push(anchor);
     }
 
-    cleanAnchors() {
-        for (let i = 0; i < this.#anchors.length - 1; i++) {
+    joinAnchors() {
+        for (let i = 0; i < this.#anchors.length; i++) {
             const anchor = this.#anchors[i];
+            const prevAnchor = this.#anchors[i - 1];
             const nextAnchor = this.#anchors[i + 1];
-            if (anchor.nextElementSibling === nextAnchor) {
+            // merge touching sibling Anchors (cleanup)
+            if (i < this.anchors.length - 1 && anchor.nextElementSibling === nextAnchor) {
                 anchor.textContent += nextAnchor.value;
                 nextAnchor.remove();
                 this.#anchors.splice(i + 1, 1);
             }
-        }
-    }
-
-    joinAnchors() {
-        for (let i = 0; i < this.#anchors.length; i++) {
-            const anchor = this.#anchors[i];
+            // join Anchors internally
             if (i === 0) {
                 anchor.tabIndex = 0;
                 anchor.ariaLabel = this.value;
             } else {
                 anchor.tabIndex = -1;
                 anchor.removeAttribute("aria-label");
-                anchor.leftJoin = this.#anchors[i - 1];
-                this.#anchors[i - 1].rightJoin = anchor;
+                anchor.leftJoin = prevAnchor;
+                prevAnchor.rightJoin = anchor;
             }
         }
     }
@@ -125,7 +122,6 @@ export default class AnchorBlock {
         // data merging; data of toAnchorBlock may be overwritten
         this.data = { ...toAnchorBlock.data, ...this.#data };
 
-        this.cleanAnchors();
         this.joinAnchors();
         this.#dta.removeAnchorBlocks([toAnchorBlock]);
     }
