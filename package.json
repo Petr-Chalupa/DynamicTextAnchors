@@ -31,7 +31,6 @@
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^4.2.3",
-        "hotkeys-js": "^3.13.3",
         "lorem-ipsum": "^2.0.8",
         "sass": "^1.68.0",
         "sass-loader": "^13.2.2",

@@ -108,10 +108,10 @@ export default class AnchorBlock {
         if (to === "left") textNode = getConnectingTextNode(this.#dta.rootNode, this.#anchors.at(0), "preceding");
         if (to === "right") textNode = getConnectingTextNode(this.#dta.rootNode, this.#anchors.at(-1), "following");
         if (!textNode) return;
-        const toAnchorBlock = this.#dta.containsTextNode(textNode);
-        if (!toAnchorBlock) return;
+        const containerAnchorBlock = this.#dta.getTextNodeContainer(textNode);
+        if (!containerAnchorBlock) return;
 
-        const mergeAnchors = to === "left" ? [...toAnchorBlock.anchors].reverse() : [...toAnchorBlock.anchors];
+        const mergeAnchors = to === "left" ? [...containerAnchorBlock.anchors].reverse() : [...containerAnchorBlock.anchors];
         mergeAnchors.forEach((anchor) => {
             if (to === "left") this.#anchors.unshift(anchor);
             if (to === "right") this.#anchors.push(anchor);
@@ -119,11 +119,12 @@ export default class AnchorBlock {
             anchor.color(this.#color);
         });
 
-        // data merging; data of toAnchorBlock may be overwritten
-        this.data = { ...toAnchorBlock.data, ...this.#data };
+        // data merging; data of containerAnchorBlock may be overwritten
+        this.data = { ...containerAnchorBlock.data, ...this.#data };
 
         this.joinAnchors();
-        this.#dta.removeAnchorBlocks([toAnchorBlock]);
+        this.#dta.removeAnchorBlocks([containerAnchorBlock]);
+        this.setFocused(true);
     }
 
     serialize() {

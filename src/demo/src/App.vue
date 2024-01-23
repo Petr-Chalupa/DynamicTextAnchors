@@ -16,32 +16,24 @@
       <button @click="saveAnchors" :disabled="controlsDisabled">SAVE ANCHORS</button>
       <button @click="createAnchorBlock" :disabled="controlsDisabled">CREATE ANCHOR</button>
     </div>
+  </div>
 
-    <div id="anchors" :key="forceAnchorsRerenderKey">
-      <h3>Anchor Blocks</h3>
-      <div v-if="!dta || dta.anchorBlocks.length === 0"><i>-- No anchor blocks yet --</i></div>
-      <div v-else v-for="anchorBlock in dta.anchorBlocks" :key="anchorBlock.uuid" class="anchor">
-        <h6 @click="focusAnchorBlock(anchorBlock.anchors)">{{ anchorBlock.uuid }}</h6>
-        <details class="settings">
-          <summary>Settings</summary>
-          <div>
-            <input type="color" v-model="anchorBlock.color" />
-            <pre contenteditable="true" title="Data">{{ JSON.stringify(anchorBlock.data, null, 2) }}</pre>
-            <button @click="(e) => saveAnchorData(anchorBlock, e.target.previousSibling.textContent)" class="saveDataBtn">Save data</button>
-            <button @click="destroyAnchorBlock(anchorBlock.uuid)" class="destroyBtn">DESTROY</button>
-          </div>
-        </details>
-        <details class="parts">
-          <summary>Anchors ({{ anchorBlock.anchors.length }})</summary>
-          <div>
-            <div v-for="anchor in anchorBlock.anchors" :key="anchor.uuid" @click="focusAnchorBlock([anchor])">
-              <h6>{{ anchor.uuid }}</h6>
-              <p>{{ anchor.value }}</p>
-            </div>
-          </div>
-        </details>
-      </div>
+  <div v-if="clickedAnchor != null" id="anchor-details" :key="clickedAnchor?.uuid">
+    <h4>Last clicked AnchorBlock: {{ clickedAnchor.uuid }}</h4>
+    <div class="settings">
+      <input type="color" v-model="clickedAnchor.anchorBlock.color" />
+      <pre contenteditable="true" title="Data">{{ JSON.stringify(clickedAnchor.anchorBlock.data, null, 2) }}</pre>
+      <button @click="(e) => saveAnchorData(clickedAnchor.anchorBlock, e.target.previousSibling.textContent)" class="saveDataBtn">Save data</button>
     </div>
+    <details class="parts">
+      <summary>Anchors</summary>
+      <div>
+        <div v-for="anchor in clickedAnchor.anchorBlock.anchors" :key="anchor.uuid">
+          <h6>{{ anchor.uuid }}</h6>
+          <p>{{ anchor.value }}</p>
+        </div>
+      </div>
+    </details>
   </div>
 </template>
 
@@ -49,7 +41,6 @@
 
 <script setup>
 import { computed, onMounted, ref } from "vue";
-import hotkeys from "hotkeys-js";
 import LoremGenerator from "./LoremGenerator.vue";
 import DTA from "../../../dist/lib/index.js";
 
@@ -59,10 +50,10 @@ const useMode = ref(true);
 const controlsDisabled = computed(() => (loremXML.value.length === 0 || !useMode.value));
 const loadXMLInput = ref(null);
 const loadAnchorsInput = ref(null);
+const clickedAnchor = ref(null);
 
 let dta = null;
 onMounted(() => dta = new DTA(textfield.value));
-const forceAnchorsRerenderKey = ref(0);
 
 function genXML(XML) {
   loremXML.value = XML;
@@ -77,7 +68,6 @@ function loadXML() {
   fileReader.onload = (e) => {
     loremXML.value = e.target.result;
     dta = new DTA(textfield.value);
-    forceAnchorsRerenderKey.value++;
   }
 }
 
@@ -98,7 +88,6 @@ function loadAnchors() {
   fileReader.readAsText(file);
   fileReader.onload = (e) => {
     dta.deserialize(JSON.parse(e.target.result));
-    forceAnchorsRerenderKey.value++;
   }
 }
 
@@ -114,7 +103,6 @@ function saveAnchors() {
 
 function createAnchorBlock() {
   dta.createAnchorBlockFromSelection();
-  forceAnchorsRerenderKey.value++;
 }
 
 function saveAnchorData(anchorBlock, rawData) {
@@ -126,41 +114,5 @@ function saveAnchorData(anchorBlock, rawData) {
   }
 }
 
-function destroyAnchorBlock(uuid) {
-  if (!confirm("Really?")) return;
-  const anchorBlock = dta.anchorBlocks.find((anchorBlock) => anchorBlock.uuid === uuid);
-  dta.destroyAnchorBlocks([anchorBlock]);
-  forceAnchorsRerenderKey.value++;
-}
-
-function focusAnchorBlock(anchors = []) {
-  const focused = [...textfield.value.querySelectorAll("[data-focused]")].map((anchor) => {
-    anchor.removeAttribute("data-focused");
-    return anchor.dataset.uuid;
-  });
-  anchors.forEach((anchor) => {
-    if (focused.includes(anchor.uuid)) return;
-    textfield.value.querySelector(`[data-uuid="${anchor.uuid}"]`).setAttribute("data-focused", "true")
-  });
-}
-
-document.addEventListener("anchor-click", (e) => {
-  console.info(`Anchor #${e.detail.anchor.uuid} has been clicked`);
-});
-
-hotkeys("ctrl+m+l, ctrl+m+r", (e, handler) => {
-  e.preventDefault();
-  if (!/DTA-ANCHOR/i.test(e.target.nodeName)) return;
-
-  for (const anchorBlock of dta.anchorBlocks) {
-    for (const anchor of anchorBlock.anchors) {
-      if (anchor.uuid === e.target.dataset.uuid) {
-        if (handler.key === "ctrl+m+l") anchorBlock.merge("left");
-        if (handler.key === "ctrl+m+r") anchorBlock.merge("right");
-        forceAnchorsRerenderKey.value++;
-        return;
-      }
-    }
-  }
-});
+document.addEventListener("anchor-click", (e) => clickedAnchor.value = e.detail.anchor);
 </script>

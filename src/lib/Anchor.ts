@@ -16,6 +16,7 @@ export default class Anchor extends HTMLElement {
     #value: string;
     #leftJoin: Anchor = null;
     #rightJoin: Anchor = null;
+    #currentKeys: string[] = [];
 
     constructor(anchorBlock: AnchorBlock, node: Node, startOffset: number, endOffset: number) {
         super();
@@ -78,6 +79,20 @@ export default class Anchor extends HTMLElement {
         });
         this.addEventListener("focusin", () => this.#anchorBlock.setFocused(true));
         this.addEventListener("focusout", () => this.#anchorBlock.setFocused(false));
+        this.addEventListener("keyup", () => (this.#currentKeys = []));
+        this.#setShortcut(["Control", "m", "l"], () => this.#anchorBlock.merge("left"));
+        this.#setShortcut(["Control", "m", "r"], () => this.#anchorBlock.merge("right"));
+    }
+
+    #setShortcut(shortcut: string[], handler: Function) {
+        this.addEventListener("keydown", (e) => {
+            if (!this.#currentKeys.includes(e.key)) this.#currentKeys.push(e.key);
+            if (JSON.stringify(this.#currentKeys.sort()) == JSON.stringify(shortcut.sort())) {
+                e.preventDefault();
+                this.#currentKeys = [];
+                handler(this);
+            }
+        });
     }
 
     destroy() {
