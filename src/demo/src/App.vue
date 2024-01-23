@@ -16,24 +16,24 @@
       <button @click="saveAnchors" :disabled="controlsDisabled">SAVE ANCHORS</button>
       <button @click="createAnchorBlock" :disabled="controlsDisabled">CREATE ANCHOR</button>
     </div>
-  </div>
 
-  <div v-if="clickedAnchor != null" id="anchor-details" :key="clickedAnchor?.uuid">
-    <h4>Last clicked AnchorBlock: {{ clickedAnchor.uuid }}</h4>
-    <div class="settings">
-      <input type="color" v-model="clickedAnchor.anchorBlock.color" />
-      <pre contenteditable="true" title="Data">{{ JSON.stringify(clickedAnchor.anchorBlock.data, null, 2) }}</pre>
-      <button @click="(e) => saveAnchorData(clickedAnchor.anchorBlock, e.target.previousSibling.textContent)" class="saveDataBtn">Save data</button>
-    </div>
-    <details class="parts">
-      <summary>Anchors</summary>
-      <div>
-        <div v-for="anchor in clickedAnchor.anchorBlock.anchors" :key="anchor.uuid">
-          <h6>{{ anchor.uuid }}</h6>
-          <p>{{ anchor.value }}</p>
-        </div>
+    <div v-if="clickedAnchor != null" id="anchor-details" :key="clickedAnchor?.uuid">
+      <h4>Last clicked AnchorBlock: {{ clickedAnchor.uuid }}</h4>
+      <div class="settings">
+        <input type="color" v-model="clickedAnchor.anchorBlock.color" />
+        <pre contenteditable="true" title="Data">{{ JSON.stringify(clickedAnchor.anchorBlock.data, null, 2) }}</pre>
+        <button @click="(e) => saveAnchorData(clickedAnchor.anchorBlock, e.target.previousSibling.textContent)" class="saveDataBtn">Save data</button>
       </div>
-    </details>
+      <details class="parts">
+        <summary>Anchors</summary>
+        <div>
+          <div v-for="anchor in clickedAnchor.anchorBlock.anchors" :key="anchor.uuid">
+            <h6>{{ anchor.uuid }}</h6>
+            <p>{{ anchor.value }}</p>
+          </div>
+        </div>
+      </details>
+    </div>
   </div>
 </template>
 
