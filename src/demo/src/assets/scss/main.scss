@@ -206,6 +206,7 @@ nav {
 
     > h4 {
         margin: 0;
+        font-size: clamp(0.75rem, 2vw, 1.05rem);
     }
 
     .settings {
@@ -244,7 +245,13 @@ nav {
             border-top: 0;
             border-radius: 0 0 $border-radius $border-radius;
             font-weight: bold;
+            transition: filter $anim-duration ease-in-out;
             cursor: pointer;
+
+            &:hover {
+                filter: brightness(0.9);
+                transition: filter $anim-duration ease-in-out;
+            }
         }
     }
 
@@ -254,8 +261,6 @@ nav {
         }
 
         > div {
-            transition: max-height 400ms ease-out;
-
             display: grid;
             gap: 0.5rem;
             padding: 0.5rem 0 0 0.5rem;

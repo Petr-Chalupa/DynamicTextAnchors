@@ -17,8 +17,8 @@
       <button @click="createAnchorBlock" :disabled="controlsDisabled">CREATE ANCHOR</button>
     </div>
 
-    <div v-if="clickedAnchor != null" id="anchor-details" :key="clickedAnchor?.uuid">
-      <h4>Last clicked AnchorBlock: {{ clickedAnchor.uuid }}</h4>
+    <div v-if="clickedAnchor != null" id="anchor-details">
+      <h4 :title="'Anchor: ' + clickedAnchor.uuid">Last clicked AnchorBlock: {{ clickedAnchor.anchorBlock.uuid }}</h4>
       <div class="settings">
         <input type="color" v-model="clickedAnchor.anchorBlock.color" />
         <pre contenteditable="true" title="Data">{{ JSON.stringify(clickedAnchor.anchorBlock.data, null, 2) }}</pre>
@@ -114,5 +114,5 @@ function saveAnchorData(anchorBlock, rawData) {
   }
 }
 
-document.addEventListener("anchor-click", (e) => clickedAnchor.value = e.detail.anchor);
+document.addEventListener("anchor-click", (e) => { clickedAnchor.value = null; clickedAnchor.value = e.detail.anchor });
 </script>
