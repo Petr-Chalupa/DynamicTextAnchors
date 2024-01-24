@@ -18,7 +18,7 @@
     </div>
 
     <div v-if="clickedAnchor != null" id="anchor-details">
-      <h4 :title="'Anchor: ' + clickedAnchor.uuid">Last clicked AnchorBlock: {{ clickedAnchor.anchorBlock.uuid }}</h4>
+      <h4 :title="'Anchor: ' + clickedAnchor.uuid" @click="focusAnchorBlock(clickedAnchor.anchorBlock.uuid)">Last clicked AnchorBlock: {{ clickedAnchor.anchorBlock.uuid }}</h4>
       <div class="settings">
         <input type="color" v-model="clickedAnchor.anchorBlock.color" />
         <pre contenteditable="true" title="Data">{{ JSON.stringify(clickedAnchor.anchorBlock.data, null, 2) }}</pre>
@@ -103,6 +103,10 @@ function saveAnchors() {
 
 function createAnchorBlock() {
   dta.createAnchorBlockFromSelection();
+}
+
+function focusAnchorBlock(uuid) {
+  dta.anchorBlocks.find((anchorBlock) => anchorBlock.uuid === uuid)?.anchors[0].focus();
 }
 
 function saveAnchorData(anchorBlock, rawData) {

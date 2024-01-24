@@ -82,6 +82,7 @@ export default class Anchor extends HTMLElement {
         this.addEventListener("keyup", () => (this.#currentKeys = []));
         this.#setShortcut(["Control", "m", "l"], () => this.#anchorBlock.merge("left"));
         this.#setShortcut(["Control", "m", "r"], () => this.#anchorBlock.merge("right"));
+        this.#setShortcut(["Control", "Delete"], () => this.#anchorBlock.dta.removeAnchorBlocks([this.anchorBlock]));
     }
 
     #setShortcut(shortcut: string[], handler: Function) {
