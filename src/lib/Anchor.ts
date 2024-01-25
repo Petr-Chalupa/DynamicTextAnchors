@@ -82,6 +82,8 @@ export default class Anchor extends HTMLElement {
         this.addEventListener("keyup", () => (this.#currentKeys = []));
         this.#setShortcut(["Control", "m", "l"], () => this.#anchorBlock.merge("left"));
         this.#setShortcut(["Control", "m", "r"], () => this.#anchorBlock.merge("right"));
+        this.#setShortcut(["Control", "Alt", "Ł"], () => console.log("Edit left (to do)"));
+        this.#setShortcut(["Control", "Alt", "r"], () => console.log("Edit right (to do)"));
         this.#setShortcut(["Control", "Delete"], () => this.#anchorBlock.dta.removeAnchorBlocks([this.anchorBlock]));
     }
 
@@ -91,7 +93,7 @@ export default class Anchor extends HTMLElement {
             if (JSON.stringify(this.#currentKeys.sort()) == JSON.stringify(shortcut.sort())) {
                 e.preventDefault();
                 this.#currentKeys = [];
-                handler(this);
+                handler();
             }
         });
     }
