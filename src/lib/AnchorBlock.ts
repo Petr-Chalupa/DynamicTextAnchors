@@ -127,6 +127,28 @@ export default class AnchorBlock {
         this.setFocused(true);
     }
 
+    split(selection: Selection = window.getSelection()) {
+        if (selection.rangeCount === 0 || selection.toString().trim().length === 0) {
+            console.error(new Error("Anchor split error: Empty selection!"));
+            return;
+        }
+
+        for (let i = 0; i < selection.rangeCount; i++) {
+            const range = selection.getRangeAt(i);
+
+            const intersectingAnchors = this.#anchors.filter((anchor) => range.intersectsNode(anchor));
+            const valueSplits = intersectingAnchors.flatMap((anchor, i) => {
+                const startOffset = i === 0 ? range.startOffset : 0;
+                const endOffset = i === intersectingAnchors.length - 1 ? range.endOffset : anchor.value.length;
+                console.log(startOffset, endOffset);
+
+                // null will signal split between AnchorBlocks
+                if (i === 0 && endOffset != anchor.value.length) return [anchor, null];
+                else return anchor;
+            });
+        }
+    }
+
     serialize() {
         const serializedData: SerializedAnchorBlock = {
             startAnchor: this.#anchors[0].serialize(),
