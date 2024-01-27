@@ -17,23 +17,27 @@ export function getPathFromNode(rootNode: Element, node: Node) {
         }
         const id = node.ELEMENT_NODE ? node.id : null;
 
-        if (node.nodeType === node.ELEMENT_NODE) {
-            xPath += `/${node.nodeName}[${nodePosition}]${id ? `[@id="${id}"]` : ""}`;
-        } else {
-            xPath += `/text()[${nodePosition}]`;
-        }
+        if (node.nodeType === node.TEXT_NODE) xPath += `/text()[${nodePosition}]`;
+        else xPath += `/${node.nodeName}[${nodePosition}]${id ? `[@id="${id}"]` : ""}`;
     });
 
     return xPath;
 }
 
-export function getNodeFromPath(rootNode: Element, xPath: string) {
+export function getNodeFromPath(rootNode: Element, xPath: string, resType: number = XPathResult.FIRST_ORDERED_NODE_TYPE) {
     try {
-        const result = document.evaluate(xPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-        return result.singleNodeValue;
+        const result = document.evaluate(xPath, rootNode, null, resType, null);
+        return result;
     } catch (err) {
         return null;
     }
+}
+
+export function getAllTextNodes(rootNode: Node) {
+    const children: Node[] = [];
+    const walker = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) children.push(walker.currentNode);
+    return children;
 }
 
 export function getConnectingTextNode(rootNode: Element, node: Node, position: "preceding" | "following") {
@@ -44,6 +48,13 @@ export function getConnectingTextNode(rootNode: Element, node: Node, position: "
     } catch (err) {
         return null;
     }
+}
+
+export function nodePositionComparator(a: Node, b: Node) {
+    const position = a.compareDocumentPosition(b);
+    if (position === Node.DOCUMENT_POSITION_FOLLOWING || position === Node.DOCUMENT_POSITION_CONTAINED_BY) return -1;
+    else if (position === Node.DOCUMENT_POSITION_PRECEDING || position === Node.DOCUMENT_POSITION_CONTAINS) return 1;
+    else return 0;
 }
 
 export function splitArrayToChunks(array: any[], del: any) {

@@ -1,14 +1,13 @@
 import Anchor, { SerializedAnchor } from "./Anchor";
 import DTA from "./index";
-import { getConnectingTextNode, isValidHexColor } from "./utils";
+import { nodePositionComparator, getConnectingTextNode, isValidHexColor } from "./utils";
 
 type AnchorBlockData = { [key: string]: any };
 export type SerializedAnchorBlock = {
-    startAnchor: SerializedAnchor;
-    endAnchor: SerializedAnchor;
     value: string;
     color: string;
     data: object;
+    anchors: SerializedAnchor[];
 };
 
 export default class AnchorBlock {
@@ -60,6 +59,12 @@ export default class AnchorBlock {
 
         const anchor = new Anchor(this, node, startOffset, endOffset);
         anchor.color(this.#color);
+
+        const range = new Range();
+        range.setStart(node, startOffset);
+        range.setEnd(node, endOffset);
+        range.surroundContents(anchor);
+
         this.#anchors.push(anchor);
         return anchor;
     }
@@ -72,11 +77,10 @@ export default class AnchorBlock {
             // merge touching sibling Anchors (cleanup)
             if (i < this.anchors.length - 1 && anchor.nextElementSibling === nextAnchor) {
                 anchor.textContent += nextAnchor.value;
-                anchor.endOffset = nextAnchor.endOffset;
                 nextAnchor.remove();
                 this.#anchors.splice(i + 1, 1);
             }
-            // join Anchors internally
+            // join Anchors internally, set the first focusable
             if (i === 0) {
                 anchor.tabIndex = 0;
                 anchor.ariaLabel = this.value;
@@ -98,17 +102,13 @@ export default class AnchorBlock {
         });
     }
 
-    setChanged(changed: boolean, anchors: Anchor[] = this.#anchors) {
-        anchors.forEach((anchor) => anchor.setChanged(changed));
-    }
-
     setFocused(focused: boolean, anchors: Anchor[] = this.#anchors) {
         anchors.forEach((anchor) => anchor.setFocused(focused));
     }
 
-    merge(to: "left" | "right") {
+    merge(to: "left" | "right", focus: boolean = true) {
         let textNode = null;
-        if (to === "left") textNode = getConnectingTextNode(this.#dta.rootNode, this.#anchors.at(0), "preceding");
+        if (to === "left") textNode = getConnectingTextNode(this.#dta.rootNode, this.#anchors[0], "preceding");
         if (to === "right") textNode = getConnectingTextNode(this.#dta.rootNode, this.#anchors.at(-1), "following");
         if (!textNode) return;
         const containerAnchorBlock = this.#dta.getTextNodeContainer(textNode);
@@ -125,18 +125,17 @@ export default class AnchorBlock {
         // data merging; data of containerAnchorBlock may be overwritten
         this.data = { ...containerAnchorBlock.data, ...this.#data };
 
-        this.joinAnchors();
         this.#dta.removeAnchorBlocks([containerAnchorBlock]);
-        this.setFocused(true);
+        this.joinAnchors();
+        this.setFocused(focus);
     }
 
     serialize() {
         const serializedData: SerializedAnchorBlock = {
-            startAnchor: this.#anchors[0].serialize(),
-            endAnchor: this.#anchors.at(-1).serialize(),
             value: this.value,
             color: this.#color,
             data: this.#data,
+            anchors: this.#anchors.sort(nodePositionComparator).map((anchor) => anchor.serialize()),
         };
         return serializedData;
     }

@@ -5,31 +5,21 @@ export type SerializedAnchor = {
     startOffset: number;
     endOffset: number;
     xPath: string;
+    value: string;
 };
 
 export default class Anchor extends HTMLElement {
     uuid: string;
-    startOffset: number;
-    endOffset: number;
     leftJoin: Anchor = null;
     rightJoin: Anchor = null;
     #anchorBlock: AnchorBlock;
-    #xPath: string;
     #currentKeys: string[] = [];
 
     constructor(anchorBlock: AnchorBlock, node: Node, startOffset: number, endOffset: number) {
         super();
 
         this.uuid = crypto.randomUUID();
-        this.startOffset = startOffset;
-        this.endOffset = endOffset;
         this.#anchorBlock = anchorBlock;
-        this.#xPath = getPathFromNode(anchorBlock.dta.rootNode, node);
-
-        const range = new Range();
-        range.setStart(node, startOffset);
-        range.setEnd(node, endOffset);
-        range.surroundContents(this);
     }
 
     get anchorBlock() {
@@ -41,12 +31,27 @@ export default class Anchor extends HTMLElement {
         this.#anchorBlock = anchorBlock;
     }
 
+    get startOffset() {
+        return this.previousSibling?.nodeType === Node.TEXT_NODE ? this.previousSibling.textContent.length : 0;
+    }
+
+    get endOffset() {
+        return this.startOffset + this.value.length;
+    }
+
     get value() {
         return this.textContent;
     }
 
     get xPath() {
-        return this.#xPath;
+        let nodePosition = 0;
+        let prevSibling = this.previousSibling;
+        while (prevSibling != null) {
+            if (prevSibling.nodeType === prevSibling.TEXT_NODE) nodePosition++;
+            else if (/^DTA-ANCHOR$/i.test(prevSibling.nodeName)) nodePosition--;
+            prevSibling = prevSibling.previousSibling;
+        }
+        return getPathFromNode(this.#anchorBlock.dta.rootNode, this.parentNode) + `/text()[${nodePosition}]`;
     }
 
     connectedCallback() {
@@ -86,8 +91,10 @@ export default class Anchor extends HTMLElement {
     }
 
     setFocused(focused: boolean) {
-        if (focused) this.setAttribute("data-focused", "true");
-        else this.removeAttribute("data-focused");
+        if (focused) {
+            this.setAttribute("data-focused", "true");
+            if (this.tabIndex === 0 && document.activeElement != this) this.focus(); // ensure the first Anchor is focused
+        } else this.removeAttribute("data-focused");
     }
 
     color(color: string) {
@@ -100,7 +107,8 @@ export default class Anchor extends HTMLElement {
         const serializedData: SerializedAnchor = {
             startOffset: this.startOffset,
             endOffset: this.endOffset,
-            xPath: this.#xPath,
+            xPath: this.xPath,
+            value: this.value,
         };
         return serializedData;
     }

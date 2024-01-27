@@ -1,5 +1,5 @@
 import AnchorBlock, { SerializedAnchorBlock } from "./AnchorBlock";
-import { getNodeFromPath, getPathFromNode, splitArrayToChunks } from "./utils";
+import { nodePositionComparator, getNodeFromPath, getPathFromNode, splitArrayToChunks, getAllTextNodes } from "./utils";
 
 type SerializedDTA = {
     anchorBlocks: SerializedAnchorBlock[];
@@ -11,6 +11,7 @@ export default class DTA {
 
     constructor(rootNode: Element) {
         this.#rootNode = rootNode;
+        rootNode.normalize();
     }
 
     get rootNode() {
@@ -21,13 +22,8 @@ export default class DTA {
         return this.#anchorBlocks;
     }
 
-    createAnchorBlockFromSelection(selection: Selection = window.getSelection(), checkValue?: string) {
-        const anchorBlocks: AnchorBlock[] = [];
-
-        if (selection.rangeCount === 0 || selection.toString().trim().length === 0) {
-            console.error(new Error("Anchor creation error: Empty selection!"));
-            return anchorBlocks;
-        }
+    createAnchorBlockFromSelection(selection: Selection = window.getSelection()) {
+        if (selection.rangeCount === 0 || selection.toString().trim().length === 0) return console.error(new Error("Anchor creation error: Empty selection!"));
 
         for (let i = 0; i < selection.rangeCount; i++) {
             const range = selection.getRangeAt(i);
@@ -39,20 +35,12 @@ export default class DTA {
                 continue;
             }
 
-            let textNodes: Node[] = [];
-            (function traverse(node: Node) {
-                if (!range.intersectsNode(node)) return;
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    for (const child of node.childNodes) traverse(child);
-                } else if (node.nodeType === Node.TEXT_NODE) {
-                    textNodes.push(node);
-                }
-            })(container);
-
-            textNodes = textNodes.map((node) => {
-                const xPath = getPathFromNode(this.#rootNode, node);
-                return /DTA-ANCHOR/gi.test(xPath) ? null : node; // null will signal split between AnchorBlocks
-            });
+            const textNodes: Node[] = getAllTextNodes(container)
+                .filter((node) => range.intersectsNode(node))
+                .map((node) => {
+                    const xPath = getPathFromNode(this.#rootNode, node);
+                    return /DTA-ANCHOR/gi.test(xPath) ? null : node; // null will signal split between AnchorBlocks
+                });
             const ignoreStartOffset = textNodes[0] === null;
             const ignoreEndOffset = textNodes.at(-1) === null;
 
@@ -66,42 +54,12 @@ export default class DTA {
                 });
                 if (anchorBlock.anchors.length > 0) {
                     anchorBlock.joinAnchors();
-                    anchorBlocks.push(anchorBlock);
+                    this.#anchorBlocks.push(anchorBlock);
                 }
             });
         }
 
-        if (checkValue) {
-            if (anchorBlocks.length != 1) anchorBlocks.forEach((anchorBlock) => anchorBlock.setChanged(true)); // one AnchorBlock got split into more
-            else if (anchorBlocks[0].value != checkValue) {
-                // gets start and end indexes of Anchor values inside the original value (if present)
-                const valueIndexes = anchorBlocks[0].anchors.map((anchor) => {
-                    const split = checkValue.split(anchor.value, 2);
-                    return split.length === 2 ? [split[0].length, split[0].length + anchor.value.length] : undefined;
-                });
-
-                const changedAnchors = [];
-                for (let i = 0; i < valueIndexes.length; i++) {
-                    const indexes = valueIndexes[i];
-                    if (indexes === undefined) {
-                        changedAnchors.push(anchorBlocks[0].anchors[i]);
-                        i++; // skip the next indexes, for it could not verify touching
-                    } else if ((i === 0 && indexes[0] != 0) || (i === valueIndexes.length - 1 && indexes[1] != checkValue.length)) {
-                        // start or end of value is different from the original value
-                        changedAnchors.push(anchorBlocks[0].anchors[i]);
-                    } else if (i != 0 && indexes[0] != valueIndexes[i - 1][1]) {
-                        // two following Anchors are not touching
-                        changedAnchors.push(anchorBlocks[0].anchors[i], anchorBlocks[0].anchors[i - 1]);
-                    }
-                }
-
-                anchorBlocks[0].setChanged(true, changedAnchors);
-            }
-        }
-
-        this.#anchorBlocks = this.#anchorBlocks.concat(anchorBlocks);
         selection.collapseToEnd();
-        return anchorBlocks;
     }
 
     removeAnchorBlocks(anchorBlocks: AnchorBlock[] = [...this.#anchorBlocks], destroy: boolean | "remove" = true) {
@@ -123,38 +81,49 @@ export default class DTA {
 
     serialize() {
         const serializedData: SerializedDTA = {
-            anchorBlocks: this.#anchorBlocks.map((anchorBlock) => anchorBlock.serialize()),
+            anchorBlocks: this.#anchorBlocks.sort((a, b) => nodePositionComparator(a.anchors.at(-1), b.anchors[0])).map((anchorBlock) => anchorBlock.serialize()),
         };
         return serializedData;
     }
 
     deserialize(data: SerializedDTA) {
-        return data.anchorBlocks.flatMap((anchorBlockData) => {
-            const { startAnchor, endAnchor, color, data, value } = anchorBlockData;
+        data.anchorBlocks.forEach((anchorBlockData) => {
+            const { color, data, anchors } = anchorBlockData;
 
-            const startNode = getNodeFromPath(this.#rootNode, startAnchor.xPath);
-            const endNode = getNodeFromPath(this.#rootNode, endAnchor.xPath);
-            if (!startNode || !endNode) {
-                console.error(new Error("Anchor deserialization error: Missing start or end node!"));
-                return;
-            }
-            if (startAnchor.startOffset > startNode.textContent.length) startAnchor.startOffset = startNode.textContent.length - 5; //random number
-            if (endAnchor.endOffset > endNode.textContent.length) endAnchor.endOffset = endNode.textContent.length;
+            anchors.forEach((anchor) => {
+                let { startOffset, endOffset, xPath, value } = anchor;
 
-            const range = new Range();
-            range.setStart(startNode, startAnchor.startOffset);
-            range.setEnd(endNode, endAnchor.endOffset);
+                let node = getNodeFromPath(this.#rootNode, xPath)?.singleNodeValue;
+                if (!node) return; // Anchor can not be inserted
 
-            const selection = document.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
-
-            const anchorBlocks = this.createAnchorBlockFromSelection(selection, value);
-            anchorBlocks.forEach((anchorBlock) => {
+                const anchorBlock = new AnchorBlock(this);
                 anchorBlock.color = color;
                 anchorBlock.data = data;
+                const createdAnchor = anchorBlock.createAnchor(node, startOffset, endOffset);
+
+                if (!createdAnchor) {
+                    const searchXPath = `//text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "${value.toLocaleLowerCase()}")]`; // search is case-insensitive
+                    const occurences = getNodeFromPath(this.#rootNode, searchXPath, XPathResult.ORDERED_NODE_ITERATOR_TYPE);
+                    let textNodes: Node[] = [];
+                    let occurence: Node = null;
+                    while ((occurence = occurences.iterateNext())) textNodes.push(occurence);
+
+                    if (textNodes.includes(node)) {
+                        // value is contained inside the same node, but has been moved
+                        startOffset = node.textContent.match(new RegExp(value, "i")).index;
+                        anchorBlock.createAnchor(node, startOffset, startOffset + value.length);
+                    } else {
+                        // Anchor must be created in the closest possible node containing the value
+                        console.log(textNodes);
+                    }
+                } else if (createdAnchor.value != value) createdAnchor.setChanged(true);
+
+                if (anchorBlock.anchors.length > 0) {
+                    this.#anchorBlocks.push(anchorBlock);
+                    anchorBlock.merge("left", false); // try to merge with the previous AnchorBlock
+                    anchorBlock.joinAnchors();
+                }
             });
-            return anchorBlocks;
         });
     }
 }
