@@ -9,24 +9,22 @@ export type SerializedAnchor = {
 
 export default class Anchor extends HTMLElement {
     uuid: string;
-    #startOffset: number;
-    #endOffset: number;
+    startOffset: number;
+    endOffset: number;
+    leftJoin: Anchor = null;
+    rightJoin: Anchor = null;
     #anchorBlock: AnchorBlock;
     #xPath: string;
-    #value: string;
-    #leftJoin: Anchor = null;
-    #rightJoin: Anchor = null;
     #currentKeys: string[] = [];
 
     constructor(anchorBlock: AnchorBlock, node: Node, startOffset: number, endOffset: number) {
         super();
 
         this.uuid = crypto.randomUUID();
-        this.#startOffset = startOffset;
-        this.#endOffset = endOffset;
+        this.startOffset = startOffset;
+        this.endOffset = endOffset;
         this.#anchorBlock = anchorBlock;
         this.#xPath = getPathFromNode(anchorBlock.dta.rootNode, node);
-        this.#value = node.textContent.substring(startOffset, endOffset);
 
         const range = new Range();
         range.setStart(node, startOffset);
@@ -34,49 +32,27 @@ export default class Anchor extends HTMLElement {
         range.surroundContents(this);
     }
 
-    get startOffset() {
-        return this.#startOffset;
-    }
-
-    get endOffset() {
-        return this.#endOffset;
-    }
-
     get anchorBlock() {
         return this.#anchorBlock;
     }
 
     set anchorBlock(anchorBlock: AnchorBlock) {
-        this.#anchorBlock.destroyAnchors([this], false);
+        this.#anchorBlock.removeAnchors([this], false);
         this.#anchorBlock = anchorBlock;
     }
 
     get value() {
-        return this.#value;
+        return this.textContent;
     }
 
-    get leftJoin() {
-        return this.#leftJoin;
-    }
-
-    set leftJoin(leftJoin: Anchor) {
-        this.#leftJoin = leftJoin;
-    }
-
-    get rightJoin() {
-        return this.#rightJoin;
-    }
-
-    set rightJoin(rightJoin: Anchor) {
-        this.#rightJoin = rightJoin;
+    get xPath() {
+        return this.#xPath;
     }
 
     connectedCallback() {
         this.dataset.uuid = this.uuid;
 
-        this.addEventListener("click", (e) => {
-            this.dispatchEvent(new CustomEvent("anchor-click", { bubbles: true, detail: { originalEvent: e, anchor: this } }));
-        });
+        // focus handling
         this.addEventListener("focusin", () => this.#anchorBlock.setFocused(true));
         this.addEventListener("focusout", () => this.#anchorBlock.setFocused(false));
 
@@ -84,8 +60,7 @@ export default class Anchor extends HTMLElement {
         this.addEventListener("keyup", () => (this.#currentKeys = []));
         this.#setShortcut(["Control", "m", "l"], () => this.#anchorBlock.merge("left"));
         this.#setShortcut(["Control", "m", "r"], () => this.#anchorBlock.merge("right"));
-        this.#setShortcut(["Control", "Delete"], () => this.#anchorBlock.split());
-        this.#setShortcut(["Control", "Delete", "a"], () => this.#anchorBlock.dta.removeAnchorBlocks([this.anchorBlock]));
+        this.#setShortcut(["Control", "Delete"], () => this.#anchorBlock.dta.removeAnchorBlocks([this.anchorBlock]));
     }
 
     #setShortcut(shortcut: string[], handler: Function) {
@@ -123,8 +98,8 @@ export default class Anchor extends HTMLElement {
 
     serialize() {
         const serializedData: SerializedAnchor = {
-            startOffset: this.#startOffset,
-            endOffset: this.#endOffset,
+            startOffset: this.startOffset,
+            endOffset: this.endOffset,
             xPath: this.#xPath,
         };
         return serializedData;

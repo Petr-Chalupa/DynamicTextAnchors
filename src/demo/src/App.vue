@@ -118,5 +118,9 @@ function saveAnchorData(anchorBlock, rawData) {
   }
 }
 
-document.addEventListener("anchor-click", (e) => { clickedAnchor.value = null; clickedAnchor.value = e.detail.anchor });
+document.addEventListener("click", (e) => {
+  if (!/^DTA-ANCHOR$/i.test(e.target.nodeName)) return;
+  clickedAnchor.value = null;
+  clickedAnchor.value = e.target;
+});
 </script>

@@ -61,6 +61,7 @@ export default class AnchorBlock {
         const anchor = new Anchor(this, node, startOffset, endOffset);
         anchor.color(this.#color);
         this.#anchors.push(anchor);
+        return anchor;
     }
 
     joinAnchors() {
@@ -71,6 +72,7 @@ export default class AnchorBlock {
             // merge touching sibling Anchors (cleanup)
             if (i < this.anchors.length - 1 && anchor.nextElementSibling === nextAnchor) {
                 anchor.textContent += nextAnchor.value;
+                anchor.endOffset = nextAnchor.endOffset;
                 nextAnchor.remove();
                 this.#anchors.splice(i + 1, 1);
             }
@@ -87,11 +89,12 @@ export default class AnchorBlock {
         }
     }
 
-    destroyAnchors(anchors: Anchor[] = [...this.#anchors], destroy: boolean = true) {
+    removeAnchors(anchors: Anchor[] = [...this.#anchors], destroy: boolean | "remove" = true) {
         anchors.forEach((anchor) => {
             const anchorIndex = this.#anchors.findIndex(({ uuid }) => uuid === anchor.uuid);
-            if (destroy) anchor.destroy();
             this.#anchors.splice(anchorIndex, 1);
+            if (destroy === true) anchor.destroy();
+            else if (destroy === "remove") anchor.remove();
         });
     }
 
@@ -125,28 +128,6 @@ export default class AnchorBlock {
         this.joinAnchors();
         this.#dta.removeAnchorBlocks([containerAnchorBlock]);
         this.setFocused(true);
-    }
-
-    split(selection: Selection = window.getSelection()) {
-        if (selection.rangeCount === 0 || selection.toString().trim().length === 0) {
-            console.error(new Error("Anchor split error: Empty selection!"));
-            return;
-        }
-
-        for (let i = 0; i < selection.rangeCount; i++) {
-            const range = selection.getRangeAt(i);
-
-            const intersectingAnchors = this.#anchors.filter((anchor) => range.intersectsNode(anchor));
-            const valueSplits = intersectingAnchors.flatMap((anchor, i) => {
-                const startOffset = i === 0 ? range.startOffset : 0;
-                const endOffset = i === intersectingAnchors.length - 1 ? range.endOffset : anchor.value.length;
-                console.log(startOffset, endOffset);
-
-                // null will signal split between AnchorBlocks
-                if (i === 0 && endOffset != anchor.value.length) return [anchor, null];
-                else return anchor;
-            });
-        }
     }
 
     serialize() {

@@ -104,10 +104,10 @@ export default class DTA {
         return anchorBlocks;
     }
 
-    removeAnchorBlocks(anchorBlocks: AnchorBlock[] = [...this.#anchorBlocks], destroy: boolean = true) {
+    removeAnchorBlocks(anchorBlocks: AnchorBlock[] = [...this.#anchorBlocks], destroy: boolean | "remove" = true) {
         anchorBlocks.forEach((anchorBlock) => {
             const anchorBlockIndex = this.#anchorBlocks.findIndex(({ uuid }) => uuid === anchorBlock.uuid);
-            anchorBlock.destroyAnchors(undefined, destroy);
+            anchorBlock.removeAnchors(undefined, destroy);
             this.#anchorBlocks.splice(anchorBlockIndex, 1);
         });
     }
