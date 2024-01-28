@@ -50,8 +50,16 @@ export function getConnectingTextNode(rootNode: Element, node: Node, position: "
     }
 }
 
-export function nodePositionComparator(a: Node, b: Node) {
-    const position = a.compareDocumentPosition(b);
+export function normalizeString(str: string) {
+    return str
+        .normalize("NFD")
+        .replace(/[\p{Diacritic}.,\/#!$%\^&\*;:{}=\-_`~()]/gu, "")
+        .replace(/\s{2,}/g, " ")
+        .toLowerCase();
+}
+
+export function nodePositionComparator(x: Node, y: Node) {
+    const position = x.compareDocumentPosition(y);
     if (position === Node.DOCUMENT_POSITION_FOLLOWING || position === Node.DOCUMENT_POSITION_CONTAINED_BY) return -1;
     else if (position === Node.DOCUMENT_POSITION_PRECEDING || position === Node.DOCUMENT_POSITION_CONTAINS) return 1;
     else return 0;

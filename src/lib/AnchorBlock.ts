@@ -66,6 +66,7 @@ export default class AnchorBlock {
         range.surroundContents(anchor);
 
         this.#anchors.push(anchor);
+        this.joinAnchors();
         return anchor;
     }
 
@@ -106,7 +107,7 @@ export default class AnchorBlock {
         anchors.forEach((anchor) => anchor.setFocused(focused));
     }
 
-    merge(to: "left" | "right", focus: boolean = true) {
+    merge(to: "left" | "right") {
         let textNode = null;
         if (to === "left") textNode = getConnectingTextNode(this.#dta.rootNode, this.#anchors[0], "preceding");
         if (to === "right") textNode = getConnectingTextNode(this.#dta.rootNode, this.#anchors.at(-1), "following");
@@ -127,7 +128,7 @@ export default class AnchorBlock {
 
         this.#dta.removeAnchorBlocks([containerAnchorBlock]);
         this.joinAnchors();
-        this.setFocused(focus);
+        this.setFocused(true);
     }
 
     serialize() {

@@ -1,5 +1,6 @@
+import { SerializedAnchor } from "./Anchor";
 import AnchorBlock, { SerializedAnchorBlock } from "./AnchorBlock";
-import { nodePositionComparator, getNodeFromPath, getPathFromNode, splitArrayToChunks, getAllTextNodes } from "./utils";
+import { nodePositionComparator, getNodeFromPath, getPathFromNode, splitArrayToChunks, getAllTextNodes, normalizeString } from "./utils";
 
 type SerializedDTA = {
     anchorBlocks: SerializedAnchorBlock[];
@@ -52,10 +53,7 @@ export default class DTA {
                     const endOffset = !ignoreEndOffset && i === splittedTextNodes.length - 1 && j === chunk.length - 1 ? range.endOffset : textNode.textContent.length;
                     anchorBlock.createAnchor(textNode, startOffset, endOffset);
                 });
-                if (anchorBlock.anchors.length > 0) {
-                    anchorBlock.joinAnchors();
-                    this.#anchorBlocks.push(anchorBlock);
-                }
+                if (anchorBlock.anchors.length > 0) this.#anchorBlocks.push(anchorBlock);
             });
         }
 
@@ -87,43 +85,73 @@ export default class DTA {
     }
 
     deserialize(data: SerializedDTA) {
+        const invalidAnchors: { anchor: SerializedAnchor; anchorBlockData: SerializedAnchorBlock }[] = [];
+
         data.anchorBlocks.forEach((anchorBlockData) => {
             const { color, data, anchors } = anchorBlockData;
+            const anchorBlock = new AnchorBlock(this);
 
             anchors.forEach((anchor) => {
-                let { startOffset, endOffset, xPath, value } = anchor;
+                const { startOffset, endOffset, xPath, value } = anchor;
 
-                let node = getNodeFromPath(this.#rootNode, xPath)?.singleNodeValue;
-                if (!node) return; // Anchor can not be inserted
+                const node = getNodeFromPath(this.#rootNode, xPath)?.singleNodeValue;
+                if (!node) {
+                    // Anchor can not be inserted due to a missing parent node
+                    invalidAnchors.push({ anchor, anchorBlockData });
+                    return;
+                }
+                const actualValue = node.textContent.substring(startOffset, endOffset);
+                if (value != actualValue) {
+                    // determine if there was only a change in text case/diacritics/punctuation = soft
+                    if (normalizeString(value) === normalizeString(actualValue)) {
+                        const createdAnchor = anchorBlock.createAnchor(node, startOffset, endOffset);
+                        createdAnchor.setChanged(true);
+                    } else {
+                        invalidAnchors.push({ anchor, anchorBlockData });
+                        return;
+                    }
+                }
 
-                const anchorBlock = new AnchorBlock(this);
+                anchorBlock.createAnchor(node, startOffset, endOffset);
+            });
+
+            if (anchorBlock.anchors.length > 0) {
                 anchorBlock.color = color;
                 anchorBlock.data = data;
-                const createdAnchor = anchorBlock.createAnchor(node, startOffset, endOffset);
+                this.#anchorBlocks.push(anchorBlock);
+            }
+        });
 
-                if (!createdAnchor) {
-                    const searchXPath = `//text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "${value.toLocaleLowerCase()}")]`; // search is case-insensitive
-                    const occurences = getNodeFromPath(this.#rootNode, searchXPath, XPathResult.ORDERED_NODE_ITERATOR_TYPE);
-                    let textNodes: Node[] = [];
-                    let occurence: Node = null;
-                    while ((occurence = occurences.iterateNext())) textNodes.push(occurence);
+        invalidAnchors.forEach((invalidAnchor) => {
+            let { startOffset, xPath, value } = invalidAnchor.anchor;
+            const anchorBlock = new AnchorBlock(this);
 
-                    if (textNodes.includes(node)) {
-                        // value is contained inside the same node, but has been moved
-                        startOffset = node.textContent.match(new RegExp(value, "i")).index;
-                        anchorBlock.createAnchor(node, startOffset, startOffset + value.length);
-                    } else {
-                        // Anchor must be created in the closest possible node containing the value
-                        console.log(textNodes);
-                    }
-                } else if (createdAnchor.value != value) createdAnchor.setChanged(true);
+            const searchXPath = `//text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "${value.toLocaleLowerCase()}")]`; // search is case-insensitive
+            const occurences = getNodeFromPath(this.#rootNode, searchXPath, XPathResult.ORDERED_NODE_ITERATOR_TYPE);
+            let textNodes: Node[] = [];
+            let occurence: Node = null;
+            while ((occurence = occurences.iterateNext()) && !/^DTA-ANCHOR$/.test(getPathFromNode(this.#rootNode, occurence))) textNodes.push(occurence); // filter out text nodes inside Anchors
+            if (textNodes.length === 0) return; // no match was found
 
-                if (anchorBlock.anchors.length > 0) {
-                    this.#anchorBlocks.push(anchorBlock);
-                    anchorBlock.merge("left", false); // try to merge with the previous AnchorBlock
-                    anchorBlock.joinAnchors();
-                }
-            });
+            const node = getNodeFromPath(this.#rootNode, xPath)?.singleNodeValue;
+            if (textNodes.includes(node)) {
+                startOffset = [...node.textContent.matchAll(new RegExp(value, "gi"))]
+                    .map((match) => match.index)
+                    .reduce((prev, curr) => (Math.abs(curr - startOffset) < Math.abs(prev - startOffset) ? curr : prev)); // select the closest occurence inside the node
+                const createdAnchor = anchorBlock.createAnchor(node, startOffset, startOffset + value.length);
+                createdAnchor.setChanged(true);
+            } else {
+                const node = textNodes[0]; // select the first occurence
+                startOffset = node.textContent.match(new RegExp(value, "i")).index;
+                const createdAnchor = anchorBlock.createAnchor(node, startOffset, startOffset + value.length);
+                createdAnchor.setChanged(true);
+            }
+
+            if (anchorBlock.anchors.length > 0) {
+                anchorBlock.color = invalidAnchor.anchorBlockData.color;
+                anchorBlock.data = invalidAnchor.anchorBlockData.data;
+                this.#anchorBlocks.push(anchorBlock);
+            }
         });
     }
 }
