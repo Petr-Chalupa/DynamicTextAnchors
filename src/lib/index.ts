@@ -133,19 +133,14 @@ export default class DTA {
             while ((occurence = occurences.iterateNext()) && !/^DTA-ANCHOR$/.test(getPathFromNode(this.#rootNode, occurence))) textNodes.push(occurence); // filter out text nodes inside Anchors
             if (textNodes.length === 0) return; // no match was found
 
-            const node = getNodeFromPath(this.#rootNode, xPath)?.singleNodeValue;
-            if (textNodes.includes(node)) {
-                startOffset = [...node.textContent.matchAll(new RegExp(value, "gi"))]
-                    .map((match) => match.index)
-                    .reduce((prev, curr) => (Math.abs(curr - startOffset) < Math.abs(prev - startOffset) ? curr : prev)); // select the closest occurence inside the node
-                const createdAnchor = anchorBlock.createAnchor(node, startOffset, startOffset + value.length);
-                createdAnchor.setChanged(true);
-            } else {
-                const node = textNodes[0]; // select the first occurence
-                startOffset = node.textContent.match(new RegExp(value, "i")).index;
-                const createdAnchor = anchorBlock.createAnchor(node, startOffset, startOffset + value.length);
-                createdAnchor.setChanged(true);
-            }
+            let node = getNodeFromPath(this.#rootNode, xPath)?.singleNodeValue;
+            if (!node || !textNodes.includes(node)) node = textNodes[0]; // select the first node if original parent node does not exist
+
+            startOffset = [...node.textContent.matchAll(new RegExp(value, "gi"))]
+                .map((match) => match.index)
+                .reduce((prev, curr) => (Math.abs(curr - startOffset) < Math.abs(prev - startOffset) ? curr : prev)); // select the closest occurence to the startOffset inside the node
+            const createdAnchor = anchorBlock.createAnchor(node, startOffset, startOffset + value.length);
+            createdAnchor.setChanged(true);
 
             if (anchorBlock.anchors.length > 0) {
                 anchorBlock.color = invalidAnchor.anchorBlockData.color;
