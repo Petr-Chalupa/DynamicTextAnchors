@@ -102,7 +102,7 @@ export default class DTA {
                 }
                 const actualValue = node.textContent.substring(startOffset, endOffset);
                 if (value != actualValue) {
-                    // determine if there was only a change in text case/diacritics/punctuation = soft
+                    // determine if there was only a soft change - in text case/diacritics/punctuation
                     if (normalizeString(value) === normalizeString(actualValue)) {
                         const createdAnchor = anchorBlock.createAnchor(node, startOffset, endOffset);
                         createdAnchor.setChanged(true);

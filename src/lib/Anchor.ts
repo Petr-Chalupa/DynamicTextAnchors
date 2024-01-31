@@ -15,7 +15,7 @@ export default class Anchor extends HTMLElement {
     #anchorBlock: AnchorBlock;
     #currentKeys: string[] = [];
 
-    constructor(anchorBlock: AnchorBlock, node: Node, startOffset: number, endOffset: number) {
+    constructor(anchorBlock: AnchorBlock) {
         super();
 
         this.uuid = crypto.randomUUID();

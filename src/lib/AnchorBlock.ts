@@ -57,7 +57,7 @@ export default class AnchorBlock {
         if (startOffset > node.textContent.length || endOffset > node.textContent.length) return;
         if (node.textContent.substring(startOffset, endOffset + 1).trim().length === 0) return;
 
-        const anchor = new Anchor(this, node, startOffset, endOffset);
+        const anchor = new Anchor(this);
         anchor.color(this.#color);
 
         const range = new Range();
