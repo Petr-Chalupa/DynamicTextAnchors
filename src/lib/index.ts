@@ -136,7 +136,7 @@ export default class DTA {
             let node = getNodeFromPath(this.#rootNode, xPath)?.singleNodeValue;
             if (!node || !textNodes.includes(node)) node = textNodes[0]; // select the first node if original parent node does not exist
 
-            startOffset = [...node.textContent.matchAll(new RegExp(value, "gi"))]
+            startOffset = [...node.textContent.matchAll(new RegExp(value.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&"), "gi"))]
                 .map((match) => match.index)
                 .reduce((prev, curr) => (Math.abs(curr - startOffset) < Math.abs(prev - startOffset) ? curr : prev)); // select the closest occurence to the startOffset inside the node
             const createdAnchor = anchorBlock.createAnchor(node, startOffset, startOffset + value.length);
