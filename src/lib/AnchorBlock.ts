@@ -1,6 +1,6 @@
 import Anchor, { SerializedAnchor } from "./Anchor";
 import DTA from "./index";
-import { nodePositionComparator, getConnectingTextNode, isValidHexColor } from "./utils";
+import { nodePositionComparator, getConnectingTextNode, isValidHexColor, getAllTextNodes } from "./utils";
 
 type AnchorBlockData = { [key: string]: any };
 export type SerializedAnchorBlock = {
@@ -108,14 +108,17 @@ export default class AnchorBlock {
     }
 
     merge(to: "left" | "right") {
-        let textNode = null;
-        if (to === "left") textNode = getConnectingTextNode(this.#dta.rootNode, this.#anchors[0], "preceding");
-        if (to === "right") textNode = getConnectingTextNode(this.#dta.rootNode, this.#anchors.at(-1), "following");
-        if (!textNode) return;
-        const containerAnchorBlock = this.#dta.getTextNodeContainer(textNode);
-        if (!containerAnchorBlock) return;
+        const textNodes = getAllTextNodes(this.#dta.rootNode).filter((node) => node.textContent.trim().length > 0);
 
-        const mergeAnchors = to === "left" ? [...containerAnchorBlock.anchors].reverse() : [...containerAnchorBlock.anchors];
+        const boundaryAnchor = to === "left" ? this.#anchors[0] : this.#anchors.at(-1);
+        const boundaryTextNodeIndex = textNodes.findIndex((node) => node === boundaryAnchor.firstChild);
+
+        const connectingTextNode = to === "left" ? textNodes[boundaryTextNodeIndex - 1] : textNodes[boundaryTextNodeIndex + 1];
+        if (!connectingTextNode) return;
+        const connectingAnchorBlock = this.#dta.getTextNodeContainer(connectingTextNode);
+        if (!connectingAnchorBlock) return;
+
+        const mergeAnchors = to === "left" ? [...connectingAnchorBlock.anchors].reverse() : [...connectingAnchorBlock.anchors];
         mergeAnchors.forEach((anchor) => {
             if (to === "left") this.#anchors.unshift(anchor);
             if (to === "right") this.#anchors.push(anchor);
@@ -123,10 +126,10 @@ export default class AnchorBlock {
             anchor.color(this.#color);
         });
 
-        // data merging; data of containerAnchorBlock may be overwritten
-        this.data = { ...containerAnchorBlock.data, ...this.#data };
+        // data merging; data of connectingAnchorBlock may be overwritten
+        this.data = { ...connectingAnchorBlock.data, ...this.#data };
 
-        this.#dta.removeAnchorBlocks([containerAnchorBlock]);
+        this.#dta.removeAnchorBlocks([connectingAnchorBlock]);
         this.joinAnchors();
         this.setFocused(true);
     }

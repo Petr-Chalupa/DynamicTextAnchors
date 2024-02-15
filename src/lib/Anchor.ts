@@ -55,6 +55,7 @@ export default class Anchor extends HTMLElement {
     }
 
     connectedCallback() {
+        this.parentNode.normalize();
         this.dataset.uuid = this.uuid;
 
         // focus handling

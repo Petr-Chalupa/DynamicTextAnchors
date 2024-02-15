@@ -71,7 +71,7 @@ export default class DTA {
     getTextNodeContainer(node: Node) {
         for (const anchorBlock of this.#anchorBlocks) {
             for (const anchor of anchorBlock.anchors) {
-                if (anchor.textContent === node.textContent) return anchorBlock;
+                if (anchor.firstChild === node) return anchorBlock;
             }
         }
         return null;
