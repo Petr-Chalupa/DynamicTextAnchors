@@ -44,7 +44,7 @@ export default class Anchor extends HTMLElement {
     }
 
     get xPath() {
-        let nodePosition = 0;
+        let nodePosition = 1; // in xPath the frist element has index 1
         let prevSibling = this.previousSibling;
         while (prevSibling != null) {
             if (prevSibling.nodeType === prevSibling.TEXT_NODE) nodePosition++;

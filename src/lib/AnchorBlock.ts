@@ -1,6 +1,6 @@
 import Anchor, { SerializedAnchor } from "./Anchor";
 import DTA from "./index";
-import { nodePositionComparator, getConnectingTextNode, isValidHexColor, getAllTextNodes } from "./utils";
+import { nodePositionComparator, isValidHexColor, getAllTextNodes } from "./utils";
 
 type AnchorBlockData = { [key: string]: any };
 export type SerializedAnchorBlock = {

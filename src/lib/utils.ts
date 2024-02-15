@@ -40,16 +40,6 @@ export function getAllTextNodes(rootNode: Node) {
     return children;
 }
 
-export function getConnectingTextNode(rootNode: Element, node: Node, position: "preceding" | "following") {
-    try {
-        const xPath = getPathFromNode(rootNode, node) + "/" + position + "::*[text()]/text()[1]";
-        const result = document.evaluate(xPath, rootNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-        return result.snapshotItem(position === "preceding" ? result.snapshotLength - 1 : 0);
-    } catch (err) {
-        return null;
-    }
-}
-
 export function normalizeString(str: string) {
     return str
         .normalize("NFD")
