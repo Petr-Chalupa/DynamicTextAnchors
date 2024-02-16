@@ -48,7 +48,7 @@ export default class Anchor extends HTMLElement {
         let prevSibling = this.previousSibling;
         while (prevSibling != null) {
             if (prevSibling.nodeType === Node.TEXT_NODE) nodePosition++;
-            else if (/^DTA-ANCHOR$/i.test(prevSibling.nodeName) && prevSibling.previousSibling.nodeType === Node.TEXT_NODE) nodePosition--;
+            else if (/^DTA-ANCHOR$/i.test(prevSibling.nodeName) && prevSibling.previousSibling?.nodeType === Node.TEXT_NODE) nodePosition--;
             prevSibling = prevSibling.previousSibling;
         }
         if (nodePosition <= 0) nodePosition = 1; // xPath indexes from 1
