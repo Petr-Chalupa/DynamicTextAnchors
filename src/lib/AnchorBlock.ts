@@ -1,6 +1,6 @@
 import Anchor, { SerializedAnchor } from "./Anchor";
 import DTA from "./index";
-import { nodePositionComparator, isValidHexColor, getAllTextNodes } from "./utils";
+import { nodePositionComparator, isValidHexColor, getConnectingTextNodes } from "./utils";
 
 type AnchorBlockData = { [key: string]: any };
 export type SerializedAnchorBlock = {
@@ -71,6 +71,9 @@ export default class AnchorBlock {
     }
 
     joinAnchors() {
+        // sort Anchors by position in document
+        this.#anchors.sort(nodePositionComparator);
+
         for (let i = 0; i < this.#anchors.length; i++) {
             const anchor = this.#anchors[i];
             const prevAnchor = this.#anchors[i - 1];
@@ -101,6 +104,7 @@ export default class AnchorBlock {
             if (destroy === true) anchor.destroy();
             else if (destroy === "remove") anchor.remove();
         });
+        this.joinAnchors();
     }
 
     setFocused(focused: boolean, anchors: Anchor[] = this.#anchors) {
@@ -108,12 +112,8 @@ export default class AnchorBlock {
     }
 
     merge(to: "left" | "right") {
-        const textNodes = getAllTextNodes(this.#dta.rootNode).filter((node) => node.textContent.trim().length > 0);
-
-        const boundaryAnchor = to === "left" ? this.#anchors[0] : this.#anchors.at(-1);
-        const boundaryTextNodeIndex = textNodes.findIndex((node) => node === boundaryAnchor.firstChild);
-
-        const connectingTextNode = to === "left" ? textNodes[boundaryTextNodeIndex - 1] : textNodes[boundaryTextNodeIndex + 1];
+        const connectingTextNodes = getConnectingTextNodes(this.#dta.rootNode, to === "left" ? this.#anchors[0].firstChild : this.#anchors.at(-1).firstChild);
+        const connectingTextNode = connectingTextNodes[to];
         if (!connectingTextNode) return;
         const connectingAnchorBlock = this.#dta.getTextNodeContainer(connectingTextNode);
         if (!connectingAnchorBlock) return;
@@ -139,7 +139,7 @@ export default class AnchorBlock {
             value: this.value,
             color: this.#color,
             data: this.#data,
-            anchors: this.#anchors.sort(nodePositionComparator).map((anchor) => anchor.serialize()),
+            anchors: this.#anchors.map((anchor) => anchor.serialize()),
         };
         return serializedData;
     }

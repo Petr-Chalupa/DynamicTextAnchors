@@ -1,6 +1,5 @@
-import { SerializedAnchor } from "./Anchor";
 import AnchorBlock, { SerializedAnchorBlock } from "./AnchorBlock";
-import { nodePositionComparator, getNodeFromPath, getPathFromNode, splitArrayToChunks, getAllTextNodes, normalizeString } from "./utils";
+import { nodePositionComparator, getNodeFromPath, getPathFromNode, splitArrayToChunks, getAllTextNodes, normalizeString, getConnectingTextNodes } from "./utils";
 
 type SerializedDTA = {
     anchorBlocks: SerializedAnchorBlock[];
@@ -58,6 +57,7 @@ export default class DTA {
         }
 
         selection.collapseToEnd();
+        this.sort();
     }
 
     removeAnchorBlocks(anchorBlocks: AnchorBlock[] = [...this.#anchorBlocks], destroy: boolean | "remove" = true) {
@@ -66,6 +66,7 @@ export default class DTA {
             anchorBlock.removeAnchors(undefined, destroy);
             this.#anchorBlocks.splice(anchorBlockIndex, 1);
         });
+        this.sort();
     }
 
     getTextNodeContainer(node: Node) {
@@ -77,27 +78,32 @@ export default class DTA {
         return null;
     }
 
+    sort() {
+        // sort AnchorBlocks by position in document
+        this.#anchorBlocks.sort((a, b) => nodePositionComparator(a.anchors.at(-1), b.anchors[0]));
+    }
+
     serialize() {
         const serializedData: SerializedDTA = {
-            anchorBlocks: this.#anchorBlocks.sort((a, b) => nodePositionComparator(a.anchors.at(-1), b.anchors[0])).map((anchorBlock) => anchorBlock.serialize()),
+            anchorBlocks: this.#anchorBlocks.map((anchorBlock) => anchorBlock.serialize()),
         };
         return serializedData;
     }
 
     deserialize(data: SerializedDTA) {
-        const invalidAnchors: { anchor: SerializedAnchor; anchorBlockData: SerializedAnchorBlock }[] = [];
+        const invalidAnchors: { anchorBlockData: SerializedAnchorBlock; index: number }[] = [];
 
         data.anchorBlocks.forEach((anchorBlockData) => {
             const { color, data, anchors } = anchorBlockData;
             const anchorBlock = new AnchorBlock(this);
 
-            anchors.forEach((anchor) => {
+            anchors.forEach((anchor, index) => {
                 const { startOffset, endOffset, xPath, value } = anchor;
 
                 const node = getNodeFromPath(this.#rootNode, xPath)?.singleNodeValue;
                 if (!node) {
                     // Anchor can not be inserted due to a missing parent node
-                    invalidAnchors.push({ anchor, anchorBlockData });
+                    invalidAnchors.push({ anchorBlockData, index });
                     return;
                 }
                 const actualValue = node.textContent.substring(startOffset, endOffset);
@@ -107,7 +113,7 @@ export default class DTA {
                         const createdAnchor = anchorBlock.createAnchor(node, startOffset, endOffset);
                         createdAnchor.setChanged(true);
                     } else {
-                        invalidAnchors.push({ anchor, anchorBlockData });
+                        invalidAnchors.push({ anchorBlockData, index });
                         return;
                     }
                 }
@@ -122,8 +128,8 @@ export default class DTA {
             }
         });
 
-        invalidAnchors.forEach((invalidAnchor) => {
-            let { startOffset, xPath, value } = invalidAnchor.anchor;
+        invalidAnchors.forEach(({ anchorBlockData, index }) => {
+            let { startOffset, xPath, value } = anchorBlockData.anchors[index];
             const anchorBlock = new AnchorBlock(this);
 
             const searchXPath = `//text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "${value.toLocaleLowerCase()}")]`; // search is case-insensitive
@@ -143,10 +149,24 @@ export default class DTA {
             createdAnchor.setChanged(true);
 
             if (anchorBlock.anchors.length > 0) {
-                anchorBlock.color = invalidAnchor.anchorBlockData.color;
-                anchorBlock.data = invalidAnchor.anchorBlockData.data;
+                anchorBlock.color = anchorBlockData.color;
+                anchorBlock.data = anchorBlockData.data;
                 this.#anchorBlocks.push(anchorBlock);
+
+                // try to reconnect Anchors, that were not in fact separated
+                this.sort();
+                const connectingTextNodes = getConnectingTextNodes(this.#rootNode, anchorBlock.anchors[index].firstChild);
+                if (anchorBlockData.anchors[index - 1] && connectingTextNodes.left) {
+                    const leftConnectingAnchorBlock = this.getTextNodeContainer(connectingTextNodes.left);
+                    if (leftConnectingAnchorBlock && normalizeString(connectingTextNodes.left.textContent) === normalizeString(anchorBlockData.anchors[index - 1].value)) anchorBlock.merge("left");
+                }
+                if (anchorBlockData.anchors[index + 1] && connectingTextNodes.right) {
+                    const rightConnectingAnchorBlock = this.getTextNodeContainer(connectingTextNodes.right);
+                    if (rightConnectingAnchorBlock && normalizeString(connectingTextNodes.right.textContent) === normalizeString(anchorBlockData.anchors[index + 1].value)) anchorBlock.merge("right");
+                }
             }
         });
+
+        this.sort();
     }
 }

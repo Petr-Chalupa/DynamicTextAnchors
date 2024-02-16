@@ -198,7 +198,7 @@ nav {
     }
 }
 
-#anchor-details {
+#anchor-details > div {
     display: grid;
     gap: 0.5rem;
     border: 2px solid $tertiary-color;

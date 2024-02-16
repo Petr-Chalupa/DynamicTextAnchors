@@ -17,22 +17,24 @@
       <button @click="createAnchorBlock" :disabled="controlsDisabled">CREATE ANCHOR</button>
     </div>
 
-    <div v-if="clickedAnchor != null" id="anchor-details">
-      <h4 :title="'Anchor: ' + clickedAnchor.uuid" @click="focusAnchorBlock(clickedAnchor.anchorBlock.uuid)">Last clicked AnchorBlock: {{ clickedAnchor.anchorBlock.uuid }}</h4>
-      <div class="settings">
-        <input type="color" v-model="clickedAnchor.anchorBlock.color" />
-        <pre contenteditable="true" title="Data">{{ JSON.stringify(clickedAnchor.anchorBlock.data, null, 2) }}</pre>
-        <button @click="(e) => saveAnchorData(clickedAnchor.anchorBlock, e.target.previousSibling.textContent)" class="saveDataBtn">Save data</button>
-      </div>
-      <details class="parts">
-        <summary>Anchors</summary>
-        <div>
-          <div v-for="anchor in clickedAnchor.anchorBlock.anchors" :key="anchor.uuid">
-            <h6>{{ anchor.uuid }}</h6>
-            <p>{{ anchor.value }}</p>
-          </div>
+    <div v-show="clickedAnchor != null" id="anchor-details" ref="anchorDetails">
+      <div v-if="clickedAnchor != null">
+        <h4 @click="focusAnchorBlock(clickedAnchor.anchorBlock.uuid)">AnchorBlock: {{ clickedAnchor.anchorBlock.uuid }}</h4>
+        <div class="settings">
+          <input type="color" v-model="clickedAnchor.anchorBlock.color" />
+          <pre contenteditable="true" title="Data">{{ JSON.stringify(clickedAnchor.anchorBlock.data, null, 2) }}</pre>
+          <button @click="(e) => saveAnchorData(clickedAnchor.anchorBlock, e.target.previousSibling.textContent)" class="saveDataBtn">Save data</button>
         </div>
-      </details>
+        <details class="parts">
+          <summary>Anchors</summary>
+          <div>
+            <div v-for="anchor in clickedAnchor.anchorBlock.anchors" :key="anchor.uuid">
+              <h6>{{ anchor.uuid }}</h6>
+              <p>{{ anchor.value }}</p>
+            </div>
+          </div>
+        </details>
+      </div>
     </div>
   </div>
 </template>
@@ -50,6 +52,7 @@ const useMode = ref(true);
 const controlsDisabled = computed(() => (loremXML.value.length === 0 || !useMode.value));
 const loadXMLInput = ref(null);
 const loadAnchorsInput = ref(null);
+const anchorDetails = ref(null);
 const clickedAnchor = ref(null);
 
 let dta = null;
@@ -118,9 +121,10 @@ function saveAnchorData(anchorBlock, rawData) {
   }
 }
 
-document.addEventListener("click", (e) => {
-  if (!/^DTA-ANCHOR$/i.test(e.target.nodeName)) return;
-  clickedAnchor.value = null;
-  clickedAnchor.value = e.target;
-});
+function displayAnchorBlockDetails(e) {
+  if (/^DTA-ANCHOR$/i.test(e.target.nodeName)) return clickedAnchor.value = e.target;
+  else if (!anchorDetails.value.contains(e.target)) return clickedAnchor.value = null;
+}
+document.addEventListener("click", displayAnchorBlockDetails);
+document.addEventListener("focusin", displayAnchorBlockDetails);
 </script>

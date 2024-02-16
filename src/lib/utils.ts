@@ -8,7 +8,7 @@ export function getPathFromNode(rootNode: Element, node: Node) {
 
     let xPath = ".";
     elPath.reverse().forEach((node: Element, index) => {
-        let nodePosition = 1; // in xPath the frist element has index 1
+        let nodePosition = 1; // xPath indexes from 1
         const nodeSiblings = index > 0 ? elPath[index - 1].childNodes : rootNode.childNodes;
 
         for (let i = 0; i < nodeSiblings.length; i++) {
@@ -38,6 +38,15 @@ export function getAllTextNodes(rootNode: Node) {
     const walker = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) children.push(walker.currentNode);
     return children;
+}
+
+export function getConnectingTextNodes(rootNode: Node, boundaryTextNode: Node) {
+    const textNodes = getAllTextNodes(rootNode).filter((node) => node.textContent.trim().length > 0);
+    const boundaryTextNodeIndex = textNodes.findIndex((node) => node === boundaryTextNode);
+    return {
+        left: boundaryTextNodeIndex === 0 ? null : textNodes[boundaryTextNodeIndex - 1],
+        right: boundaryTextNodeIndex === textNodes.length ? null : textNodes[boundaryTextNodeIndex + 1],
+    };
 }
 
 export function normalizeString(str: string) {
