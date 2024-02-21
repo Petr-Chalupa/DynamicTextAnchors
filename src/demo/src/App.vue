@@ -40,7 +40,7 @@
 </template>
 
 <style lang="scss" src="@/assets/scss/main.scss" />
-<style lang="css" src="../../lib/_styles.css" />
+<style lang="css" src="../../../dist/lib/_styles.css" />
 
 <script setup>
 import { computed, onMounted, ref } from "vue";
