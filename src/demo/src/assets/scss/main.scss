@@ -142,19 +142,6 @@ nav {
             padding: 0.5rem;
         }
     }
-
-    dta-anchor {
-        &[data-focused] {
-            border: 2px solid $font-color !important;
-            border-radius: $border-radius !important;
-            outline: none;
-        }
-
-        &[data-changed] {
-            border: 2px dashed #ff0000;
-            border-radius: $border-radius;
-        }
-    }
 }
 
 #controls {

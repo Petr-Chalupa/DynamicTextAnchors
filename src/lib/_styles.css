@@ -1,0 +1,12 @@
+@layer DTA {
+    dta-anchor[data-focused] {
+        border: 2px solid currentColor !important;
+        border-radius: 7px;
+        outline: none;
+    }
+
+    dta-anchor[data-changed] {
+        border: 2px dashed #ff0000;
+        border-radius: 7px;
+    }
+}
