@@ -1,5 +1,7 @@
 # DynamicTextAnchors (DTA)
 
+![NPM Version](https://img.shields.io/npm/v/dynamic-text-anchors)
+
 **Table of contents**
 
 - [DynamicTextAnchors (DTA)](#dynamictextanchors-dta)
@@ -9,12 +11,25 @@
   - [Technologies used](#technologies-used)
   - [How to use](#how-to-use)
     - [DTA methods](#dta-methods)
-      - [`createAnchorBlockFromSelection()`](#createanchorblockfromselection)
-      - [`destroyAnchorBlocks()`](#destroyanchorblocks)
+      - [`createAnchorBlockFromSelection([selection])`](#createanchorblockfromselectionselection)
+      - [`removeAnchorBlocks([anchorBlocks], [destroy])`](#removeanchorblocksanchorblocks-destroy)
+      - [`getTextNodeContainer(node)`](#gettextnodecontainernode)
+      - [`sort()`](#sort)
       - [`serialize()`](#serialize)
-      - [`deserialize()`](#deserialize)
+      - [`deserialize(data)`](#deserializedata)
     - [AnchorBlock methods](#anchorblock-methods)
-      - [`merge()`](#merge)
+      - [`createAnchor(node, startOffset, endOffset)`](#createanchornode-startoffset-endoffset)
+      - [`joinAnchors()`](#joinanchors)
+      - [`removeAnchors([anchors], [destroy])`](#removeanchorsanchors-destroy)
+      - [`setFocused(focused, [anchors])`](#setfocusedfocused-anchors)
+      - [`merge(to)`](#mergeto)
+      - [`serialize()`](#serialize-1)
+    - [Anchor methods](#anchor-methods)
+      - [`destroy()`](#destroy)
+      - [`setChanged(changed)`](#setchangedchanged)
+      - [`setFocused(focused)`](#setfocusedfocused)
+      - [`color(color)`](#colorcolor)
+      - [`serialize()`](#serialize-2)
 
 ---
 
@@ -38,6 +53,7 @@
 
 -   lib
     -   TS
+    -   CSS
 -   demo
     -   Vue.JS
     -   SCSS
@@ -48,28 +64,86 @@
 
 `const dta = new DTA(rootElement);`
 
-Now you can use all public methods.
+You can also import default styles:
+
+`import "dynamic-text-anchors/dist/lib/_styles.css";`
 
 ### DTA methods
 
-#### `createAnchorBlockFromSelection()`
+#### `createAnchorBlockFromSelection([selection])`
 
-Creates AnchorBlock from given selection or from the user's current selection. Selection must be contained within the configured rootNode. Multiple selection ranges _are_ supported.
+Creates AnchorBlock/s from given selection or from the user's current selection. Selection must be contained within the configured rootNode. Multiple selection ranges _are_ supported (Firefox).
 
-#### `destroyAnchorBlocks()`
+#### `removeAnchorBlocks([anchorBlocks], [destroy])`
 
-Destroys the specified AnchorBlocks and their Anchors, or destroys all AnchorBlocks if none are specified.
+Removes the specified AnchorBlocks and their Anchors (or all, if none are specified). Accepts argument telling the function whether it should remove the Anchors from the AnchorBlock and if so, whether it should also remove them from the document either completely or "silently".
+
+#### `getTextNodeContainer(node)`
+
+Returns AnchorBlock containing specified textnode. If none of the AnchorBlocks is an ancestor, returns null.
+
+#### `sort()`
+
+Sorts AnchorBlocks by their position in the document by comparing position of the last Anchor and first Anchor of following AnchorBlocks. This method sorts in-place and expects, that individual AnchorBlock's Anchors are sorted.
 
 #### `serialize()`
 
-Returns the DTA data ready to be saved.
+Returns the DTA data serialized in JSON object format ready to be saved.
 
-#### `deserialize()`
+#### `deserialize(data)`
 
-Attempts to reconstruct AnchorBlocks and Anchors from the given data.
+Attempts to reconstruct AnchorBlocks and Anchors from the given data in JSON object format.
+
+---
+
+_The following methods are not intended for stand-alone use (but only through DTA), but are described here for a better understanding of the mechanisms._
 
 ### AnchorBlock methods
 
-#### `merge()`
+#### `createAnchor(node, startOffset, endOffset)`
+
+Creates Anchor in specified node at specified offsets, that must be contained in the node. Returns the created Anchor.
+
+#### `joinAnchors()`
+
+Helper function that sorts AnchorBlock's Anchors in-place, sets the focusable Anchor, merges connecting Anchors if possible, sets aria-label and connects the Anchors internally via leftJoin and rightJoin properties.
+
+#### `removeAnchors([anchors], [destroy])`
+
+Removes the specified Anchors (or all, if none are specified). Accepts argument telling the function whether it should remove the Anchors from the AnchorBlock and if so, whether it should also remove them from the document either completely or "silently".
+
+#### `setFocused(focused, [anchors])`
+
+Adds or removes focus from specified Anchors (or all, if none are specified).
+
+#### `merge(to)`
 
 Attempts to merge AnchorBlock with following or preceding AnchorBlock (specified by parameter "left" or "right"). Both of the AchorBlocks must be touching. The merging AnchorBlock overrides, when there is conflict in properties and/or data.
+
+#### `serialize()`
+
+Returns the AnchorBlock data serialized in JSON object format ready to be saved.
+
+---
+
+### Anchor methods
+
+#### `destroy()`
+
+Silently removes the Anchor from the document (= replace itself by textnode with it's value).
+
+#### `setChanged(changed)`
+
+Adds or removes data-changed attribute of Anchor.
+
+#### `setFocused(focused)`
+
+Adds or removes focus and data-focused attribute of Anchor.
+
+#### `color(color)`
+
+Sets the background color of Anchor.
+
+#### `serialize()`
+
+Returns the Anchor data serialized in JSON object format ready to be saved.
