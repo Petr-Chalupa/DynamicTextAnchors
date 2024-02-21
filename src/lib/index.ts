@@ -155,7 +155,7 @@ export default class DTA {
 
                 // try to reconnect Anchors, that were not in fact separated
                 this.sort();
-                const connectingTextNodes = getConnectingTextNodes(this.#rootNode, anchorBlock.anchors[index].firstChild);
+                const connectingTextNodes = getConnectingTextNodes(this.#rootNode, createdAnchor.firstChild);
                 if (anchorBlockData.anchors[index - 1] && connectingTextNodes.left) {
                     const leftConnectingAnchorBlock = this.getTextNodeContainer(connectingTextNodes.left);
                     if (leftConnectingAnchorBlock && normalizeString(connectingTextNodes.left.textContent) === normalizeString(anchorBlockData.anchors[index - 1].value)) anchorBlock.merge("left");

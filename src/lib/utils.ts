@@ -44,8 +44,8 @@ export function getConnectingTextNodes(rootNode: Node, boundaryTextNode: Node) {
     const textNodes = getAllTextNodes(rootNode).filter((node) => node.textContent.trim().length > 0);
     const boundaryTextNodeIndex = textNodes.findIndex((node) => node === boundaryTextNode);
     return {
-        left: boundaryTextNodeIndex === 0 ? null : textNodes[boundaryTextNodeIndex - 1],
-        right: boundaryTextNodeIndex === textNodes.length ? null : textNodes[boundaryTextNodeIndex + 1],
+        left: boundaryTextNodeIndex === -1 || boundaryTextNodeIndex === 0 ? null : textNodes[boundaryTextNodeIndex - 1],
+        right: boundaryTextNodeIndex === -1 || boundaryTextNodeIndex === textNodes.length ? null : textNodes[boundaryTextNodeIndex + 1],
     };
 }
 
