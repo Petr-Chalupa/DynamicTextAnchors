@@ -132,7 +132,7 @@ export default class DTA {
             let { startOffset, xPath, value } = anchorBlockData.anchors[index];
             const anchorBlock = new AnchorBlock(this);
 
-            const searchXPath = `//text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "${value.toLocaleLowerCase()}")]`; // search is case-insensitive
+            const searchXPath = `//text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "${value.toLowerCase()}")]`; // search is case-insensitive
             const occurences = getNodeFromPath(this.#rootNode, searchXPath, XPathResult.ORDERED_NODE_ITERATOR_TYPE);
             let textNodes: Node[] = [];
             let occurence: Node = null;
