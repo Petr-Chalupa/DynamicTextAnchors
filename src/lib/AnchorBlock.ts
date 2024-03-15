@@ -111,11 +111,19 @@ export default class AnchorBlock {
         anchors.forEach((anchor) => anchor.setFocused(focused));
     }
 
-    merge(to: "left" | "right") {
+    canMerge(to: "left" | "right") {
         const connectingTextNodes = getConnectingTextNodes(this.#dta.rootNode, to === "left" ? this.#anchors[0].firstChild : this.#anchors.at(-1).firstChild);
         const connectingTextNode = connectingTextNodes[to];
-        if (!connectingTextNode) return;
+        if (!connectingTextNode) return null;
+
         const connectingAnchorBlock = this.#dta.getTextNodeContainer(connectingTextNode);
+        if (!connectingAnchorBlock) return null;
+
+        return connectingAnchorBlock;
+    }
+
+    merge(to: "left" | "right") {
+        const connectingAnchorBlock = this.canMerge(to);
         if (!connectingAnchorBlock) return;
 
         const mergeAnchors = to === "left" ? [...connectingAnchorBlock.anchors].reverse() : [...connectingAnchorBlock.anchors];

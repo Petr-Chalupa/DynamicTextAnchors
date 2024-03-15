@@ -17,20 +17,22 @@
       <button @click="createAnchorBlock" :disabled="controlsDisabled">CREATE ANCHOR</button>
     </div>
 
-    <div v-show="clickedAnchor != null" id="anchor-details" ref="anchorDetails">
-      <div v-if="clickedAnchor != null">
-        <h4 @click="focusAnchorBlock(clickedAnchor.anchorBlock.uuid)">AnchorBlock: {{ clickedAnchor.anchorBlock.uuid }}</h4>
-        <div class="settings">
-          <input type="color" v-model="clickedAnchor.anchorBlock.color" />
-          <pre contenteditable="true" title="Data">{{ JSON.stringify(clickedAnchor.anchorBlock.data, null, 2) }}</pre>
-          <button @click="(e) => saveAnchorData(clickedAnchor.anchorBlock, e.target.previousSibling.textContent)" class="saveDataBtn">Save data</button>
+    <div v-show="focusedAnchor != null" id="anchor-details" ref="anchorDetails">
+      <div v-if="focusedAnchor != null">
+        <h4 @click="focusAnchorBlock(focusedAnchor.anchorBlock.uuid)">AnchorBlock: {{ focusedAnchor.anchorBlock.uuid }}</h4>
+        <div class="data">
+          <input type="color" v-model="focusedAnchor.anchorBlock.color" />
+          <pre contenteditable="true" title="Data">{{ JSON.stringify(focusedAnchor.anchorBlock.data, null, 2) }}</pre>
+          <button @click="(e) => saveAnchorData(focusedAnchor.anchorBlock, e.target.previousSibling.textContent)" class="saveDataBtn">Save data</button>
+          <p class="merge">[{{ focusedAnchor.anchorBlock.canMerge("left") != null ? "Can" : "Can't" }} merge to left, {{ focusedAnchor.anchorBlock.canMerge("right") != null ? "Can" : "Can't" }} merge to right]</p>
         </div>
         <details class="parts">
           <summary>Anchors</summary>
           <div>
-            <div v-for="anchor in clickedAnchor.anchorBlock.anchors" :key="anchor.uuid">
+            <div v-for="anchor in focusedAnchor.anchorBlock.anchors" :key="anchor.uuid" class="anchor">
               <h6>{{ anchor.uuid }}</h6>
               <p>{{ anchor.value }}</p>
+              <p class="changed">{{ Object.keys(anchor.dataset).find((attr) => attr === "changed") }}</p>
             </div>
           </div>
         </details>
@@ -54,7 +56,7 @@ const controlsDisabled = computed(() => (loremXML.value.length === 0 || !useMode
 const loadXMLInput = ref(null);
 const loadAnchorsInput = ref(null);
 const anchorDetails = ref(null);
-const clickedAnchor = ref(null);
+const focusedAnchor = ref(null);
 
 let dta = null;
 onMounted(() => dta = new DTA(textfield.value));
@@ -122,10 +124,12 @@ function saveAnchorData(anchorBlock, rawData) {
   }
 }
 
-function displayAnchorBlockDetails(e) {
-  if (/^DTA-ANCHOR$/i.test(e.target.nodeName)) return clickedAnchor.value = e.target;
-  else if (!anchorDetails.value.contains(e.target)) return clickedAnchor.value = null;
-}
-document.addEventListener("click", displayAnchorBlockDetails);
-document.addEventListener("focusin", displayAnchorBlockDetails);
+const anchorFocusObserver = new MutationObserver((mutationList, observer) => {
+  for (const mutation of mutationList) {
+    if (mutation.type === "attributes" && mutation.attributeName === "data-focused") {
+      if (mutation.target.dataset.focused) focusedAnchor.value = mutation.target;
+    }
+  }
+});
+onMounted(() => anchorFocusObserver.observe(textfield.value, { attributes: true, childList: false, subtree: true }));
 </script>
