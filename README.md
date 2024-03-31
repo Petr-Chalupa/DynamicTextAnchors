@@ -30,6 +30,16 @@
       - [`setFocused(focused)`](#setfocusedfocused)
       - [`color(color)`](#colorcolor)
       - [`serialize()`](#serialize-2)
+    - [Utility methods](#utility-methods)
+      - [`getPathFromNode(rootNode, node)`](#getpathfromnoderootnode-node)
+      - [`getNodeFromPath(rootNode, xPath, resType)`](#getnodefrompathrootnode-xpath-restype)
+      - [`getAllTextNodes(rootNode)`](#getalltextnodesrootnode)
+      - [`getConnectingTextNodes(rootNode, boundaryTextNode)`](#getconnectingtextnodesrootnode-boundarytextnode)
+      - [`normalizeString(str)`](#normalizestringstr)
+      - [`nodePositionComparator(x, y)`](#nodepositioncomparatorx-y)
+      - [`splitArrayToChunks(array, del)`](#splitarraytochunksarray-del)
+      - [`isValidHexColor(hex)`](#isvalidhexcolorhex)
+      - [`invertHexColor(hex)`](#inverthexcolorhex)
 
 ---
 
@@ -147,3 +157,51 @@ Sets the background color of Anchor.
 #### `serialize()`
 
 Returns the Anchor data serialized in JSON object format ready to be saved.
+
+---
+
+### Utility methods
+
+#### `getPathFromNode(rootNode, node)`
+
+Returns the xPath string from rootNode to node. 
+
+
+#### `getNodeFromPath(rootNode, xPath, resType)`
+
+Evaluates the xPath - starting from the rootNode and returns it in the desired XPathResult type.
+
+
+#### `getAllTextNodes(rootNode)`
+
+Returns all text nodes in the rootNode.
+
+
+#### `getConnectingTextNodes(rootNode, boundaryTextNode)`
+
+Returns all text nodes in the rootNode, that are connecting to the boundaryTextNode (result includes both directions).
+
+
+#### `normalizeString(str)`
+
+Returns the string in the normalized form - without diacritics, special symbols, with trimmed spaces and in lowercase.
+
+
+#### `nodePositionComparator(x, y)`
+
+Returns the evaluated result of `Node.compareDocumentPosition()` method.
+
+
+#### `splitArrayToChunks(array, del)`
+
+Splits given array into array of smaller chunks by the giver delimiter.
+
+
+#### `isValidHexColor(hex)`
+
+Checks if the given hex color is valid.
+
+
+#### `invertHexColor(hex)`
+
+Returns `#ffffff` or `#000000` depending on the contrast with the given hex color.
