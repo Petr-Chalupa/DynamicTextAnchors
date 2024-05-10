@@ -194,7 +194,7 @@ Returns the evaluated result of `Node.compareDocumentPosition()` method.
 
 #### `splitArrayToChunks(array, del)`
 
-Splits given array into array of smaller chunks by the giver delimiter.
+Splits given array into array of smaller chunks by the given delimiter.
 
 
 #### `isValidHexColor(hex)`
