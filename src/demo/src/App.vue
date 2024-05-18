@@ -2,7 +2,7 @@
   <nav>
     <h1>DTA DEMO</h1>
     <a href="https://github.com/Petr-Chalupa" target="_blank">AUTHOR</a>
-    <a href="https://github.com/Petr-Chalupa/DynamicTextAnchors" target="_blank">README</a>
+    <a href="https://www.npmjs.com/package/dynamic-text-anchors?activeTab=readme" target="_blank">README</a>
   </nav>
 
   <div id="container">
