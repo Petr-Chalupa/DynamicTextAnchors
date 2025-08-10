@@ -4,6 +4,7 @@ import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
     plugins: [vue()],
+    root: "./src/demo",
     build: {
         outDir: "../../dist/demo",
         assetsDir: "./assets",
@@ -19,9 +20,6 @@ export default defineConfig({
         alias: {
             "@": fileURLToPath(new URL("./src", import.meta.url)),
         },
-    },
-    server: {
-        port: 8080,
     },
     css: {
         preprocessorOptions: {

@@ -1,19 +1,7 @@
 {
-    "compilerOptions": {
-        "target": "ES6",
-        "module": "ES6",
-        "outDir": "dist/lib",
-        "declaration": true,
-        "sourceMap": true,
-        "noImplicitAny": true,
-        "moduleResolution": "Node",
-        "lib": [
-            "ES2023",
-            "DOM",
-            "DOM.Iterable",
-        ]
-    },
-    "include": [
-        "src/lib"
-    ]
+  "files": [],
+  "references": [
+    { "path": "./src/lib" },
+    { "path": "./src/demo" }
+  ]
 }

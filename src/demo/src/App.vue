@@ -24,7 +24,8 @@
           <input type="color" v-model="focusedAnchor.anchorBlock.color" />
           <pre contenteditable="true" title="Data">{{ JSON.stringify(focusedAnchor.anchorBlock.data, null, 2) }}</pre>
           <button @click="(e) => saveAnchorData(focusedAnchor.anchorBlock, e.target.previousSibling.textContent)" class="saveDataBtn">Save data</button>
-          <p class="merge">[{{ focusedAnchor.anchorBlock.canMerge("left") != null ? "Can" : "Can't" }} merge to left, {{ focusedAnchor.anchorBlock.canMerge("right") != null ? "Can" : "Can't" }} merge to right]</p>
+          <p class="merge">[{{ focusedAnchor.anchorBlock.canMerge("left") != null ? "Can" : "Can't" }} merge to left, {{ focusedAnchor.anchorBlock.canMerge("right") != null ? "Can" : "Can't" }} merge
+            to right]</p>
         </div>
         <details class="parts">
           <summary>Anchors</summary>
@@ -32,7 +33,7 @@
             <div v-for="anchor in focusedAnchor.anchorBlock.anchors" :key="anchor.uuid" class="anchor">
               <h6>{{ anchor.uuid }}</h6>
               <p>{{ anchor.value }}</p>
-              <p class="changed">{{ Object.keys(anchor.dataset).find((attr) => attr === "changed") }}</p>
+              <p class="changed">{{Object.keys(anchor.dataset).find((attr) => attr === "changed")}}</p>
             </div>
           </div>
         </details>
