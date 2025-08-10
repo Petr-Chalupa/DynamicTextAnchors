@@ -6,7 +6,6 @@
 
 - [DynamicTextAnchors (DTA)](#dynamictextanchors-dta)
   - [Annotation](#annotation)
-  - [Important files](#important-files)
   - [Installation](#installation)
   - [Technologies used](#technologies-used)
   - [How to use](#how-to-use)
@@ -50,10 +49,8 @@
 > inserted into the text even after its editing (and possibly evaluate the error during insertion). Such
 > a program should then be usable as a library for e.g., web applications.
 
-## Important files
-
-1.  #### [LICENSE FILE](./LICENSE.md)
-2.  #### [DOCUMENTATION FILE](/documentation/Documentation.pdf)
+- [***LICENSE***](./LICENSE.md)
+- [***DOCUMENTATION***](/documentation/Documentation.pdf) (Reflects the state of the project at the time of its creation; not intended to be updated with the project)
 
 ## Installation
 

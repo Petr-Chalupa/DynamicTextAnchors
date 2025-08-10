@@ -1,11 +1,14 @@
-#### **Copyright (C) Petr Chalupa - All rights reserved**
+# License
 
-This source code is protected under international copyright law. All rights
-reserved and protected by the copyright holders.
-This file is confidential and **only** available to authorized individuals with the
-**permission** of the copyright holders. If you encounter this file and do not have
-permission, please contact the copyright holders and delete this file.
+**DynamicTextAnchors (DTA)**  
+Copyright (c) 2025 [Your Name or Organization]  
+This work is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International License**.
 
-If you are not allowed to see this repository, report it immediately.
+You are free to:  
+- **Share** — copy and redistribute the material in any medium or format  
+- **Adapt** — remix, transform, and build upon the material  
 
-
+Under the following terms:  
+1. **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.  
+2. **NonCommercial** — You may not use the material for commercial purposes.  
+3. **No Additional Restrictions** — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.  
