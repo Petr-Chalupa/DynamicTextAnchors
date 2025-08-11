@@ -1,21 +1,26 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "outDir": "../../dist/lib",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "strict": true,
-    "moduleResolution": "bundler",
-    "composite": true,
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "outDir": "../../dist/lib",
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "strict": true,
+        "moduleResolution": "bundler",
+        "composite": true,
+        "lib": [
+            "ESNext",
+            "DOM",
+            "DOM.Iterable",
+            "WebWorker"
+        ]
+    },
+    "include": [
+        "./*.ts",
+        "./**/*.ts",
+        "core/Anchor.ts",
+        "core/AnchorBlock.ts",
+        "utils/index.ts"
     ]
-  },
-  "include": [
-    "./*.ts"
-  ]
 }
