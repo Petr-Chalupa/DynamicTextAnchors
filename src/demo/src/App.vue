@@ -24,34 +24,29 @@
     </div>
 
     <div v-show="focusedAnchor !== null" id="anchor-details" ref="anchorDetails">
-      <!-- <div v-if="focusedAnchor !== null">
-        <h4 @click="focusAnchorBlock(focusedAnchor.anchorBlock.uuid)">
-          AnchorBlock: {{ focusedAnchor.anchorBlock.uuid }}
-        </h4>
+      <div v-if="focusedAnchor !== null">
+        <h4 @click="focusedAnchor.requestFocus(true)">Anchor: {{ focusedAnchor.id }}</h4>
         <div class="data">
-          <input type="color" v-model="focusedAnchor.anchorBlock.color" />
-          <pre contenteditable="true" title="Data" ref="dataEditor">{{ JSON.stringify(focusedAnchor.anchorBlock.data, null, 2) }}</pre>
-          <button @click="saveAnchorData(focusedAnchor.anchorBlock)" class="saveDataBtn">
-            Save data
-          </button>
+          <label>BG: <input type="color" :value="focusedAnchor.bgColor" @input="e => focusedAnchor?.setColor((e.target as HTMLInputElement)?.value as ColorValue, focusedAnchor.fgColor)" />
+          </label>
+          <label>FG: <input type="color" :value="focusedAnchor.fgColor" @input="e => focusedAnchor?.setColor(focusedAnchor.bgColor, (e.target as HTMLInputElement)?.value as ColorValue)" />
+          </label>
+          <details class="quote">
+            <summary>Quote Data</summary>
+            <pre title="Quote">{{ JSON.stringify(focusedAnchor.range.quote, null, 2) }}</pre>
+          </details>
           <p class="merge">
-            [{{ focusedAnchor.anchorBlock.canMerge("left") !== null ? "Can" : "Can't" }} merge to left,
-            {{ focusedAnchor.anchorBlock.canMerge("right") !== null ? "Can" : "Can't" }} merge to right]
+            <button :disabled="!canMerge(focusedAnchor, 'left')" @click="focusedAnchor.requestMerge('left')">Merge LEFT</button>
+            <button :disabled="!canMerge(focusedAnchor, 'right')" @click="focusedAnchor.requestMerge('right')">Merge RIGHT</button>
           </p>
+          <p class="changed">
+            {{ focusedAnchor.changed ? "Changed" : "Unchanged" }}
+            <button :disabled="!focusedAnchor.changed" @click="focusedAnchor.acceptChange()">Accept change</button>
+          </p>
+          <p class="range"><strong>Range:</strong> {{ focusedAnchor.range.start }} - {{ focusedAnchor.range.end }}</p>
         </div>
-        <details class="parts">
-          <summary>Anchors</summary>
-          <div>
-            <div v-for="anchor in focusedAnchor.anchorBlock.anchors" :key="anchor.uuid" class="anchor">
-              <h6>{{ anchor.uuid }}</h6>
-              <p>{{ anchor.value }}</p>
-              <p class="changed">
-                {{Object.keys(anchor.dataset).find((attr) => attr === "changed")}}
-              </p>
-            </div>
-          </div>
-        </details>
-      </div> -->
+        <button @click="destroyAnchor(focusedAnchor)" class="destroyBtn">Destroy Anchor</button>
+      </div>
     </div>
   </div>
 </template>
@@ -60,11 +55,11 @@
 <style lang="css" src="../../../dist/lib/_styles.css" />
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, computed, type Ref } from "vue";
+import { onMounted, ref, computed, type Ref } from "vue";
 import LoremGenerator from "./LoremGenerator.vue";
 
 import { DTA, InlineRenderer } from "../../../dist/lib/index.js";
-import type { DTAI, AnchorI } from "../../../dist/lib/types.js";
+import type { DTAI, AnchorI, MergeDirection, ColorValue, SerializedDTA } from "../../../dist/lib/types.js";
 
 const textfield: Ref<HTMLElement | null> = ref(null);
 const loremXML = ref("");
@@ -72,24 +67,28 @@ const useMode = ref(true);
 const loadXMLInput = ref<HTMLInputElement | null>(null);
 const loadAnchorsInput = ref<HTMLInputElement | null>(null);
 const focusedAnchor = ref<AnchorI | null>(null);
-const dataEditor = ref<HTMLPreElement | null>(null);
 const controlsDisabled = computed(() => loremXML.value.length === 0 || !useMode.value);
 
-let dta: DTAI | null = null;
+let dta: DTAI = new DTA();
 
 onMounted(() => {
   if (!textfield.value) return;
 
-  dta = new DTA();
-  dta.addRenderer(new InlineRenderer(textfield.value))
-});
-
-onUnmounted(() => {
-  dta = null;
+  dta.addRenderer(new InlineRenderer(textfield.value));
+  dta.eventBus.on("anchor:focus-request", (event) => {
+    if (event.payload.focus) focusedAnchor.value = event.payload.anchor;
+  }, dta);
+  dta.eventBus.on("anchor:change", (event) => {
+    if (focusedAnchor.value && event.payload.anchor.id === focusedAnchor.value.id) {
+      focusedAnchor.value = null; // Reset the reference
+      focusedAnchor.value = event.payload.anchor;
+    }
+  }, dta);
 });
 
 function handleGenXML(xml: string) {
   loremXML.value = xml;
+  dta.clearAnchors();
 }
 
 async function loadXML() {
@@ -118,46 +117,34 @@ async function loadAnchors() {
   const text = await file.text();
   try {
     const parsed = JSON.parse(text);
-    // dta.deserialize(parsed.data);
+    dta.deserialize(parsed as SerializedDTA);
   } catch (err) {
     console.error("Error parsing anchors", err);
   }
 }
 
 function saveAnchors() {
-  // if (!dta) return;
-  // const serialized = dta.serialize();
+  const serialized = dta.serialize();
 
-  // const file = new Blob([JSON.stringify(serialized, null, 2)], {
-  //   type: "application/json",
-  // });
-  // const link = document.createElement("a");
-  // link.href = URL.createObjectURL(file);
-  // link.download = "Anchors.json";
-  // link.click();
+  const file = new Blob([JSON.stringify(serialized, null, 2)], {
+    type: "application/json",
+  });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(file);
+  link.download = "Anchors.json";
+  link.click();
 }
 
 function createAnchor() {
-  if (!dta) return;
   dta.createAnchorFromSelection();
 }
 
-function focusAnchor(uuid: string) {
-  // if (!dta) return;
-  // const anchor = dta.anchors.find((a) => a.uuid === uuid);
-  // if (anchor) {
-  //   focusedAnchor.value = anchor;
-  //   anchor.focus();
-  // }
+function canMerge(anchor: AnchorI, direction: MergeDirection) {
+  return dta.canAnchorMerge(anchor, direction);
 }
 
-function saveAnchorData(anchor: AnchorI) {
-  // if (!dataEditor.value) return;
-  // try {
-  //   const raw = dataEditor.value.textContent || "{}";
-  //   anchor.data = JSON.parse(raw);
-  // } catch (err) {
-  //   console.error("Invalid JSON", err);
-  // }
-}
+function destroyAnchor(anchor: AnchorI) {
+  anchor.destroy();
+  focusedAnchor.value = null;
+} 
 </script>

@@ -4,6 +4,7 @@ import { RendererI } from "../render/types";
 export interface EventMap {
     "anchor:create": { anchor: AnchorI };
     "anchor:change": { anchor: AnchorI };
+    "anchor:merge": { anchor: AnchorI };
     "anchor:destroy": { anchor: AnchorI };
     "anchor:focus-request": { anchor: AnchorI; focus: boolean };
     "anchor:hover-request": { anchor: AnchorI; hover: boolean };
@@ -13,9 +14,10 @@ export interface EventMap {
     "renderer:render": { renderer: RendererI };
     "renderer:destroy": { renderer: RendererI };
 
+    "dta:anchors-cleared": {};
+    "dta:renderers-cleared": {};
+    "dta:deserialize": { anchors: AnchorI[] };
     "dta:destroy": {};
-    "dta:serialize": { data: any };
-    "dta:deserialize": { data: any };
 }
 
 export type Event<K extends keyof EventMap = keyof EventMap> = {

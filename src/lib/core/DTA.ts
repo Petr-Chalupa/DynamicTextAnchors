@@ -1,9 +1,8 @@
 import { Anchor } from "..";
 import { EventBus } from "../events/EventBus";
 import { RendererI } from "../render/types";
-import { generateRandomColor } from "../utils/color";
-import { buildTextIndex, deserializeRange, findFirstTextNode, findLastTextNode, getSelection, mergeRange, rangeIntersects, serializeRange } from "../utils/dom";
-import { AnchorI, DTAI, MergeDirection } from "./types";
+import { buildTextIndex, findFirstTextNode, findLastTextNode, getSelection, mergeRange, rangeIntersects, serializeRange } from "../utils/dom";
+import { AnchorI, DTAI, MergeDirection, SerializedDTA } from "./types";
 
 export class DTA implements DTAI {
     anchors: AnchorI[] = [];
@@ -66,7 +65,17 @@ export class DTA implements DTAI {
         this.anchors = this.anchors.filter((a) => a != anchor);
     }
 
-    mergeAnchor(anchor: AnchorI, direction: MergeDirection) {
+    canAnchorMerge(anchor: AnchorI, direction: MergeDirection): boolean {
+        if (direction === "left") {
+            return this.anchors.some((a) => a.range.end === anchor.range.start);
+        }
+        if (direction === "right") {
+            return this.anchors.some((a) => a.range.start === anchor.range.end);
+        }
+        return false;
+    }
+
+    mergeAnchor(anchor: AnchorI, direction: MergeDirection): void {
         const mergeCandidate = this.anchors.find((a) => {
             if (direction === "left") return a.range.end === anchor.range.start;
             if (direction === "right") return a.range.start === anchor.range.end;
@@ -76,19 +85,37 @@ export class DTA implements DTAI {
         const newRange = mergeRange(anchor.range, mergeCandidate.range, direction);
         mergeCandidate.destroy();
         anchor.setRange(newRange);
+        this.eventBus.emit({ type: "anchor:merge", payload: { anchor } });
     }
 
-    destroy(): void {
-        for (let anchor of this.anchors) {
+    serialize(): SerializedDTA {
+        return { anchors: this.anchors.map((a) => a.serialize()) } as SerializedDTA;
+    }
+
+    deserialize(data: SerializedDTA): void {
+        this.anchors = data.anchors.map((a: any) => Anchor.deserialize(a));
+        this.eventBus.emit({ type: "dta:deserialize", payload: { anchors: this.anchors } });
+    }
+
+    clearAnchors(): void {
+        for (const anchor of this.anchors) {
             anchor.destroy();
         }
         this.anchors = [];
+        this.eventBus.emit({ type: "dta:anchors-cleared", payload: {} });
+    }
 
-        for (let renderer of this.renderers) {
+    clearRenderers(): void {
+        for (const renderer of this.renderers) {
             renderer.destroy();
         }
         this.renderers = [];
+        this.eventBus.emit({ type: "dta:renderers-cleared", payload: {} });
+    }
 
+    destroy(): void {
+        this.clearAnchors();
+        this.clearRenderers();
         this.eventBus.emit({ type: "dta:destroy", payload: {} });
         this.eventBus.offAll(this);
     }

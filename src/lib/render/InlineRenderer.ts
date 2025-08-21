@@ -13,6 +13,7 @@ export class InlineRenderer implements RendererI {
     constructor(root: HTMLElement) {
         this.root = root;
 
+        this.eventBus.on("dta:deserialize", (event) => event.payload.anchors.forEach((a) => this.renderAnchor(a)), this);
         this.eventBus.on("anchor:create", (event) => this.renderAnchor(event.payload.anchor), this);
         this.eventBus.on("anchor:change", (event) => this.updateAnchor(event.payload.anchor), this);
         this.eventBus.on("anchor:destroy", (event) => this.removeAnchor(event.payload.anchor), this);

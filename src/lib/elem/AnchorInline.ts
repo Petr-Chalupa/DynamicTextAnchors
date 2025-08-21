@@ -22,10 +22,14 @@ export class AnchorInline extends HTMLElement {
     }
 
     render() {
-        this.setAttribute("tabindex", "0");
         this.dataset.id = this.anchor.id;
         this.style.color = this.anchor.fgColor;
         this.style.backgroundColor = this.anchor.bgColor;
+
+        this.setAttribute("tabindex", "0");
+
+        if (this.anchor.changed) this.setAttribute("data-changed", "");
+        else this.removeAttribute("data-changed");
     }
 
     requestFocus(focus: boolean) {

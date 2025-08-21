@@ -222,65 +222,52 @@ nav {
             }
         }
 
-        pre {
-            border: 1px solid $font-color;
-            border-radius: $border-radius $border-radius 0 0;
-            padding: 0.25rem;
+        .quote {
             margin: 1rem 0 0 0;
-        }
 
-        .saveDataBtn {
-            border: 1px solid $font-color;
-            border-top: 0;
-            border-radius: 0 0 $border-radius $border-radius;
-            font-weight: bold;
-            transition: filter $anim-duration ease-in-out;
-            cursor: pointer;
-
-            &:hover {
-                filter: brightness(0.9);
-                transition: filter $anim-duration ease-in-out;
+            pre {
+                max-width: 100%;
+                border: 1px solid $font-color;
+                border-radius: $border-radius $border-radius;
+                padding: 0.25rem;
+                margin: 0;
+                white-space: pre-wrap;
+                overflow-wrap: anywhere;
             }
         }
 
         .merge {
             margin: 1rem 0 0 0;
-            font-size: 0.85rem;
+
+            > button {
+                cursor: pointer;
+            }
+        }
+
+        .changed,
+        .range {
+            margin: 1rem 0 0 0;
+            font-size: 0.9rem;
+
+            > button {
+                margin-left: 0.5rem;
+                cursor: pointer;
+            }
         }
     }
 
-    .parts {
-        summary {
-            cursor: pointer;
-        }
+    .destroyBtn {
+        width: fit-content;
+        background-color: #ff0000;
+        border: 2px solid #a31313;
+        padding: 0.5rem 2rem;
+        margin: 2rem 0 0 0;
+        border-radius: $border-radius $border-radius;
+        font-weight: bold;
+        cursor: pointer;
 
-        > div {
-            display: grid;
-            gap: 0.5rem;
-            padding: 0.5rem 0 0 0.5rem;
-
-            .anchor {
-                position: relative;
-                padding: 0.25rem;
-                border: 1px solid $font-color;
-                border-radius: $border-radius;
-
-                h6 {
-                    font-size: 0.85rem;
-                    margin: 0;
-                }
-
-                p {
-                    margin: 0;
-                }
-
-                .changed {
-                    position: absolute;
-                    inset: 0.25rem 0.25rem auto auto;
-                    font-size: 0.85rem;
-                    color: #ff0000;
-                }
-            }
+        &:hover {
+            background-color: #a31313;
         }
     }
 }

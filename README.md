@@ -51,7 +51,7 @@
 
 > **A note on project history and documentation** \
 > This library was originally developed as a graduation thesis on the design of algorithms for text anchors in static and dynamic text. The codebase has since been fully rewritten to improve its architecture, performance, and maintainability.
-> The DOCUMENTATION file reflects the state of the project at the time of the thesis's creation and is not intended to be updated with the current project.
+> The DOCUMENTATION file reflects the state of the project at the time of the thesis's creation and is not intended to be updated with the current project (original code can be found in [*thesis-legacy*](/thesis-legacy/) folder).
 > This README reflects the project's current state.
 
 - [***LICENSE***](./LICENSE.md)
