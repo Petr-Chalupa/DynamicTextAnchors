@@ -49,8 +49,13 @@
 > inserted into the text even after its editing (and possibly evaluate the error during insertion). Such
 > a program should then be usable as a library for e.g., web applications.
 
+> **A note on project history and documentation** \
+> This library was originally developed as a graduation thesis on the design of algorithms for text anchors in static and dynamic text. The codebase has since been fully rewritten to improve its architecture, performance, and maintainability.
+> The DOCUMENTATION file reflects the state of the project at the time of the thesis's creation and is not intended to be updated with the current project.
+> This README reflects the project's current state.
+
 - [***LICENSE***](./LICENSE.md)
-- [***DOCUMENTATION***](/documentation/Documentation.pdf) (Reflects the state of the project at the time of its creation; not intended to be updated with the project)
+- [***DOCUMENTATION***](/documentation/Documentation.pdf) 
 
 ## Installation
 

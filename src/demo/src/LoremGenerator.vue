@@ -56,7 +56,7 @@ interface LoremSettings {
 
 type TagType = "img" | "audio" | "video" | "table" | string;
 
-const emits = defineEmits(["genXML"]);
+const emits = defineEmits(["gen-xml"]);
 
 const dialog: Ref<HTMLDialogElement | null> = ref(null);
 const settings: LoremSettings = reactive({
@@ -169,6 +169,6 @@ function generateXML(): void {
         loremXML = generateLoremXML();
     } while (loremXML.trim().length === 0);
 
-    emits("genXML", loremXML);
+    emits("gen-xml", loremXML);
 }
 </script>

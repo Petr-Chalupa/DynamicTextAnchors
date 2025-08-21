@@ -19,8 +19,5 @@
     "include": [
         "./*.ts",
         "./**/*.ts",
-        "core/Anchor.ts",
-        "core/AnchorBlock.ts",
-        "utils/index.ts"
     ]
 }

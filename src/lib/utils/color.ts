@@ -1,4 +1,4 @@
-import { ColorValue } from "../types";
+import { ColorValue } from "../core/types";
 
 export function isValidHexColor(color: string): boolean {
     const hexColorRegex = /^#[0-9a-f]{3}([0-9a-f]{3})?$/i;
