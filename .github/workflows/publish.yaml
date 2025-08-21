@@ -18,7 +18,7 @@ jobs:
               run: |
                   npm ci
                   npm run build-lib
-                  cp ./src/lib/_styles.css ./dist/lib/_styles.css
+                  cp ./src/lib/utils/_styles.css ./dist/lib/utils/_styles.css
             - name: publish
               run: npm publish
               env:
