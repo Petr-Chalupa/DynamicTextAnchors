@@ -52,7 +52,7 @@
 </template>
 
 <style lang="scss" src="@/assets/scss/main.scss" />
-<style lang="css" src="../../../dist/lib/_styles.css" />
+<style lang="css" src="../../../dist/lib/utils/_styles.css" />
 
 <script setup lang="ts">
 import { onMounted, ref, computed, type Ref } from "vue";

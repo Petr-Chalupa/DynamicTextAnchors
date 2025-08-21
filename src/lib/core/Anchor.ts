@@ -1,6 +1,6 @@
-import { EventBus } from "../events/EventBus";
+import { EventBus } from "./EventBus";
+import { AnchorI, ColorValue, DTARange, MergeDirection, SerializedAnchor } from "../types";
 import { invertHexColor, isValidHexColor } from "../utils/color";
-import { AnchorI, ColorValue, DTARange, MergeDirection, SerializedAnchor } from "./types";
 
 export class Anchor implements AnchorI {
     id: string;

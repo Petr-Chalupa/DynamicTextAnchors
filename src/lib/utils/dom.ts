@@ -1,4 +1,4 @@
-import { DTARange, MergeDirection, RangeIntersection, Segment, TextIndex } from "../core/types";
+import { TextIndex, Segment, DTARange, RangeIntersection, MergeDirection } from "../types";
 
 export function getSelection(): Selection | null {
     const selection = window.getSelection();

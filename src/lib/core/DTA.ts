@@ -1,8 +1,7 @@
-import { Anchor } from "..";
-import { EventBus } from "../events/EventBus";
-import { RendererI } from "../render/types";
+import { EventBus } from "./EventBus";
+import { DTAI, AnchorI, RendererI, MergeDirection, SerializedDTA } from "../types";
 import { buildTextIndex, findFirstTextNode, findLastTextNode, getSelection, mergeRange, rangeIntersects, serializeRange } from "../utils/dom";
-import { AnchorI, DTAI, MergeDirection, SerializedDTA } from "./types";
+import { Anchor } from "./Anchor";
 
 export class DTA implements DTAI {
     anchors: AnchorI[] = [];

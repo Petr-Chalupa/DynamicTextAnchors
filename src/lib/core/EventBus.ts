@@ -1,4 +1,4 @@
-import { EventBusI, EventCallback, Event, EventMap } from "./types";
+import { EventBusI, Event, EventMap, EventCallback } from "../types";
 
 export class EventBus implements EventBusI {
     private static instance: EventBusI;

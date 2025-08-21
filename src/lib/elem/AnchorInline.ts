@@ -1,5 +1,5 @@
-import { AnchorI, MergeDirection } from "../core/types";
-import { EventBus } from "../events/EventBus";
+import { EventBus } from "../core/EventBus";
+import { AnchorI, MergeDirection } from "../types";
 import { adjustColorBrightness } from "../utils/color";
 
 export class AnchorInline extends HTMLElement {

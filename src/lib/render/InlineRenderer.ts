@@ -1,12 +1,11 @@
-import { AnchorI } from "../core/types";
 import { AnchorInline } from "../elem/AnchorInline";
-import { EventBus } from "../events/EventBus";
-import { deserializeRange, getAllTextNodes, serializeRange } from "../utils/dom";
-import { RendererI } from "./types";
+import { EventBus } from "../core/EventBus";
+import { RendererI, AnchorInlineI, AnchorI } from "../types";
+import { deserializeRange, getAllTextNodes } from "../utils/dom";
 
 export class InlineRenderer implements RendererI {
     root: HTMLElement;
-    renderedAnchors = new Map<string, AnchorInline[]>();
+    renderedAnchors = new Map<string, AnchorInlineI[]>();
     interactive = true;
     eventBus = EventBus.getInstance();
 
