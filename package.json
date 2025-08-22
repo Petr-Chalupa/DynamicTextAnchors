@@ -20,7 +20,7 @@
     ],
     "scripts": {
         "demo-dev": "vite --config ./src/demo/vite.config.js",
-        "build-demo": "vite build --config ./src/demo/vite.config.js",
+        "build-demo": "vite build --emptyOutDir --config ./src/demo/vite.config.js",
         "build-lib": "tsc --build ./src/lib/tsconfig.json",
         "build-lib-watch": "tsc --build ./src/lib/tsconfig.json --watch",
         "version-patch": "npm version patch -m \"Upgrade to version %s\"",

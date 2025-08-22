@@ -6,6 +6,7 @@ import vue from "@vitejs/plugin-vue";
 export default defineConfig({
     plugins: [vue()],
     root: "./src/demo",
+    base: "/DynamicTextAnchors/",
     build: {
         outDir: "../../dist/demo",
         assetsDir: "./assets",
