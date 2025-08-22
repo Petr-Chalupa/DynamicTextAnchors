@@ -26,11 +26,15 @@ jobs:
                   npm run build-lib
                   cp ./src/lib/utils/_styles.css ./dist/lib/utils/_styles.css
                   npm run build-demo
+                  #
+                  mkdir -p deploy/lib
+                  cp -r dist/demo/* deploy/
+                  cp -r dist/lib/* deploy/lib/
 
             - name: deploy
               uses: peaceiris/actions-gh-pages@v3
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
-                  publish_dir: ./dist
+                  publish_dir: ./deploy
                   publish_branch: gh-pages
                   force_orphan: true
