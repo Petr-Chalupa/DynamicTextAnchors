@@ -1,27 +1,13 @@
-import { EventBus } from "../core/EventBus";
-import { AnchorI, MergeDirection } from "../types";
+import { AnchorI } from "../types";
 import { adjustColorBrightness } from "../utils/color";
+import { AnchorElement } from "./AnchorElement";
 
-export class AnchorInline extends HTMLElement {
-    anchor: AnchorI;
-    eventBus = EventBus.getInstance();
-
+export class AnchorInline extends AnchorElement {
     constructor(anchor: AnchorI) {
-        super();
-        this.anchor = anchor;
+        super(anchor);
     }
 
-    connectedCallback() {
-        this.addEventListener("focusin", () => this.requestFocus(true));
-        this.addEventListener("focusout", () => this.requestFocus(false));
-        //
-        this.addEventListener("mouseenter", () => this.requestHover(true));
-        this.addEventListener("mouseleave", () => this.requestHover(false));
-
-        this.render();
-    }
-
-    render() {
+    render(): void {
         this.dataset.id = this.anchor.id;
         this.style.color = this.anchor.fgColor;
         this.style.backgroundColor = this.anchor.bgColor;
@@ -30,22 +16,6 @@ export class AnchorInline extends HTMLElement {
 
         if (this.anchor.changed) this.setAttribute("data-changed", "");
         else this.removeAttribute("data-changed");
-    }
-
-    requestFocus(focus: boolean) {
-        this.eventBus.emit({ type: "anchor:focus-request", payload: { anchor: this.anchor, focus } });
-    }
-
-    requestHover(hover: boolean) {
-        this.eventBus.emit({ type: "anchor:hover-request", payload: { anchor: this.anchor, hover } });
-    }
-
-    requestMerge(direction: MergeDirection) {
-        this.eventBus.emit({ type: "anchor:merge-request", payload: { anchor: this.anchor, direction } });
-    }
-
-    requestDestroy() {
-        this.eventBus.emit({ type: "anchor:destroy-request", payload: { anchor: this.anchor } });
     }
 
     toggleFocus(focus: boolean) {
@@ -66,5 +36,3 @@ export class AnchorInline extends HTMLElement {
         }
     }
 }
-
-customElements.define("dta-anchor", AnchorInline);

@@ -1,12 +1,16 @@
 @layer DTA {
-    dta-anchor[data-focused] {
+    dta-anchor-inline[data-focused] {
         border: 2px solid currentColor !important;
         border-radius: 7px;
         outline: none;
     }
 
-    dta-anchor[data-changed] {
+    dta-anchor-inline[data-changed] {
         border: 2px dashed #ff0000;
         border-radius: 7px;
+    }
+
+    dta-anchor-list[data-changed] {
+        font-style: italic;
     }
 }

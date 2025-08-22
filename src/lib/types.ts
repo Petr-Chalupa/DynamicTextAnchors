@@ -42,11 +42,10 @@ export interface AnchorI {
 // DOM Element Interfaces
 // =========================================================
 
-export interface AnchorInlineI extends HTMLElement {
+export interface AnchorElementI extends HTMLElement {
     anchor: AnchorI;
     eventBus: EventBusI;
 
-    connectedCallback(): void;
     render(): void;
     requestFocus(focus: boolean): void;
     requestHover(hover: boolean): void;
@@ -63,7 +62,7 @@ export interface AnchorInlineI extends HTMLElement {
 
 export interface RendererI {
     readonly root: HTMLElement;
-    readonly renderedAnchors: Map<string, AnchorInlineI[]>;
+    readonly renderedAnchors: Map<string, AnchorElementI[]>;
     readonly interactive: boolean;
     readonly eventBus: EventBusI;
 
