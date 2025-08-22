@@ -27,7 +27,7 @@ jobs:
                   cp ./src/lib/utils/_styles.css ./dist/lib/utils/_styles.css
                   npm run build-demo
                   #
-                  mkdir -p deploy
+                  mkdir -p deploy/lib
                   cp -r dist/demo/* deploy/
                   cp -r dist/lib/* deploy/lib/
 
