@@ -1,25 +1,31 @@
-name: Publish Package to NPM
+name: Deploy Demo to GitHub Pages
 on:
     push:
-        tags:
-            - "v*.*.*"
+        branches:
+            - main
 jobs:
-    publish:
+    deploy:
         runs-on: ubuntu-latest
         steps:
             - name: checkout
               uses: actions/checkout@v4
+
             - name: node-setup
               uses: actions/setup-node@v3
               with:
                   node-version: "20.x"
                   registry-url: "https://registry.npmjs.org"
+
             - name: build
               run: |
                   npm ci
                   npm run build-lib
                   cp ./src/lib/utils/_styles.css ./dist/lib/utils/_styles.css
-            - name: publish
-              run: npm publish
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+                  npm run build-demo
+
+            - name: deploy
+              uses: peaceiris/actions-gh-pages@v6
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./dist/demo
+                  publish_branch: gh-pages
