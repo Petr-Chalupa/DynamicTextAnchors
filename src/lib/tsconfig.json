@@ -5,19 +5,19 @@
         "outDir": "../../dist/lib",
         "declaration": true,
         "declarationMap": true,
+        "declarationDir": "../../dist/types",
         "sourceMap": true,
         "strict": true,
-        "moduleResolution": "bundler",
+        "moduleResolution": "node",
         "composite": true,
+        "skipLibCheck": true,
         "lib": [
             "ESNext",
-            "DOM",
-            "DOM.Iterable",
-            "WebWorker"
+            "DOM"
         ]
     },
     "include": [
         "./*.ts",
-        "./**/*.ts",
+        "./**/*.ts"
     ]
 }
