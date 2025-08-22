@@ -5,7 +5,6 @@
         "outDir": "../../dist/lib",
         "declaration": true,
         "declarationMap": true,
-        "declarationDir": "../../dist/types",
         "sourceMap": true,
         "strict": true,
         "moduleResolution": "node",

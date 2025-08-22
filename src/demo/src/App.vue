@@ -52,14 +52,14 @@
 </template>
 
 <style lang="scss" src="@/assets/scss/main.scss" />
-<style lang="css" src="../../../dist/lib/utils/_styles.css" />
+<style lang="css" src="dynamic-text-anchors/utils/_styles.css" />
 
 <script setup lang="ts">
 import { onMounted, ref, computed, type Ref } from "vue";
 import LoremGenerator from "./LoremGenerator.vue";
 
-import { DTA, InlineRenderer } from "../../../dist/lib/index.js";
-import type { DTAI, AnchorI, MergeDirection, ColorValue, SerializedDTA } from "../../../dist/lib/types.js";
+import { DTA, InlineRenderer } from "dynamic-text-anchors";
+import type { DTAI, AnchorI, MergeDirection, ColorValue, SerializedDTA } from "dynamic-text-anchors/types.js";
 
 const textfield: Ref<HTMLElement | null> = ref(null);
 const loremXML = ref("");
