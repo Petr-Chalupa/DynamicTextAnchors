@@ -20,17 +20,15 @@ jobs:
               run: |
                   npm ci
                   npm run build-lib
-                  cp ./src/lib/utils/_styles.css ./dist/lib/utils/_styles.css
                   npm run build-demo
-                  #
-                  mkdir -p deploy
-                  cp -r dist/demo/* deploy/
-                  cp -r dist/lib/* deploy/
+
+            - name: upload artifact
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: ./dist/demo
 
             - name: deploy
-              uses: peaceiris/actions-gh-pages@v3
+              id: deployment
+              uses: actions/deploy-pages@v3
               with:
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
-                  publish_dir: ./deploy
-                  publish_branch: gh-pages
-                  force_orphan: true
+                  token: ${{ secrets.GITHUB_TOKEN }}
