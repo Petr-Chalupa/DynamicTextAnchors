@@ -1,44 +1,28 @@
-# DynamicTextAnchors (DTA)
+# DynamicTextAnchors (DTA) <!-- omit in toc -->
 
 ![NPM Version](https://img.shields.io/npm/v/dynamic-text-anchors)
 
 **Table of contents**
 
-- [DynamicTextAnchors (DTA)](#dynamictextanchors-dta)
-  - [Annotation](#annotation)
-  - [Installation](#installation)
-  - [Technologies used](#technologies-used)
-  - [How to use](#how-to-use)
-    - [DTA methods](#dta-methods)
-      - [`createAnchorBlockFromSelection([selection])`](#createanchorblockfromselectionselection)
-      - [`removeAnchorBlocks([anchorBlocks], [destroy])`](#removeanchorblocksanchorblocks-destroy)
-      - [`getTextNodeContainer(node)`](#gettextnodecontainernode)
-      - [`sort()`](#sort)
-      - [`serialize()`](#serialize)
-      - [`deserialize(data)`](#deserializedata)
-    - [AnchorBlock methods](#anchorblock-methods)
-      - [`createAnchor(node, startOffset, endOffset)`](#createanchornode-startoffset-endoffset)
-      - [`joinAnchors()`](#joinanchors)
-      - [`removeAnchors([anchors], [destroy])`](#removeanchorsanchors-destroy)
-      - [`setFocused(focused, [anchors])`](#setfocusedfocused-anchors)
-      - [`merge(to)`](#mergeto)
-      - [`serialize()`](#serialize-1)
-    - [Anchor methods](#anchor-methods)
-      - [`destroy()`](#destroy)
-      - [`setChanged(changed)`](#setchangedchanged)
-      - [`setFocused(focused)`](#setfocusedfocused)
-      - [`color(color)`](#colorcolor)
-      - [`serialize()`](#serialize-2)
-    - [Utility methods](#utility-methods)
-      - [`getPathFromNode(rootNode, node)`](#getpathfromnoderootnode-node)
-      - [`getNodeFromPath(rootNode, xPath, resType)`](#getnodefrompathrootnode-xpath-restype)
-      - [`getAllTextNodes(rootNode)`](#getalltextnodesrootnode)
-      - [`getConnectingTextNodes(rootNode, boundaryTextNode)`](#getconnectingtextnodesrootnode-boundarytextnode)
-      - [`normalizeString(str)`](#normalizestringstr)
-      - [`nodePositionComparator(x, y)`](#nodepositioncomparatorx-y)
-      - [`splitArrayToChunks(array, del)`](#splitarraytochunksarray-del)
-      - [`isValidHexColor(hex)`](#isvalidhexcolorhex)
-      - [`invertHexColor(hex)`](#inverthexcolorhex)
+- [Annotation](#annotation)
+- [Technologies used](#technologies-used)
+- [Installation](#installation)
+- [Styles](#styles)
+- [How to use](#how-to-use)
+- [DTA methods](#dta-methods)
+- [Anchor methods](#anchor-methods)
+- [AnchorElement methods](#anchorelement-methods)
+- [Renderers](#renderers)
+  - [Default Renderers](#default-renderers)
+  - [How to Use](#how-to-use-1)
+  - [Methods](#methods)
+- [Event Bus](#event-bus)
+  - [How to Use](#how-to-use-2)
+  - [Methods](#methods-1)
+- [Utility Methods](#utility-methods)
+  - [DOM Utilities](#dom-utilities)
+  - [Color Utilities](#color-utilities)
+  - [String Utilities](#string-utilities)
 
 ---
 
@@ -49,161 +33,288 @@
 > inserted into the text even after its editing (and possibly evaluate the error during insertion). Such
 > a program should then be usable as a library for e.g., web applications.
 
-> **A note on project history and documentation** \
-> This library was originally developed as a graduation thesis on the design of algorithms for text anchors in static and dynamic text. The codebase has since been fully rewritten to improve its architecture, performance, and maintainability.
+> **A note on project history and documentation** > This library was originally developed as a graduation thesis on the design of algorithms for text anchors in static and dynamic text. The codebase has since been fully rewritten to improve its architecture, performance, and maintainability.
 > The DOCUMENTATION file reflects the state of the project at the time of the thesis's creation and is not intended to be updated with the current project (original code can be found in [*thesis-legacy*](/thesis-legacy/) folder).
 > This README reflects the project's current state.
 
 - [***LICENSE***](./LICENSE.md)
 - [***DOCUMENTATION***](/documentation/Documentation.pdf) 
 
-## Installation
-
-`npm i dynamic-text-anchors`
-
 ## Technologies used
 
--   lib
-    -   TS
-    -   CSS
--   demo
-    -   Vue.JS
-    -   SCSS
+-   *lib*: TS, CSS
+-   *demo*: Vue.JS, TS, SCSS
+  
+## Installation
+
+```bash
+npm i dynamic-text-anchors
+```
+
+## Styles
+
+For default styling of the custom elements, include the following CSS file in your project. This is optional; you can also create your own styles or easily override them.
+
+```typescript
+import 'dynamic-text-anchors/dist/_styles.css';
+```
 
 ## How to use
 
-`import DTA from "dynamic-text-anchors";`
+The library's core is the `DTA` class, which serves as the main entry point and orchestrator. You instantiate it with a root DOM element and then interact with its public methods to manage anchors and renderers.
 
-`const dta = new DTA(rootElement);`
+**Basic Usage Example**
 
-You can also import default styles:
+Here is a quick example of how to set up the library and create highlights from a user's selection.
 
-`import "dynamic-text-anchors/dist/lib/_styles.css";`
+```typescript
+// Assume your project has an HTML file with an element with id="content"
 
-### DTA methods
+import { DTA, InlineRenderer } from 'dynamic-text-anchors';
+import 'dynamic-text-anchors/dist/_styles.css'; // Optional, for default styling
 
-#### `createAnchorBlockFromSelection([selection])`
+// 1. Get the root element you want to work with.
+const contentElement = document.getElementById('content');
 
-Creates AnchorBlock/s from given selection or from the user's current selection. Selection must be contained within the configured rootNode. Multiple selection ranges _are_ supported (Firefox).
+if (contentElement) {
+    // 2. Instantiate the DTA library
+    const dta = new DTA();
 
-#### `removeAnchorBlocks([anchorBlocks], [destroy])`
+    // 3. Create a renderer for how anchors will be displayed, linking it to the content element.
+    const inlineRenderer = new InlineRenderer(contentElement);
 
-Removes the specified AnchorBlocks and their Anchors (or all, if none are specified). Accepts argument telling the function whether it should remove the Anchors from the AnchorBlock and if so, whether it should also remove them from the document either completely or "silently".
+    // 4. Add the renderer to the DTA instance.
+    dta.addRenderer(inlineRenderer);
 
-#### `getTextNodeContainer(node)`
+    // 5. Add a listener to the root element to create an anchor on selection.
+    contentElement.addEventListener('mouseup', () => {
+        dta.createAnchorFromSelection();
+    });
+}
+```
 
-Returns AnchorBlock containing specified textnode. If none of the AnchorBlocks is an ancestor, returns null.
+-----
 
-#### `sort()`
+## DTA methods
 
-Sorts AnchorBlocks by their position in the document by comparing position of the last Anchor and first Anchor of following AnchorBlocks. This method sorts in-place and expects, that individual AnchorBlock's Anchors are sorted.
+The `DTA` class manages the lifecycle of all anchors and renderers.
 
-#### `serialize()`
+  * `constructor()`\
+    Instantiates the DTA library instance.
 
-Returns the DTA data serialized in JSON object format ready to be saved.
+  * `addRenderer(renderer: RendererI): void`\
+    Adds a new renderer to the DTA instance. This is how you tell DTA how to display anchors.
 
-#### `deserialize(data)`
+  * `removeRenderer(renderer: RendererI): void`\
+    Removes a renderer and its rendered anchors from the DTA instance.
 
-Attempts to reconstruct AnchorBlocks and Anchors from the given data in JSON object format.
+  * `createAnchorFromSelection(selection?: Selection | null): void`\
+    Creates an anchor based on the current user selection. If no selection is provided, it uses the active one.
 
----
+  * `createAnchorFromRange(range: Range): void`\
+    Creates an anchor from a given `Range` object.
 
-_The following methods are not intended for stand-alone use (but only through DTA), but are described here for a better understanding of the mechanisms._
+  * `removeAnchor(anchor: AnchorI): void`\
+    Destroys a specific anchor and removes it from the DOM.
 
-### AnchorBlock methods
+  * `canAnchorMerge(anchor: AnchorI, direction: MergeDirection): boolean`\
+    Checks if an anchor can be merged with an adjacent anchor in a given direction (`'left'` or `'right'`).
 
-#### `createAnchor(node, startOffset, endOffset)`
+  * `mergeAnchor(anchor: AnchorI, direction: MergeDirection): void`\
+    Merges an anchor with an adjacent anchor in the specified direction.
 
-Creates Anchor in specified node at specified offsets, that must be contained in the node. Returns the created Anchor.
+  * `serialize(): SerializedDTA`\
+    Returns a serializable JSON object of all active anchors. This can be used to save the anchors to a database.
 
-#### `joinAnchors()`
+  * `deserialize(data: SerializedDTA): void`\
+    Loads a set of anchors from a serialized JSON object, rendering them in the DOM.
 
-Helper function that sorts AnchorBlock's Anchors in-place, sets the focusable Anchor, merges connecting Anchors if possible, sets aria-label and connects the Anchors internally via leftJoin and rightJoin properties.
+  * `clearAnchors(): void`\
+    Destroys all anchors managed by the instance.
 
-#### `removeAnchors([anchors], [destroy])`
+  * `clearRenderers(): void`\
+    Destroys all renderers and their rendered content.
 
-Removes the specified Anchors (or all, if none are specified). Accepts argument telling the function whether it should remove the Anchors from the AnchorBlock and if so, whether it should also remove them from the document either completely or "silently".
+  * `destroy(): void`\
+    Destroys the DTA instance, all anchors, and all renderers.
 
-#### `setFocused(focused, [anchors])`
+-----
 
-Adds or removes focus from specified Anchors (or all, if none are specified).
+## Anchor methods
 
-#### `merge(to)`
+The `Anchor` class represents a single text highlight. You typically interact with it via the `DTA` instance, but you can also manipulate it directly.
 
-Attempts to merge AnchorBlock with following or preceding AnchorBlock (specified by parameter "left" or "right"). Both of the AchorBlocks must be touching. The merging AnchorBlock overrides, when there is conflict in properties and/or data.
+  * `constructor(range: DTARange)`\
+    Instantiates a new Anchor object from a `DTARange` object. A unique id is automatically generated.
 
-#### `serialize()`
+  * `setColor(bg: ColorValue, fg?: ColorValue): void`\
+    Sets the background and optional foreground colors of the anchor. The `fg` defaults to an inverted version of `bg`.
 
-Returns the AnchorBlock data serialized in JSON object format ready to be saved.
+  * `setRange(range: DTARange): void`\
+    Updates the anchor's underlying range.
 
----
+  * `acceptChange(): void`\
+    Marks the anchor’s change as accepted (e.g., removes the "changed" state).
 
-### Anchor methods
+  * `requestFocus(focus: boolean): void`\
+    Emits a request to the Event Bus for the anchor's associated element to be focused or unfocused.
 
-#### `destroy()`
+  * `requestMerge(direction: MergeDirection): void`\
+    Emits a request to the Event Bus for the anchor to be merged with a neighboring anchor.
 
-Silently removes the Anchor from the document (= replace itself by textnode with it's value).
+  * `serialize(): SerializedAnchor`\
+    Returns a serializable JSON object of the anchor's data.
 
-#### `setChanged(changed)`
+  * `static deserialize(data: SerializedAnchor): Anchor`\
+    Creates a new Anchor instance from a serialized JSON object.
 
-Adds or removes data-changed attribute of Anchor.
+  * `destroy(): void`\
+    Removes the anchor from the DTA instance and the DOM.
 
-#### `setFocused(focused)`
+-----
 
-Adds or removes focus and data-focused attribute of Anchor.
+## AnchorElement methods
 
-#### `color(color)`
+The `AnchorElement` is a custom DOM element that represents the rendered anchor.  
 
-Sets the background color of Anchor.
+  * `render(): void`\
+    Renders the element into the DOM.
 
-#### `serialize()`
+  * `requestFocus(focus: boolean): void`\
+    Requests that the element gain or lose focus.
 
-Returns the Anchor data serialized in JSON object format ready to be saved.
+  * `requestHover(hover: boolean): void`\
+    Requests that the element gain or lose hover state.
 
----
+  * `requestMerge(direction: MergeDirection): void`\
+    Requests a merge action for this anchor element.
 
-### Utility methods
+  * `requestDestroy(): void`\
+    Requests removal of this anchor element.
 
-#### `getPathFromNode(rootNode, node)`
+  * `toggleFocus(focus: boolean): void`\
+    Applies or removes the focus state on the element.
 
-Returns the xPath string from rootNode to node. 
+  * `toggleHover(hover: boolean): void`\
+    Applies or removes the hover state on the element.
 
+  * `destroy(): void`\
+    Removes the element from the DOM and performs cleanup.
 
-#### `getNodeFromPath(rootNode, xPath, resType)`
+-----
 
-Evaluates the xPath - starting from the rootNode and returns it in the desired XPathResult type.
+## Renderers
 
+Renderers are responsible for the visual representation of anchors. The library provides abstract base classes to help you create your own, and two built-in renderers to get you started.
 
-#### `getAllTextNodes(rootNode)`
+###  Default Renderers
 
-Returns all text nodes in the rootNode.
+  * `InlineRenderer`: Renders anchors as inline elements that wrap the text.
+  * `ListRenderer`: Renders anchors as list items in a separate container.
 
+###  How to Use
 
-#### `getConnectingTextNodes(rootNode, boundaryTextNode)`
+You must add a renderer to a DTA instance to see any anchors rendered.
 
-Returns all text nodes in the rootNode, that are connecting to the boundaryTextNode (result includes both directions).
+```typescript
+const dta = new DTA();
+const listRenderer = new ListRenderer(document.getElementById('list-container'));
+dta.addRenderer(listRenderer);
+```
 
+### Methods
 
-#### `normalizeString(str)`
+  * `renderAnchor(anchor: AnchorI): void`\
+    Renders a specific anchor in the DOM.
 
-Returns the string in the normalized form - without diacritics, special symbols, with trimmed spaces and in lowercase.
+  * `updateAnchor(anchor: AnchorI): void`\
+    Updates the visual representation of a rendered anchor. The default implementation calls `removeAnchor` and then `renderAnchor`.
 
+  * `removeAnchor(anchor: AnchorI): void`\
+    Removes a rendered anchor from the DOM.
 
-#### `nodePositionComparator(x, y)`
+  * `focusAnchor(anchor: AnchorI, focus: boolean): void`\
+    Toggles the focus state of the rendered anchor element.
 
-Returns the evaluated result of `Node.compareDocumentPosition()` method.
+  * `hoverAnchor(anchor: AnchorI, hover: boolean): void`\
+    Toggles the hover state of the rendered anchor element.
 
+  * `destroy(): void`\
+    Destroys the renderer and removes all of its rendered content from the DOM.
 
-#### `splitArrayToChunks(array, del)`
+-----
 
-Splits given array into array of smaller chunks by the given delimiter.
+## Event Bus
 
+The library uses a global `EventBus` to handle communication between different components. All components have an event bus instance you can listen to.
 
-#### `isValidHexColor(hex)`
+###  How to Use
 
-Checks if the given hex color is valid.
+```typescript
+import { EventBus } from "dynamic-text-anchors";
 
+const eventBus = EventBus.getInstance();
 
-#### `invertHexColor(hex)`
+eventBus.on("anchor:create", (event) => {
+    console.log("New anchor created:", event.payload.anchor.id);
+}, this);
+```
 
-Returns `#ffffff` or `#000000` depending on the contrast with the given hex color.
+### Methods
+
+  * `on<K extends keyof EventMap>(type: K, fn: (event: Event<K>) => void, target: any): void`\
+    Subscribes a function to a specific event type. The target is used for cleanup.
+
+  * `off<K extends keyof EventMap>(type: K, fn: (event: Event<K>) => void, target: any): void`\
+    Unsubscribes a specific function from an event.
+
+  * `offAll(target: any): void`\
+    Removes all subscriptions for a given target object.
+
+  * `emit<K extends keyof EventMap>(event: Event<K>): void`\
+    Emits an event, triggering all subscribed functions.
+
+-----
+
+## Utility Methods
+
+A small set of utility functions are also exported for convenience.
+
+### DOM Utilities
+
+  * `getSelection(): Selection | null`\
+    Returns the active `Selection` object or `null`.
+
+  * `buildTextIndex(root: Node): TextIndex`\
+    Creates an index of all text nodes within a root element, mapping character positions to DOM nodes.
+
+  * `deserializeRange(range: DTARange, root: Node): Range | null`\
+    Reconstructs a `Range` object from a serialized `DTARange` object within a given root node.
+
+  * `getAllTextNodes(range: Range): Text[]`\
+    Returns all text nodes within a given `Range` object.
+
+### Color Utilities
+
+  * `isValidHexColor(color: string): boolean`\
+    Checks if a string is a valid hex color string.
+
+  * `invertHexColor(hex: string): ColorValue`\
+    Inverts a hex color to be readable on the original color.
+
+  * `adjustColorBrightness(hex: string, percent: number): ColorValue`\
+    Adjusts the brightness of a hex color by a given percentage.
+
+  * `generateRandomColor(): ColorValue`\
+    Generates a random valid hex color.
+
+### String Utilities
+
+  * `normalizeString(str: string): string`\
+    Returns a string in a normalized form by removing diacritics, punctuation, numbers, and collapsing whitespace.
+
+  * `escapeRegExp(str: string): string`\
+    Escapes a string for use in a regular expression.
+
+  * `calculateStringSimilarity(str1: string, str2: string): number`\
+    Calculates the similarity between two strings using the Levenshtein distance algorithm.
