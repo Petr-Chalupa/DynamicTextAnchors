@@ -13,7 +13,7 @@
     "main": "./dist/lib/index.js",
     "types": "./dist/lib/index.d.ts",
     "files": [
-        "dist/lib/*",
+        "dist/lib/",
         "LICENSE.md",
         "README.md",
         "package.json"
@@ -46,5 +46,5 @@
     "bugs": {
         "url": "https://github.com/Petr-Chalupa/DynamicTextAnchors/issues"
     },
-    "homepage": "https://dynamictextanchors.onrender.com"
+    "homepage": "https://petr-chalupa.github.io/DynamicTextAnchors"
 }
