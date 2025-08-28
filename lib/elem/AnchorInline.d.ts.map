@@ -1,0 +1,1 @@
+{"version":3,"file":"AnchorInline.d.ts","sourceRoot":"","sources":["../../../src/lib/elem/AnchorInline.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,MAAM,UAAU,CAAC;AAEnC,OAAO,EAAE,aAAa,EAAE,MAAM,iBAAiB,CAAC;AAEhD,qBAAa,YAAa,SAAQ,aAAa;gBAC/B,MAAM,EAAE,OAAO;IAI3B,MAAM,IAAI,IAAI;IAWd,WAAW,CAAC,KAAK,EAAE,OAAO;IAK1B,WAAW,CAAC,KAAK,EAAE,OAAO;IAK1B,OAAO;CAOV"}
