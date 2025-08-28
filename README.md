@@ -56,7 +56,7 @@ npm i dynamic-text-anchors
 For default styling of the custom elements, include the following CSS file in your project. This is optional; you can also create your own styles or easily override them.
 
 ```typescript
-import 'dynamic-text-anchors/dist/_styles.css';
+import 'dynamic-text-anchors/dist/lib/utils/_styles.css';
 ```
 
 ## How to use
@@ -71,7 +71,7 @@ Here is a quick example of how to set up the library and create highlights from 
 // Assume your project has an HTML file with an element with id="content"
 
 import { DTA, InlineRenderer } from 'dynamic-text-anchors';
-import 'dynamic-text-anchors/dist/_styles.css'; // Optional, for default styling
+import 'dynamic-text-anchors/dist/lib/utils/_styles.css'; // Optional, for default styling
 
 // 1. Get the root element you want to work with.
 const contentElement = document.getElementById('content');
