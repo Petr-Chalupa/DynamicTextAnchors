@@ -7,10 +7,7 @@ export class AnchorList extends AnchorElement {
     }
 
     render(): void {
-        this.dataset.id = this.anchor.id;
-
-        if (this.anchor.changed) this.setAttribute("data-changed", "");
-        else this.removeAttribute("data-changed");
+        super.render();
 
         this.innerHTML = `
             <li>${this.anchor.range.quote.exact}</li>

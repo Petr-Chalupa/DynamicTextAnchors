@@ -28,7 +28,7 @@
     </dialog>
 </template>
 
-<style lang="scss" scoped src="@/assets/scss/loremGenerator.scss"></style>
+<style lang="css" scoped src="@/assets/styles/loremGenerator.css"></style>
 
 <script setup lang="ts">
 import { reactive, ref, type Ref } from 'vue';

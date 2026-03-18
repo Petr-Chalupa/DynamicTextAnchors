@@ -154,7 +154,7 @@ The `Anchor` class represents a single text highlight. You typically interact wi
     Updates the anchor's underlying range.
 
   * `acceptChange(): void`\
-    Marks the anchor’s change as accepted (e.g., removes the "changed" state).
+    Marks the anchor's change as accepted (e.g., removes the "changed" state).
 
   * `requestFocus(focus: boolean): void`\
     Emits a request to the Event Bus for the anchor's associated element to be focused or unfocused.
@@ -317,4 +317,10 @@ A small set of utility functions are also exported for convenience.
     Escapes a string for use in a regular expression.
 
   * `calculateStringSimilarity(str1: string, str2: string): number`\
-    Calculates the similarity between two strings using the Levenshtein distance algorithm.
+    Calculates the similarity between two strings using the Levenshtein distance algorithm. Returns a value from 0 (completely different) to 1 (identical).
+
+  * `fuzzySearch(needle: string, haystack: string, threshold?: number): object | null`\
+    Searches for the best fuzzy match of a needle in a haystack. Returns an object with `start`, `end`, `similarity`, and `matched` properties, or `null` if no match is found above the threshold (default 0.85).
+
+  * `contextAwareFuzzySearch(needle: string, haystack: string, prefix?: string, suffix?: string, threshold?: number): object | null`\
+    Similar to `fuzzySearch` but uses prefix/suffix context to narrow the search area for more accurate results.

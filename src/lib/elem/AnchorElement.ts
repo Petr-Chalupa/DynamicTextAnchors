@@ -18,7 +18,12 @@ export abstract class AnchorElement extends HTMLElement implements AnchorElement
         this.render();
     }
 
-    abstract render(): void;
+    render(): void {
+        this.dataset.id = this.anchor.id;
+
+        if (this.anchor.changed) this.setAttribute("data-changed", "");
+        else this.removeAttribute("data-changed");
+    }
 
     requestFocus(focus: boolean): void {
         this.eventBus.emit({ type: "anchor:focus-request", payload: { anchor: this.anchor, focus } });

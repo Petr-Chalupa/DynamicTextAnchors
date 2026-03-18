@@ -1,36 +1,36 @@
 dialog {
     width: 33%;
-    border: 2px solid $tertiary-color;
-    border-radius: $border-radius;
+    border: 2px solid var(--tertiary-color);
+    border-radius: var(--border-radius);
 
     &::backdrop {
         background-color: black;
         opacity: 0.55;
     }
 
-    > div {
+    & > div {
         display: grid;
         gap: 1rem;
         inset: 0;
 
-        .section {
+        & .section {
             display: grid;
             gap: 0.25rem;
 
-            p {
+            & p {
                 display: flex;
                 justify-content: space-between;
                 margin: 0;
             }
 
-            input {
+            & input {
                 padding: 5px;
-                border: 1px solid $tertiary-color;
-                border-radius: $border-radius;
+                border: 1px solid var(--tertiary-color);
+                border-radius: var(--border-radius);
             }
         }
 
-        button {
+        & button {
             width: fit-content;
             margin: 0.5rem 0 0 auto;
         }

@@ -24,13 +24,4 @@ export default defineConfig({
             "dynamic-text-anchors": resolve(__dirname, "../lib"),
         },
     },
-    css: {
-        preprocessorOptions: {
-            scss: {
-                additionalData: `
-                    @use "@/assets/scss/_variables.scss" as *;
-                `,
-            },
-        },
-    },
 });

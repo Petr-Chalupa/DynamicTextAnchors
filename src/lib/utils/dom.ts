@@ -1,4 +1,5 @@
 import { TextIndex, Segment, DTARange, RangeIntersection, MergeDirection } from "../types";
+import { fuzzySearch, contextAwareFuzzySearch } from "./string";
 
 export function getSelection(): Selection | null {
     const selection = window.getSelection();
@@ -37,7 +38,19 @@ function posToDom(pos: number, segments: Segment[]): { node: Text; offset: numbe
     return null;
 }
 
-export function serializeRange(range: Range, root: Element, contextLen = 32) {
+function createRange(start: number, end: number, segments: Segment[]): Range | null {
+    const startDom = posToDom(start, segments);
+    const endDom = posToDom(end, segments);
+    if (startDom && endDom) {
+        const r = document.createRange();
+        r.setStart(startDom.node, startDom.offset);
+        r.setEnd(endDom.node, endDom.offset);
+        return r;
+    }
+    return null;
+}
+
+export function serializeRange(range: Range, root: Element, contextLen = 32): DTARange {
     const { text, segments } = buildTextIndex(root);
 
     let start = domToPos(range.startContainer, range.startOffset, segments);
@@ -49,39 +62,61 @@ export function serializeRange(range: Range, root: Element, contextLen = 32) {
     const prefix = text.slice(Math.max(0, start - contextLen), start);
     const suffix = text.slice(end, Math.min(text.length, end + contextLen));
 
-    return { start, end, quote: { exact, prefix, suffix, contextLen } };
+    return {
+        start,
+        end,
+        quote: { exact, prefix, suffix, contextLen },
+        matchConfidence: 1.0,
+    };
 }
 
 export function deserializeRange(range: DTARange, root: Element): Range | null {
     const { text, segments } = buildTextIndex(root);
 
-    // Exact search
+    // Try exact position match
     if (range.end <= text.length && text.slice(range.start, range.end) === range.quote.exact) {
-        const startDom = posToDom(range.start, segments);
-        const endDom = posToDom(range.end, segments);
-        if (startDom && endDom) {
-            const r = document.createRange();
-            r.setStart(startDom.node, startDom.offset);
-            r.setEnd(endDom.node, endDom.offset);
-            return r;
+        const domRange = createRange(range.start, range.end, segments);
+        if (domRange) {
+            range.matchConfidence = 1.0;
+            return domRange;
         }
     }
 
-    // Search by quote
-    const idx = text.indexOf(range.quote.exact);
-    if (idx !== -1) {
-        const s = idx;
-        const e = idx + range.quote.exact.length;
-        const startDom = posToDom(s, segments);
-        const endDom = posToDom(e, segments);
-        if (startDom && endDom) {
-            const r = document.createRange();
-            r.setStart(startDom.node, startDom.offset);
-            r.setEnd(endDom.node, endDom.offset);
-            return r;
+    // Try exact quote search (moved but unchanged)
+    const exactIdx = text.indexOf(range.quote.exact);
+    if (exactIdx !== -1) {
+        const domRange = createRange(exactIdx, exactIdx + range.quote.exact.length, segments);
+        if (domRange) {
+            range.matchConfidence = 0.95;
+            return domRange;
         }
     }
 
+    // Context-aware fuzzy search
+    if (range.quote.prefix || range.quote.suffix) {
+        const contextMatch = contextAwareFuzzySearch(range.quote.exact, text, range.quote.prefix, range.quote.suffix, 0.85);
+
+        if (contextMatch) {
+            const domRange = createRange(contextMatch.start, contextMatch.end, segments);
+            if (domRange) {
+                range.matchConfidence = contextMatch.similarity;
+                return domRange;
+            }
+        }
+    }
+
+    // Full-text fuzzy search
+    const fuzzyMatch = fuzzySearch(range.quote.exact, text, 0.85);
+    if (fuzzyMatch) {
+        const domRange = createRange(fuzzyMatch.start, fuzzyMatch.end, segments);
+        if (domRange) {
+            range.matchConfidence = fuzzyMatch.similarity;
+            return domRange;
+        }
+    }
+
+    // All strategies failed
+    range.matchConfidence = 0;
     return null;
 }
 
@@ -111,6 +146,7 @@ export function rangeIntersects(existing: DTARange, incoming: DTARange, fullText
             suffix: fullText.slice(end, end + contextLen),
             contextLen,
         },
+        matchConfidence: existing.matchConfidence,
     };
     return { type: "partial", trimmedExisting };
 }
@@ -125,6 +161,7 @@ export function mergeRange(survivor: DTARange, other: DTARange, direction: Merge
             suffix: direction === "left" ? survivor.quote.prefix : other.quote.prefix,
             contextLen: survivor.quote.contextLen,
         },
+        matchConfidence: Math.min(survivor.matchConfidence ?? 1, other.matchConfidence ?? 1),
     } as DTARange;
 }
 
@@ -165,16 +202,3 @@ export function getAllTextNodes(range: Range): Text[] {
 
     return nodes;
 }
-
-// export function compareNodePositions(nodeA: Node, nodeB: Node): number {
-//     if (nodeA.isSameNode(nodeB)) return 0;
-
-//     const position = nodeA.compareDocumentPosition(nodeB);
-//     if (position & Node.DOCUMENT_POSITION_FOLLOWING || position & Node.DOCUMENT_POSITION_CONTAINED_BY) {
-//         return -1;
-//     } else if (position & Node.DOCUMENT_POSITION_PRECEDING || position & Node.DOCUMENT_POSITION_CONTAINS) {
-//         return 1;
-//     } else {
-//         return 0;
-//     }
-// }

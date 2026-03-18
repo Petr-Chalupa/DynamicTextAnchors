@@ -127,6 +127,7 @@ export interface DTARange {
         suffix?: string;
         contextLen: number;
     };
+    matchConfidence: number;
 }
 
 export interface SerializedAnchor {

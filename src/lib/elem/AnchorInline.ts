@@ -8,14 +8,12 @@ export class AnchorInline extends AnchorElement {
     }
 
     render(): void {
-        this.dataset.id = this.anchor.id;
+        super.render();
+
         this.style.color = this.anchor.fgColor;
         this.style.backgroundColor = this.anchor.bgColor;
 
         this.setAttribute("tabindex", "0");
-
-        if (this.anchor.changed) this.setAttribute("data-changed", "");
-        else this.removeAttribute("data-changed");
     }
 
     toggleFocus(focus: boolean) {

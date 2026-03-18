@@ -43,6 +43,7 @@
             {{ focusedAnchor.changed ? "Changed" : "Unchanged" }}
             <button :disabled="!focusedAnchor.changed" @click="focusedAnchor.acceptChange()">Accept change</button>
           </p>
+          <p class="match-confidence"><strong>Match confidence:</strong> {{ focusedAnchor.range.matchConfidence }}</p>
           <p class="range"><strong>Range:</strong> {{ focusedAnchor.range.start }} - {{ focusedAnchor.range.end }}</p>
         </div>
         <button @click="destroyAnchor(focusedAnchor)" class="destroyBtn">Destroy Anchor</button>
@@ -51,7 +52,7 @@
   </div>
 </template>
 
-<style lang="scss" src="@/assets/scss/main.scss" />
+<style lang="css" src="@/assets/styles/main.css" />
 <style lang="css" src="dynamic-text-anchors/utils/_styles.css" />
 
 <script setup lang="ts">
