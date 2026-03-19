@@ -1,0 +1,18 @@
+@layer DTA {
+    dta-anchor-inline {
+        &[data-focused] {
+            border: 2px solid currentColor !important;
+            border-radius: 7px;
+            outline: none;
+        }
+
+        &[data-changed] {
+            border: 2px dashed #ff0000;
+            border-radius: 7px;
+        }
+    }
+
+    dta-anchor-list[data-changed] {
+        font-style: italic;
+    }
+}
