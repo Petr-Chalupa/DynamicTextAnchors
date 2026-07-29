@@ -10,8 +10,17 @@
     "author": "Petr Chalupa",
     "license": "SEE LICENSE IN LICENSE.md",
     "type": "module",
-    "main": "./dist/lib/index.js",
-    "types": "./dist/lib/index.d.ts",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/lib/core/index.d.ts",
+            "import": "./dist/lib/core/index.js"
+        },
+        "./*": {
+            "types": "./dist/*/index.d.ts",
+            "import": "./dist/*/index.js"
+        }
+    },
     "files": [
         "dist/lib/",
         "LICENSE.md",
@@ -19,10 +28,10 @@
         "package.json"
     ],
     "scripts": {
-        "demo-dev": "vite --config ./src/demo/vite.config.js",
-        "build-demo": "vite build --emptyOutDir --config ./src/demo/vite.config.js",
-        "build-lib": "tsc --build ./src/lib/tsconfig.json",
-        "build-lib-watch": "tsc --build ./src/lib/tsconfig.json --watch",
+        "demo-dev": "vite --config ./demo/vite.config.js",
+        "build-demo": "vite build --emptyOutDir --config ./demo/vite.config.js",
+        "build-lib": "tsc --build ./lib/tsconfig.json",
+        "build-lib-watch": "tsc --build ./lib/tsconfig.json --watch",
         "version-patch": "npm version patch -m \"Upgrade to version %s\"",
         "version-minor": "npm version minor -m \"Upgrade to version %s\"",
         "version-major": "npm version major -m \"Upgrade to version %s\"",
@@ -31,7 +40,6 @@
     "devDependencies": {
         "@vitejs/plugin-vue": "^6.0.1",
         "@vue/tsconfig": "^0.7.0",
-        "lorem-ipsum": "^2.0.8",
         "typescript": "^5.9.2",
         "vite": "^7.1.1",
         "vue": "^3.4.19",

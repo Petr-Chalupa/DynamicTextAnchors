@@ -8,7 +8,7 @@ export default defineConfig({
     root: "./src/demo",
     base: "/DynamicTextAnchors/",
     build: {
-        outDir: "../../dist/demo",
+        outDir: "../dist/demo",
         assetsDir: "./assets",
         rollupOptions: {
             output: {

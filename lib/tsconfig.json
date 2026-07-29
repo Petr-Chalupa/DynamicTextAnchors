@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "esnext",
+        "outDir": "../dist/lib",
+        "verbatimModuleSyntax": true,
+        "declaration": true,
+        "sourceMap": true,
+        "declarationMap": true,
+        "strict": true,
+        "composite": true,
+        "lib": [
+            "ESNext",
+        ]
+    },
+    "include": [
+        "./*.ts",
+        "./**/*.ts"
+    ]
+}
