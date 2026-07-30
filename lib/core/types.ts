@@ -1,0 +1,129 @@
+// -------------------------------
+// TREE ABSTRACTION
+// -------------------------------
+
+interface NodeBase<T extends "text" | "container"> {
+    readonly type: T;
+    readonly kind: string;
+}
+
+export interface TextNode extends NodeBase<"text"> {
+    readonly text: string;
+}
+
+export interface ContainerNode extends NodeBase<"container"> {
+    readonly children: readonly TreeNode[];
+}
+
+export type TreeNode = TextNode | ContainerNode;
+
+// -------------------------------
+// TREE PROJECTION
+// -------------------------------
+
+export interface TreePoint {
+    readonly node: TextNode;
+    readonly offset: number;
+}
+
+export interface TreeRange {
+    readonly start: TreePoint;
+    readonly end: TreePoint;
+}
+
+export interface TextRange {
+    readonly start: number;
+    readonly end: number;
+}
+
+export interface Segment {
+    readonly node: TextNode;
+    readonly text: TextRange;
+}
+
+export interface Projection {
+    readonly text: string;
+    readonly segments: readonly Segment[];
+}
+
+export type ProjectionPolicy = "include" | "ignore";
+
+export type ProjectionClassifier = (node: TreeNode) => ProjectionPolicy;
+
+export interface TreeProjector {
+    project(tree: TreeNode, classifier: ProjectionClassifier): Projection;
+    mapTextToTree(projection: Projection, range: TextRange): TreeRange;
+    mapTreeToText(projection: Projection, range: TreeRange): TextRange;
+}
+
+// -------------------------------
+// TREE ADAPTER
+// -------------------------------
+
+export interface TreeAdapter<TDocument, TRange> {
+    toTree(document: TDocument): TreeNode;
+    toTreeRange(tree: TreeNode, range: TRange): TreeRange;
+    fromTreeRange(tree: TreeNode, range: TreeRange): TRange;
+}
+
+// -------------------------------
+// ANCHOR
+// -------------------------------
+
+export interface Anchor<TMetadata = unknown> {
+    readonly prefix: string;
+    readonly exact: string;
+    readonly suffix: string;
+    readonly referenceRange?: TextRange;
+    readonly metadata?: TMetadata;
+}
+
+// -------------------------------
+// ANCHOR RESOLUTION
+// -------------------------------
+
+export type ResolverMethod = "reference" | "exact" | "shift" | "fuzzy";
+
+interface ResolverOptionsBase {
+    readonly enabled: boolean;
+    readonly minConfidence: number;
+}
+
+export interface ResolveOptions {
+    readonly reference: ResolverOptionsBase;
+    readonly exact: ResolverOptionsBase;
+    readonly shift: ResolverOptionsBase;
+    readonly fuzzy: ResolverOptionsBase & {
+        readonly contextWindow: number;
+        readonly algorithm: "levenshtein" | "bitap";
+    };
+}
+
+interface AnchorResolutionBase<TStatus extends "resolved" | "orphaned", TMetadata = unknown> {
+    readonly status: TStatus;
+    readonly source: Anchor<TMetadata>;
+    readonly confidence: number;
+    readonly method: ResolverMethod;
+}
+
+export type AnchorResolution<TMetadata = unknown> =
+    | (AnchorResolutionBase<"resolved", TMetadata> & {
+          readonly target: Anchor<TMetadata>;
+          readonly range: TextRange;
+      })
+    | AnchorResolutionBase<"orphaned", TMetadata>;
+
+// -------------------------------
+// DTA
+// -------------------------------
+
+export interface DTA<TDocument, TRange> {
+    readonly root: TDocument;
+    readonly adapter: TreeAdapter<TDocument, TRange>;
+    readonly projector: TreeProjector;
+    readonly classifier: ProjectionClassifier;
+    readonly defaultResolveOptions: ResolveOptions;
+    //
+    createAnchor<TMetadata = unknown>(range: TRange): Anchor<TMetadata>;
+    resolve<TMetadata = unknown>(anchors: Anchor<TMetadata>[], options?: Partial<ResolveOptions>): AnchorResolution<TMetadata>[];
+}
