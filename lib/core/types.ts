@@ -82,7 +82,21 @@ export interface Anchor<TMetadata = unknown> {
 // ANCHOR RESOLUTION
 // -------------------------------
 
-export type ResolverMethod = "reference" | "exact" | "shift" | "fuzzy";
+export type AnchorResolutionMethod = "reference" | "exact" | "shift" | "fuzzy";
+
+interface AnchorResolutionBase<TStatus extends "resolved" | "orphaned", TMetadata = unknown> {
+    readonly status: TStatus;
+    readonly source: Anchor<TMetadata>;
+    readonly confidence: number;
+    readonly method: AnchorResolutionMethod;
+}
+
+export type AnchorResolution<TMetadata = unknown> =
+    | (AnchorResolutionBase<"resolved", TMetadata> & {
+          readonly target: Anchor<TMetadata>;
+          readonly range: TextRange;
+      })
+    | AnchorResolutionBase<"orphaned", TMetadata>;
 
 interface ResolverOptionsBase {
     readonly enabled: boolean;
@@ -99,31 +113,25 @@ export interface ResolveOptions {
     };
 }
 
-interface AnchorResolutionBase<TStatus extends "resolved" | "orphaned", TMetadata = unknown> {
-    readonly status: TStatus;
-    readonly source: Anchor<TMetadata>;
-    readonly confidence: number;
-    readonly method: ResolverMethod;
-}
-
-export type AnchorResolution<TMetadata = unknown> =
-    | (AnchorResolutionBase<"resolved", TMetadata> & {
-          readonly target: Anchor<TMetadata>;
-          readonly range: TextRange;
-      })
-    | AnchorResolutionBase<"orphaned", TMetadata>;
-
 // -------------------------------
 // DTA
 // -------------------------------
 
-export interface DTA<TDocument, TRange> {
+export interface DTAConfiguration<TDocument, TRange> {
     readonly root: TDocument;
     readonly adapter: TreeAdapter<TDocument, TRange>;
     readonly projector: TreeProjector;
     readonly classifier: ProjectionClassifier;
     readonly defaultResolveOptions: ResolveOptions;
+}
+
+export interface DTA<TDocument, TRange> {
+    readonly config: DTAConfiguration<TDocument, TRange>;
+    readonly tree: TreeNode;
+    readonly projection: Projection;
     //
+    configure(config: Partial<DTAConfiguration<TDocument, TRange>>): void;
+    reproject(): void;
     createAnchor<TMetadata = unknown>(range: TRange): Anchor<TMetadata>;
     resolve<TMetadata = unknown>(anchors: Anchor<TMetadata>[], options?: Partial<ResolveOptions>): AnchorResolution<TMetadata>[];
 }
