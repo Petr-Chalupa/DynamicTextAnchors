@@ -1,15 +1,15 @@
-import { Projector } from "./projector";
-import { type Anchor, type AnchorResolution, type DTA, type DTAConfiguration, type Projection, type ResolveOptions, type TreeNode, type TreeProjector } from "./types";
+import { TreeProjector } from "./projector";
+import { type Anchor, type AnchorResolution, type IDTA, type DTAConfiguration, type Projection, type ResolveOptions, type TreeNode, type ITreeProjector } from "./types";
 
-export class DTAEngine<TDocument, TRange> implements DTA<TDocument, TRange> {
+export class DTA<TDocument, TRange> implements IDTA<TDocument, TRange> {
     config: DTAConfiguration<TDocument, TRange>;
     tree!: TreeNode;
-    projector: TreeProjector;
+    projector: ITreeProjector;
     projection!: Projection;
 
     constructor(config: DTAConfiguration<TDocument, TRange>) {
         this.config = config;
-        this.projector = new Projector();
+        this.projector = new TreeProjector();
         this.refresh();
     }
 

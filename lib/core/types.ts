@@ -50,8 +50,10 @@ export type ProjectionPolicy = "include" | "ignore";
 
 export type ProjectionClassifier = (node: TreeNode) => ProjectionPolicy;
 
-export interface TreeProjector {
+export interface ITreeProjector {
     project(tree: TreeNode, classifier: ProjectionClassifier): Projection;
+    isValidTextRange(projection: Projection, range: TextRange): boolean;
+    isValidTreeRange(projection: Projection, range: TreeRange): boolean;
     mapTextToTree(projection: Projection, range: TextRange): TreeRange;
     mapTreeToText(projection: Projection, range: TreeRange): TextRange;
 }
@@ -60,7 +62,7 @@ export interface TreeProjector {
 // TREE ADAPTER
 // -------------------------------
 
-export interface TreeAdapter<TDocument, TRange> {
+export interface ITreeAdapter<TDocument, TRange> {
     toTree(document: TDocument): TreeNode;
     toTreeRange(tree: TreeNode, range: TRange): TreeRange;
     fromTreeRange(tree: TreeNode, range: TreeRange): TRange;
@@ -119,19 +121,27 @@ export interface ResolveOptions {
 
 export interface DTAConfiguration<TDocument, TRange> {
     readonly root: TDocument;
-    readonly adapter: TreeAdapter<TDocument, TRange>;
+    readonly adapter: ITreeAdapter<TDocument, TRange>;
     readonly classifier: ProjectionClassifier;
     readonly defaultResolveOptions: ResolveOptions;
 }
 
-export interface DTA<TDocument, TRange> {
+export interface IDTA<TDocument, TRange> {
     readonly config: DTAConfiguration<TDocument, TRange>;
     readonly tree: TreeNode;
-    readonly projector: TreeProjector;
+    readonly projector: ITreeProjector;
     readonly projection: Projection;
     //
     configure(config: Partial<DTAConfiguration<TDocument, TRange>>): void;
     refresh(): void;
     createAnchor<TMetadata = unknown>(range: TRange): Anchor<TMetadata>;
     resolve<TMetadata = unknown>(anchors: Anchor<TMetadata>[], options?: Partial<ResolveOptions>): AnchorResolution<TMetadata>[];
+}
+
+export class DTAError extends Error {
+    constructor(message?: string, options?: ErrorOptions) {
+        super(message, options);
+        this.name = this.constructor.name;
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
 }
