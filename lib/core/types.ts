@@ -120,7 +120,6 @@ export interface ResolveOptions {
 export interface DTAConfiguration<TDocument, TRange> {
     readonly root: TDocument;
     readonly adapter: TreeAdapter<TDocument, TRange>;
-    readonly projector: TreeProjector;
     readonly classifier: ProjectionClassifier;
     readonly defaultResolveOptions: ResolveOptions;
 }
@@ -128,10 +127,11 @@ export interface DTAConfiguration<TDocument, TRange> {
 export interface DTA<TDocument, TRange> {
     readonly config: DTAConfiguration<TDocument, TRange>;
     readonly tree: TreeNode;
+    readonly projector: TreeProjector;
     readonly projection: Projection;
     //
     configure(config: Partial<DTAConfiguration<TDocument, TRange>>): void;
-    reproject(): void;
+    refresh(): void;
     createAnchor<TMetadata = unknown>(range: TRange): Anchor<TMetadata>;
     resolve<TMetadata = unknown>(anchors: Anchor<TMetadata>[], options?: Partial<ResolveOptions>): AnchorResolution<TMetadata>[];
 }
