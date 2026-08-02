@@ -1,4 +1,4 @@
-DynamicTextAnchors (DTA)
+**DynamicTextAnchors (DTA)**  
 Copyright (c) 2025–present Petr Chalupa
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
