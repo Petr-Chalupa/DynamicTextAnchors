@@ -36,33 +36,66 @@ export class TreeProjector implements ITreeProjector {
     }
 
     isValidTreeRange(projection: Projection, range: TreeRange): boolean {
-        throw new Error("Method not implemented.");
+        const textRange = this.tryMapTreeToText(projection, range);
+        return textRange !== null;
     }
 
     mapTextToTree(projection: Projection, range: TextRange): TreeRange {
-        if (!this.isValidTextRange(projection, range)) throw new DTAError("TextRange is outside the projection.");
+        if (!this.isValidTextRange(projection, range)) throw new DTAError("TextRange is not valid for this projection.");
 
-        let start: TreePoint | null = null;
-        let end: TreePoint | null = null;
+        let startPoint: TreePoint | undefined;
+        let endPoint: TreePoint | undefined;
 
         for (const segment of projection.segments) {
             const { node, text } = segment;
 
-            if (!start && text.start <= range.start && range.start <= text.end) {
-                start = { node, offset: range.start - text.start };
+            if (!startPoint && text.start <= range.start && range.start <= text.end) {
+                startPoint = { node, offset: range.start - text.start };
             }
 
-            if (!end && text.start <= range.end && range.end <= text.end) {
-                end = { node, offset: range.end - text.start };
+            if (!endPoint && text.start <= range.end && range.end <= text.end) {
+                endPoint = { node, offset: range.end - text.start };
             }
 
-            if (start && end) break;
+            if (startPoint && endPoint) break;
         }
 
-        return { start: start!, end: end! };
+        return {
+            start: startPoint!,
+            end: endPoint!,
+        };
     }
 
     mapTreeToText(projection: Projection, range: TreeRange): TextRange {
-        throw new Error("Method not implemented.");
+        const textRange = this.tryMapTreeToText(projection, range);
+        if (!textRange) throw new DTAError("TreeRange is not valid for this projection.");
+
+        return textRange;
+    }
+
+    private tryMapTreeToText(projection: Projection, range: TreeRange): TextRange | null {
+        if (range.start.offset < 0 || range.start.offset > range.start.node.text.length || range.end.offset < 0 || range.end.offset > range.end.node.text.length) return null;
+
+        let startSegment: Segment | undefined;
+        let endSegment: Segment | undefined;
+
+        for (const segment of projection.segments) {
+            if (segment.node === range.start.node) {
+                startSegment = segment;
+            }
+
+            if (segment.node === range.end.node) {
+                endSegment = segment;
+            }
+
+            if (startSegment && endSegment) break;
+        }
+
+        if (!startSegment || !endSegment) return null;
+
+        return {
+            start: startSegment.text.start + range.start.offset,
+            end: endSegment.text.start + range.end.offset,
+        };
     }
 }
