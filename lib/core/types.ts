@@ -134,7 +134,7 @@ export interface IDTA<TDocument, TRange> {
     //
     configure(config: Partial<DTAConfiguration<TDocument, TRange>>): void;
     refresh(): void;
-    createAnchor<TMetadata = unknown>(range: TRange): Anchor<TMetadata>;
+    createAnchor<TMetadata = unknown>(range: TRange, metadata?: TMetadata): Anchor<TMetadata>;
     resolve<TMetadata = unknown>(anchors: Anchor<TMetadata>[], options?: Partial<ResolveOptions>): AnchorResolution<TMetadata>[];
 }
 
