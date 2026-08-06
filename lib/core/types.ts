@@ -84,28 +84,12 @@ export interface Anchor<TMetadata = unknown> {
 // ANCHOR RESOLUTION
 // -------------------------------
 
-export type AnchorResolutionMethod = "reference" | "exact" | "shift" | "fuzzy";
-
-interface AnchorResolutionBase<TStatus extends "resolved" | "orphaned", TMetadata = unknown> {
-    readonly status: TStatus;
-    readonly source: Anchor<TMetadata>;
-    readonly confidence: number;
-    readonly method: AnchorResolutionMethod;
-}
-
-export type AnchorResolution<TMetadata = unknown> =
-    | (AnchorResolutionBase<"resolved", TMetadata> & {
-          readonly target: Anchor<TMetadata>;
-          readonly range: TextRange;
-      })
-    | AnchorResolutionBase<"orphaned", TMetadata>;
-
 interface ResolverOptionsBase {
     readonly enabled: boolean;
     readonly minConfidence: number;
 }
 
-export interface ResolveOptions {
+export interface ResolvePipelineOptions {
     readonly reference: ResolverOptionsBase;
     readonly exact: ResolverOptionsBase;
     readonly shift: ResolverOptionsBase;
@@ -115,6 +99,33 @@ export interface ResolveOptions {
     };
 }
 
+export type ResolverMethod = keyof ResolvePipelineOptions;
+
+export interface ResolverMatch {
+    readonly range: TextRange;
+    readonly confidence: number;
+}
+
+export interface IAnchorResolver<TMethod extends ResolverMethod = ResolverMethod> {
+    readonly method: TMethod;
+    //
+    resolve(projection: Projection, anchor: Anchor, options: ResolvePipelineOptions[TMethod]): ResolverMatch | null;
+}
+
+export type AnchorResolution<TMetadata = unknown> =
+    | {
+          readonly status: "resolved";
+          readonly source: Anchor<TMetadata>;
+          readonly target: Anchor<TMetadata>;
+          readonly range: TextRange;
+          readonly confidence: number;
+          readonly method: ResolverMethod;
+      }
+    | {
+          readonly status: "orphaned";
+          readonly source: Anchor<TMetadata>;
+      };
+
 // -------------------------------
 // DTA
 // -------------------------------
@@ -123,7 +134,7 @@ export interface DTAConfiguration<TDocument, TRange> {
     readonly root: TDocument;
     readonly adapter: ITreeAdapter<TDocument, TRange>;
     readonly classifier: ProjectionClassifier;
-    readonly defaultResolveOptions: ResolveOptions;
+    readonly defaultResolvePipelineOptions: ResolvePipelineOptions;
 }
 
 export interface IDTA<TDocument, TRange> {
@@ -135,7 +146,7 @@ export interface IDTA<TDocument, TRange> {
     configure(config: Partial<DTAConfiguration<TDocument, TRange>>): void;
     refresh(): void;
     createAnchor<TMetadata = unknown>(range: TRange, metadata?: TMetadata): Anchor<TMetadata>;
-    resolve<TMetadata = unknown>(anchors: Anchor<TMetadata>[], options?: Partial<ResolveOptions>): AnchorResolution<TMetadata>[];
+    resolve<TMetadata = unknown>(anchors: Anchor<TMetadata>[], options?: Partial<ResolvePipelineOptions>): AnchorResolution<TMetadata>[];
 }
 
 export class DTAError extends Error {
