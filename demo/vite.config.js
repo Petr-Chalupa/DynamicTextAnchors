@@ -19,7 +19,7 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            "@": resolve("./"),
+            "@": resolve(import.meta.dirname, "./assets"),
             "dynamic-text-anchors": resolve(import.meta.dirname, "../lib"),
         },
     },
