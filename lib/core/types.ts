@@ -84,32 +84,19 @@ export interface Anchor<TMetadata = unknown> {
 // ANCHOR RESOLUTION
 // -------------------------------
 
-interface ResolverOptionsBase {
-    readonly enabled: boolean;
-    readonly minConfidence: number;
-}
-
-export interface ResolvePipelineOptions {
-    readonly reference: ResolverOptionsBase;
-    readonly exact: ResolverOptionsBase;
-    readonly shift: ResolverOptionsBase;
-    readonly fuzzy: ResolverOptionsBase & {
-        readonly contextWindow: number;
-        readonly algorithm: "levenshtein" | "bitap";
-    };
-}
-
-export type ResolverMethod = keyof ResolvePipelineOptions;
+export type ResolverMethod = string;
 
 export interface ResolverMatch {
     readonly range: TextRange;
     readonly confidence: number;
 }
 
-export interface IAnchorResolver<TMethod extends ResolverMethod = ResolverMethod> {
-    readonly method: TMethod;
+export interface IAnchorResolver {
+    readonly method: ResolverMethod;
+    enabled: boolean;
+    minConfidence: number;
     //
-    resolve(projection: Projection, anchor: Anchor, options: ResolvePipelineOptions[TMethod]): ResolverMatch | null;
+    resolve(projection: Projection, anchor: Anchor): ResolverMatch | null;
 }
 
 export type AnchorResolution<TMetadata = unknown> =
@@ -134,7 +121,6 @@ export interface DTAConfiguration<TDocument, TRange> {
     readonly root: TDocument;
     readonly adapter: ITreeAdapter<TDocument, TRange>;
     readonly classifier: ProjectionClassifier;
-    readonly defaultResolvePipelineOptions: ResolvePipelineOptions;
 }
 
 export interface IDTA<TDocument, TRange> {
@@ -146,7 +132,7 @@ export interface IDTA<TDocument, TRange> {
     configure(config: Partial<DTAConfiguration<TDocument, TRange>>): void;
     refresh(): void;
     createAnchor<TMetadata = unknown>(range: TRange, metadata?: TMetadata): Anchor<TMetadata>;
-    resolve<TMetadata = unknown>(anchors: Anchor<TMetadata>[], options?: Partial<ResolvePipelineOptions>): AnchorResolution<TMetadata>[];
+    resolve<TMetadata = unknown>(anchors: Anchor<TMetadata>[]): AnchorResolution<TMetadata>[];
 }
 
 export class DTAError extends Error {

@@ -1,11 +1,11 @@
 import { TreeProjector } from "./projector";
+import { ReferenceResolver } from "../resolvers/reference";
 import {
     type Anchor,
     type AnchorResolution,
     type IDTA,
     type DTAConfiguration,
     type Projection,
-    type ResolvePipelineOptions,
     type TreeNode,
     type ITreeProjector,
     type IAnchorResolver,
@@ -14,7 +14,7 @@ import {
 
 export class DTA<TDocument, TRange> implements IDTA<TDocument, TRange> {
     private static readonly ANCHOR_CTX_LENGTH = 32;
-    private static readonly RESOLVERS: readonly IAnchorResolver[] = [];
+    private static readonly RESOLVERS: readonly IAnchorResolver[] = [new ReferenceResolver()];
     //
     config: DTAConfiguration<TDocument, TRange>;
     tree!: TreeNode;
@@ -58,24 +58,15 @@ export class DTA<TDocument, TRange> implements IDTA<TDocument, TRange> {
         };
     }
 
-    resolve<TMetadata>(anchors: Anchor<TMetadata>[], options?: Partial<ResolvePipelineOptions>): AnchorResolution<TMetadata>[] {
-        const { reference, exact, shift, fuzzy } = this.config.defaultResolvePipelineOptions;
-        const resolvePipelineOptions: ResolvePipelineOptions = {
-            reference: { ...reference, ...options?.reference },
-            exact: { ...exact, ...options?.exact },
-            shift: { ...shift, ...options?.shift },
-            fuzzy: { ...fuzzy, ...options?.fuzzy },
-        };
-
+    resolve<TMetadata>(anchors: Anchor<TMetadata>[]): AnchorResolution<TMetadata>[] {
         const anchorResolutions: AnchorResolution<TMetadata>[] = [];
 
         anchorLoop: for (const anchor of anchors) {
             for (const resolver of DTA.RESOLVERS) {
-                const resolverOptions = resolvePipelineOptions[resolver.method];
-                if (!resolverOptions.enabled) continue;
+                if (!resolver.enabled) continue;
 
-                const match = resolver.resolve(this.projection, anchor, resolverOptions);
-                if (!match || match.confidence < resolverOptions.minConfidence) continue;
+                const match = resolver.resolve(this.projection, anchor);
+                if (!match || match.confidence < resolver.minConfidence) continue;
 
                 anchorResolutions.push({
                     status: "resolved",
