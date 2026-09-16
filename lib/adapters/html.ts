@@ -5,88 +5,98 @@ export class HtmlAdapter implements ITreeAdapter<Node, Range> {
     private readonly treeNodes = new WeakMap<Node, TreeNode>();
     private readonly domNodes = new WeakMap<TextNode, Text>();
 
-    toTree(document: Node): TreeNode {
-        const tree = this.createTreeNode(document);
-        this.treeNodes.set(document, tree);
-        return tree;
-    }
-
-    toTreeRange(tree: TreeNode, range: Range): TreeRange {
-        const start = this.toTreePoint(tree, range.startContainer, range.startOffset, true);
-        const end = this.toTreePoint(tree, range.endContainer, range.endOffset, false);
-
-        return { start, end };
-    }
-
-    fromTreeRange(tree: TreeNode, range: TreeRange): Range {
-        const startNode = this.domNodes.get(range.start.node);
-        const endNode = this.domNodes.get(range.end.node);
-        if (!startNode || !endNode) throw new DTAError("TreeRange does not belong to this adapter.");
-
-        const domRange = startNode.ownerDocument?.createRange();
-        if (!domRange) throw new DTAError("TreeRange cannot be converted without an owner document.");
-
-        domRange.setStart(startNode, range.start.offset);
-        domRange.setEnd(endNode, range.end.offset);
-        return domRange;
-    }
-
-    private createTreeNode(node: Node): TreeNode {
+    toTree(node: Node): TreeNode {
         if (node.nodeType === Node.TEXT_NODE) {
-            const textNode: TextNode = {
+            const treeNode: TextNode = {
                 type: "text",
                 kind: "text",
                 text: node.nodeValue ?? "",
             };
-            this.domNodes.set(textNode, node as Text);
-            return textNode;
+
+            this.treeNodes.set(node, treeNode);
+            this.domNodes.set(treeNode, node as Text);
+
+            return treeNode;
         }
 
-        const container: TreeNode = {
+        const treeNode: TreeNode = {
             type: "container",
             kind: node.nodeName.toLowerCase(),
-            children: Array.from(node.childNodes, (child) => this.createTreeNode(child)),
+            children: Array.from(node.childNodes, (child) => this.toTree(child)),
         };
-        this.treeNodes.set(node, container);
-        return container;
+
+        this.treeNodes.set(node, treeNode);
+
+        return treeNode;
     }
 
-    private toTreePoint(tree: TreeNode, container: Node, offset: number, isStart: boolean): TreePoint {
-        const textNode = this.findBoundaryTextNode(container, offset, isStart);
-        if (!textNode) throw new DTAError("DOM range does not belong to the projected tree.");
-
-        const domText = this.domNodes.get(textNode);
-        if (domText && container === domText) {
-            return { node: textNode, offset };
-        }
-
+    toTreeRange(tree: TreeNode, range: Range): TreeRange {
         return {
-            node: textNode,
-            offset: isStart ? 0 : textNode.text.length,
+            start: this.toTreePoint(tree, range.startContainer, range.startOffset, true),
+            end: this.toTreePoint(tree, range.endContainer, range.endOffset, false),
         };
     }
 
-    private findBoundaryTextNode(container: Node, offset: number, isStart: boolean): TextNode | null {
-        if (container.nodeType === Node.TEXT_NODE) {
-            return this.findTextNode(container);
+    fromTreeRange(tree: TreeNode, range: TreeRange): Range {
+        if (!this.containsTextNode(tree, range.start.node) || !this.containsTextNode(tree, range.end.node)) {
+            throw new DTAError("TreeRange does not belong to this tree.");
         }
 
-        const children = Array.from(container.childNodes);
-        if (offset === 0) return this.firstTextNode(container);
-        if (offset >= children.length) return this.lastTextNode(container);
+        const startNode = this.domNodes.get(range.start.node);
+        const endNode = this.domNodes.get(range.end.node);
 
-        const sibling = children[isStart ? offset : offset - 1];
-        return isStart ? this.firstTextNode(sibling) : this.lastTextNode(sibling);
+        if (!startNode || !endNode) throw new DTAError("TreeRange does not belong to this adapter.");
+
+        const domRange = startNode.ownerDocument!.createRange();
+        domRange.setStart(startNode, range.start.offset);
+        domRange.setEnd(endNode, range.end.offset);
+
+        return domRange;
     }
 
-    private findTextNode(node: Node): TextNode | null {
-        const treeNode = this.treeNodes.get(node);
-        return treeNode?.type === "text" ? treeNode : null;
+    private toTreePoint(tree: TreeNode, container: Node, offset: number, start: boolean): TreePoint {
+        const treeNode = this.treeNodes.get(container);
+
+        if (!treeNode) {
+            throw new DTAError("DOM range does not belong to this adapter.");
+        }
+
+        if (treeNode.type === "text") {
+            if (!this.containsTextNode(tree, treeNode)) {
+                throw new DTAError("DOM range does not belong to the tree.");
+            }
+
+            if (offset < 0 || offset > treeNode.text.length) {
+                throw new DTAError("DOM range contains an invalid text offset.");
+            }
+
+            return { node: treeNode, offset };
+        }
+
+        const child = container.childNodes[start ? offset : offset - 1];
+        const boundaryNode = child
+            ? start
+                ? this.firstTextNode(child)
+                : this.lastTextNode(child)
+            : start
+              ? this.firstTextNode(container)
+              : this.lastTextNode(container);
+
+        if (!boundaryNode || !this.containsTextNode(tree, boundaryNode)) {
+            throw new DTAError("DOM range does not belong to the tree.");
+        }
+
+        return { node: boundaryNode, offset: start ? 0 : boundaryNode.text.length };
+    }
+
+    private containsTextNode(tree: TreeNode, target: TextNode): boolean {
+        if (tree.type === "text") return tree === target;
+        return tree.children.some((child) => this.containsTextNode(child, target));
     }
 
     private firstTextNode(node: Node): TextNode | null {
-        const direct = this.findTextNode(node);
-        if (direct) return direct;
+        const treeNode = this.treeNodes.get(node);
+        if (treeNode?.type === "text") return treeNode;
 
         for (const child of node.childNodes) {
             const textNode = this.firstTextNode(child);
@@ -97,11 +107,11 @@ export class HtmlAdapter implements ITreeAdapter<Node, Range> {
     }
 
     private lastTextNode(node: Node): TextNode | null {
-        const direct = this.findTextNode(node);
-        if (direct) return direct;
+        const treeNode = this.treeNodes.get(node);
+        if (treeNode?.type === "text") return treeNode;
 
-        for (let index = node.childNodes.length - 1; index >= 0; index--) {
-            const textNode = this.lastTextNode(node.childNodes[index]);
+        for (let i = node.childNodes.length - 1; i >= 0; i--) {
+            const textNode = this.lastTextNode(node.childNodes[i]);
             if (textNode) return textNode;
         }
 

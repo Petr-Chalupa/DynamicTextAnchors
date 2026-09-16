@@ -6,27 +6,43 @@ export class ReferenceResolver implements IAnchorResolver {
     minConfidence: number = 0.6;
 
     resolve(projection: Projection, anchor: Anchor): ResolverMatch | null {
-        const text = projection.text;
         const { prefix, exact, suffix, referenceRange } = anchor;
-
-        if (!exact.length && !prefix.length && !suffix.length) return null;
-
         const reference = prefix + exact + suffix;
-        const matchIndex = text.indexOf(reference);
-        if (matchIndex === -1) return null;
 
-        const start = matchIndex + prefix.length;
-        const end = start + exact.length;
+        if (!reference.length) return null;
 
-        let confidence = 1;
-        if (referenceRange) {
-            const drift = Math.max(Math.abs(start - referenceRange.start), Math.abs(end - referenceRange.end));
-            const decayWindow = Math.max(1, prefix.length + exact.length + suffix.length);
-            confidence = Math.max(0, 1 - drift / decayWindow);
+        let bestRange: ResolverMatch["range"] | null = null;
+        let bestDrift = Infinity;
+        let searchStart = 0;
+
+        while (searchStart <= projection.text.length - reference.length) {
+            const matchIndex = projection.text.indexOf(reference, searchStart);
+
+            if (matchIndex === -1) break;
+
+            const start = matchIndex + prefix.length;
+            const end = start + exact.length;
+            const drift = referenceRange
+                ? Math.max(Math.abs(start - referenceRange.start), Math.abs(end - referenceRange.end))
+                : 0;
+
+            if (drift < bestDrift) {
+                bestDrift = drift;
+                bestRange = { start, end };
+            }
+
+            if (drift === 0) break;
+
+            searchStart = matchIndex + 1;
         }
 
+        if (!bestRange) return null;
+
+        const decayWindow = Math.max(1, reference.length);
+        const confidence = Math.max(0, 1 - bestDrift / decayWindow);
+
         return {
-            range: { start, end },
+            range: bestRange,
             confidence,
         };
     }
