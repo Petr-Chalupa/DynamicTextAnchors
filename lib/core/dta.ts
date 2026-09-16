@@ -1,20 +1,8 @@
 import { TreeProjector } from "./projector";
-import { ReferenceResolver } from "../resolvers/reference";
-import {
-    type Anchor,
-    type AnchorResolution,
-    type IDTA,
-    type DTAConfiguration,
-    type Projection,
-    type TreeNode,
-    type ITreeProjector,
-    type IAnchorResolver,
-    type TextRange,
-} from "./types";
+import { type Anchor, type AnchorResolution, type IDTA, type DTAConfiguration, type Projection, type TreeNode, type ITreeProjector, type TextRange } from "./types";
 
 export class DTA<TDocument, TRange> implements IDTA<TDocument, TRange> {
     private static readonly ANCHOR_CTX_LENGTH = 32;
-    private static readonly RESOLVERS: readonly IAnchorResolver[] = [new ReferenceResolver()];
     //
     config: DTAConfiguration<TDocument, TRange>;
     tree!: TreeNode;
@@ -62,7 +50,7 @@ export class DTA<TDocument, TRange> implements IDTA<TDocument, TRange> {
         const anchorResolutions: AnchorResolution<TMetadata>[] = [];
 
         anchorLoop: for (const anchor of anchors) {
-            for (const resolver of DTA.RESOLVERS) {
+            for (const resolver of this.config.resolvers) {
                 if (!resolver.enabled) continue;
 
                 const match = resolver.resolve(this.projection, anchor);

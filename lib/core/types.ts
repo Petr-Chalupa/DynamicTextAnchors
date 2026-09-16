@@ -121,6 +121,7 @@ export interface DTAConfiguration<TDocument, TRange> {
     readonly root: TDocument;
     readonly adapter: ITreeAdapter<TDocument, TRange>;
     readonly classifier: ProjectionClassifier;
+    readonly resolvers: readonly IAnchorResolver[];
 }
 
 export interface IDTA<TDocument, TRange> {
