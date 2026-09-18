@@ -26,7 +26,6 @@ jobs:
               run: |
                   npm ci
                   npm run build-lib
-                  cp ./src/lib/utils/_styles.css ./dist/lib/utils/_styles.css
 
             - name: Publish
               run: npm publish --provenance --access public
