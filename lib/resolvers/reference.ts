@@ -22,9 +22,7 @@ export class ReferenceResolver implements IAnchorResolver {
 
             const start = matchIndex + prefix.length;
             const end = start + exact.length;
-            const drift = referenceRange
-                ? Math.max(Math.abs(start - referenceRange.start), Math.abs(end - referenceRange.end))
-                : 0;
+            const drift = referenceRange ? Math.max(Math.abs(start - referenceRange.start), Math.abs(end - referenceRange.end)) : 0;
 
             if (drift < bestDrift) {
                 bestDrift = drift;

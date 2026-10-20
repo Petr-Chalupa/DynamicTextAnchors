@@ -26,7 +26,3 @@
 ```bash
 npm install dynamic-text-anchors
 ```
-
-
-🚧 Under active redesign... <!-- omit in toc -->
----
